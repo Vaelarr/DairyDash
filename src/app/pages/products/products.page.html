@@ -15,7 +15,7 @@
   </div>
 
   <div class="products-grid">
-    <div class="product-tile" *ngFor="let product of filteredProducts; trackBy: trackById">
+    <a class="product-tile" *ngFor="let product of filteredProducts; trackBy: trackById" [routerLink]="['/view-product', product.id]" [attr.aria-label]="'View ' + product.name + ' details'">
       <div class="product-tile-photo">
         <img *ngIf="product.photo" [src]="product.photo" [alt]="product.name" />
       </div>
@@ -24,7 +24,7 @@
         <p class="product-tile-price">{{ product.price }}</p>
         <p class="product-tile-desc">{{ product.description }}</p>
       </div>
-    </div>
+    </a>
   </div>
 
   <p class="products-empty" *ngIf="filteredProducts.length === 0">

@@ -19,6 +19,7 @@ import {
   informationCircleOutline,
   peopleOutline,
   settingsOutline,
+  timeOutline,
 } from 'ionicons/icons';
 
 interface AppPage {
@@ -70,6 +71,11 @@ export class MenuComponent {
       icon: 'information-circle-outline',
     },
     {
+      title: 'Company History',
+      url: '/company-history',
+      icon: 'time-outline',
+    },
+    {
       title: 'Developers',
       url: '/developers',
       icon: 'people-outline',
@@ -83,11 +89,13 @@ export class MenuComponent {
       informationCircleOutline,
       peopleOutline,
       settingsOutline,
+      timeOutline,
       'settings-outline': settingsOutline,
       'cube-outline': cubeOutline,
       'grid-outline': gridOutline,
       'information-circle-outline': informationCircleOutline,
       'people-outline': peopleOutline,
+      'time-outline': timeOutline,
     });
   }
 }

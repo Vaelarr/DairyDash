@@ -17,6 +17,11 @@ export const routes: Routes = [
       import('./pages/products/products.page').then((m) => m.ProductsPage),
   },
   {
+    path: 'view-product/:id',
+    loadComponent: () =>
+      import('./pages/product-details/product-details.page').then((m) => m.ProductDetailsPage),
+  },
+  {
     path: 'manage-products',
     loadComponent: () =>
       import('./pages/manage-products/manage-products.page').then((m) => m.ManageProductsPage),
@@ -35,6 +40,11 @@ export const routes: Routes = [
     path: 'about',
     loadComponent: () =>
       import('./pages/about/about.page').then((m) => m.AboutPage),
+  },
+  {
+    path: 'company-history',
+    loadComponent: () =>
+      import('./pages/company-history/company-history.page').then((m) => m.CompanyHistoryPage),
   },
   {
     path: 'developers',

@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { IonSearchbar } from '@ionic/angular';
 import { PageLayoutComponent } from '../../components/page-layout/page-layout.component';
 import { Product } from '../../models/product';
@@ -10,7 +11,7 @@ import { ProductService } from '../../services/product.service';
   templateUrl: './products.page.html',
   styleUrls: ['./products.page.css'],
   standalone: true,
-  imports: [CommonModule, IonSearchbar, PageLayoutComponent],
+  imports: [CommonModule, RouterLink, IonSearchbar, PageLayoutComponent],
 })
 export class ProductsPage {
   searchQuery: string = '';
