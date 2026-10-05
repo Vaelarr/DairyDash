@@ -1,0 +1,96 @@
+<ion-header>
+  <ion-toolbar class="brand-toolbar">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+
+    <ion-title>My Cart</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="cart-container">
+    @if (cart.items().length === 0) {
+      <div class="empty-cart">
+        <div class="empty-icon">
+          <ion-icon name="cart-outline"></ion-icon>
+        </div>
+
+        <h2>Your cart is empty</h2>
+        <p>Add some fresh Dairy Dash products to your cart.</p>
+
+        <ion-button routerLink="/products">
+          Browse Products
+        </ion-button>
+      </div>
+    } @else {
+      <div class="cart-heading">
+        <div>
+          <span>YOUR ORDER</span>
+          <h1>Shopping Cart</h1>
+        </div>
+
+        <p>{{ cart.itemCount() }} item(s)</p>
+      </div>
+
+      <div class="cart-list">
+        @for (item of cart.items(); track item.id) {
+          <div class="cart-item">
+            <ion-thumbnail>
+              <img [src]="item.image" [alt]="item.name" />
+            </ion-thumbnail>
+
+            <div class="item-information">
+              <h3>{{ item.name }}</h3>
+              <strong>
+                {{ item.price | currency:'PHP':'symbol':'1.2-2' }}
+              </strong>
+
+              <div class="quantity-control">
+                <button
+                  type="button"
+                  (click)="cart.decreaseQuantity(item.id)"
+                >
+                  <ion-icon name="remove-outline"></ion-icon>
+                </button>
+
+                <span>{{ item.quantity }}</span>
+
+                <button
+                  type="button"
+                  class="add-button"
+                  (click)="cart.increaseQuantity(item.id)"
+                >
+                  <ion-icon name="add-outline"></ion-icon>
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="remove-button"
+              (click)="cart.removeProduct(item.id)"
+              aria-label="Remove product"
+            >
+              <ion-icon name="trash-outline"></ion-icon>
+            </button>
+          </div>
+        }
+      </div>
+
+      <div class="summary-card">
+        <div>
+          <span>Total</span>
+          <strong>
+            {{ cart.total() | currency:'PHP':'symbol':'1.2-2' }}
+          </strong>
+        </div>
+
+        <ion-button expand="block" (click)="checkout()">
+          <ion-icon slot="start" name="bag-check-outline"></ion-icon>
+          Proceed to Checkout
+        </ion-button>
+      </div>
+    }
+  </div>
+</ion-content>

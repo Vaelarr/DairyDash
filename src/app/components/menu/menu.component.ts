@@ -1,5 +1,4 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import {
   IonMenu,
@@ -11,15 +10,20 @@ import {
   IonLabel,
   IonNote,
   IonMenuToggle,
+  IonRouterLink,
 } from '@ionic/angular';
+
 import { addIcons } from 'ionicons';
 import {
   cubeOutline,
   gridOutline,
+  cartOutline,
   informationCircleOutline,
   peopleOutline,
   settingsOutline,
   timeOutline,
+  personOutline,
+  callOutline,
 } from 'ionicons/icons';
 
 interface AppPage {
@@ -34,7 +38,6 @@ interface AppPage {
   styleUrls: ['./menu.component.css'],
   standalone: true,
   imports: [
-    CommonModule,
     RouterLink,
     RouterLinkActive,
     IonMenu,
@@ -46,10 +49,20 @@ interface AppPage {
     IonLabel,
     IonNote,
     IonMenuToggle,
+    IonRouterLink,
   ],
 })
 export class MenuComponent {
-  appPages: AppPage[] = [
+  // Sample profile details. Replace these with your own.
+  readonly user = {
+    name: 'Your Name',
+    phone: '09XX XXX XXXX',
+    image: 'assets/Profiles/user.jpg',
+  };
+
+  readonly profileImageFailed = signal(false);
+
+  readonly appPages: AppPage[] = [
     {
       title: 'Dashboard',
       url: '/dashboard',
@@ -59,6 +72,11 @@ export class MenuComponent {
       title: 'List of Products',
       url: '/products',
       icon: 'cube-outline',
+    },
+    {
+      title: 'Cart',
+      url: '/cart',
+      icon: 'cart-outline',
     },
     {
       title: 'Manage Products',
@@ -80,22 +98,24 @@ export class MenuComponent {
       url: '/developers',
       icon: 'people-outline',
     },
+    {
+      title: 'Contact Us',
+      url: '/contact-us',
+      icon: 'call-outline',
+    },
   ];
 
   constructor() {
     addIcons({
-      cubeOutline,
-      gridOutline,
-      informationCircleOutline,
-      peopleOutline,
-      settingsOutline,
-      timeOutline,
-      'settings-outline': settingsOutline,
       'cube-outline': cubeOutline,
       'grid-outline': gridOutline,
+      'cart-outline': cartOutline,
       'information-circle-outline': informationCircleOutline,
       'people-outline': peopleOutline,
+      'settings-outline': settingsOutline,
       'time-outline': timeOutline,
+      'person-outline': personOutline,
+      'call-outline': callOutline,
     });
   }
 }
