@@ -1,0 +1,19 @@
+<app-page-layout
+  title="Developers"
+  eyebrow="THE TEAM"
+  description="Meet the people behind the application."
+>
+  <div class="developer-list">
+    <div class="developer-card" *ngFor="let dev of developers">
+      <div class="developer-avatar">
+        <img *ngIf="dev.photo" [src]="dev.photo" [alt]="dev.name" />
+        <span *ngIf="!dev.photo">{{ getInitials(dev.name) }}</span>
+      </div>
+      <div class="developer-info">
+        <h3>{{ dev.name }}</h3>
+        <p class="developer-role">{{ dev.role }}</p>
+        <p class="developer-desc">{{ dev.description }}</p>
+      </div>
+    </div>
+  </div>
+</app-page-layout>

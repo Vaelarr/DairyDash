@@ -1,0 +1,156 @@
+<app-page-layout
+  narrow
+  [title]="isEdit ? 'Edit Product' : 'Add Product'"
+  [heading]="isEdit ? 'Edit Product' : 'Add a Product'"
+  [eyebrow]="isEdit ? 'UPDATE PRODUCT' : 'NEW PRODUCT'"
+  [description]="description()"
+  [backHref]="isEdit ? '/manage-products' : ''"
+>
+  <form class="product-form" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <input
+      #fileInput
+      type="file"
+      hidden
+      accept="image/png,image/jpeg"
+      (change)="onFileSelected($event)"
+    />
+
+    <div *ngIf="isEdit" class="photo-card">
+      <img
+        *ngIf="imagePreview() as photo; else noPhoto"
+        class="photo-card-img"
+        [src]="photo"
+        [alt]="'Photo of ' + (original()?.name ?? 'the product')"
+      />
+      <ng-template #noPhoto>
+        <span class="photo-card-empty"><ion-icon name="image" aria-hidden="true"></ion-icon></span>
+      </ng-template>
+      <button type="button" class="upload-remove" (click)="fileInput.click()">
+        {{ imageBusy() ? 'Processing image…' : imagePreview() ? 'Change image' : 'Add image' }}
+      </button>
+    </div>
+
+    <div
+      *ngIf="!isEdit"
+      class="upload-zone"
+      [class.dragging]="dragging()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="dragging.set(false)"
+      (drop)="onDrop($event)"
+    >
+      <button type="button" class="upload-button" (click)="fileInput.click()">
+        <img
+          *ngIf="imagePreview() as preview; else uploadIcon"
+          class="upload-preview"
+          [src]="preview"
+          alt="Preview of the selected product image"
+        />
+        <ng-template #uploadIcon>
+          <span class="upload-icon"><ion-icon name="image" aria-hidden="true"></ion-icon></span>
+        </ng-template>
+        <span class="upload-title">
+          {{ imageBusy() ? 'Processing image…' : imagePreview() ? 'Change Image' : 'Upload Product Image' }}
+        </span>
+        <span class="upload-hint">PNG or JPG, up to 5 MB</span>
+      </button>
+      <button *ngIf="imagePreview()" type="button" class="upload-remove" (click)="removeImage()">
+        Remove image
+      </button>
+    </div>
+    <p class="field-error" *ngIf="imageError()" role="alert">{{ imageError() }}</p>
+
+    <div class="field">
+      <label for="product-name">Product Name</label>
+      <input
+        id="product-name"
+        type="text"
+        formControlName="name"
+        placeholder="e.g. MilkMoo"
+        maxlength="60"
+        autocomplete="off"
+        [attr.aria-invalid]="showError('name')"
+        aria-describedby="product-name-error"
+      />
+      <p class="field-error" id="product-name-error" *ngIf="showError('name')">
+        Enter a product name.
+      </p>
+    </div>
+
+    <div class="field">
+      <label for="product-category">Category</label>
+      <div class="select-wrap">
+        <select
+          id="product-category"
+          formControlName="category"
+          [class.is-empty]="!form.controls.category.value"
+          [attr.aria-invalid]="showError('category')"
+          aria-describedby="product-category-error"
+        >
+          <option value="" disabled>Select category</option>
+          <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+        </select>
+      </div>
+      <p class="field-error" id="product-category-error" *ngIf="showError('category')">
+        Select a category.
+      </p>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="product-price">Price</label>
+        <input
+          id="product-price"
+          type="number"
+          inputmode="decimal"
+          step="0.01"
+          min="0"
+          formControlName="price"
+          placeholder="₱0.00"
+          [attr.aria-invalid]="showError('price')"
+          aria-describedby="product-price-error"
+        />
+        <p class="field-error" id="product-price-error" *ngIf="showError('price')">
+          Enter a price above 0.
+        </p>
+      </div>
+
+      <div class="field">
+        <label for="product-stock">Stock</label>
+        <input
+          id="product-stock"
+          type="number"
+          inputmode="numeric"
+          step="1"
+          min="0"
+          formControlName="stock"
+          placeholder="0"
+          [attr.aria-invalid]="showError('stock')"
+          aria-describedby="product-stock-error"
+        />
+        <p class="field-error" id="product-stock-error" *ngIf="showError('stock')">
+          Use a whole number.
+        </p>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="product-description">Description</label>
+      <textarea
+        id="product-description"
+        rows="4"
+        maxlength="200"
+        formControlName="description"
+        placeholder="Write a short product description..."
+      ></textarea>
+    </div>
+
+    <p class="field-error" *ngIf="saveError()" role="alert">{{ saveError() }}</p>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" [disabled]="imageBusy()">
+        {{ isEdit ? 'Save Changes' : 'Add Product' }}
+      </button>
+      <button type="button" class="btn btn-outline" (click)="cancel()">Cancel</button>
+    </div>
+  </form>
+</app-page-layout>

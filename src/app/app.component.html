@@ -1,0 +1,15 @@
+<ion-app>
+  <ion-split-pane
+    contentId="main"
+    [attr.inert]="showSplash() ? '' : null"
+    [attr.aria-hidden]="showSplash() ? 'true' : null"
+  >
+    <app-menu></app-menu>
+
+    <ion-router-outlet id="main"></ion-router-outlet>
+  </ion-split-pane>
+
+  @if (showSplash()) {
+    <app-splash-screen></app-splash-screen>
+  }
+</ion-app>

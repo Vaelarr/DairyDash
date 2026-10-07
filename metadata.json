@@ -1,0 +1,6 @@
+{
+  "name": "MilkSwift Products",
+  "description": "A milk and dairy products catalog and dashboard application built with Ionic and Angular.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,130 @@
+<app-page-layout title="Product Details" backHref="/products">
+  <ng-container *ngIf="product as item; else missingProduct">
+    <article class="detail-card">
+      <div class="detail-visual">
+        <img *ngIf="item.photo" [src]="item.photo" [alt]="item.name" />
+        <span class="detail-category">{{ item.category || 'DAIRY FAVORITE' }}</span>
+        <button
+          class="wishlist-icon"
+          type="button"
+          (click)="toggleWishlist()"
+          [attr.aria-pressed]="isWishlisted"
+          [attr.aria-label]="isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'"
+        >
+          <ion-icon [name]="isWishlisted ? 'heart' : 'heart-outline'"></ion-icon>
+        </button>
+      </div>
+
+      <div class="detail-content">
+        <div class="detail-meta">
+          <span>FRESH FROM THE FARM</span>
+          <span>SKU: DD-{{ item.id | slice:0:8 | uppercase }}</span>
+        </div>
+        <h1>{{ item.name }}</h1>
+        <p class="detail-description">{{ item.description }}</p>
+
+        <div class="detail-rating" aria-live="polite">
+          <ion-icon name="star"></ion-icon>
+          <strong *ngIf="reviews.length; else noRatings">{{ averageRating | number:'1.1-1' }}</strong>
+          <ng-template #noRatings><span>No ratings yet</span></ng-template>
+          <span *ngIf="reviews.length">({{ reviews.length }} {{ reviews.length === 1 ? 'review' : 'reviews' }})</span>
+        </div>
+
+        <div class="detail-price-row">
+          <strong>{{ item.price }}</strong>
+          <div class="detail-stock">
+            <span><i></i>{{ stockCount === 0 ? 'Out of stock' : 'In Stock' }}</span>
+            <small *ngIf="stockCount !== undefined">{{ stockCount }} available</small>
+          </div>
+        </div>
+
+        <div class="quantity-row">
+          <span>Quantity</span>
+          <div class="quantity-control">
+            <button type="button" aria-label="Decrease quantity" (click)="decreaseQuantity()" [disabled]="quantity <= 1">−</button>
+            <output aria-live="polite">{{ quantity }}</output>
+            <button type="button" aria-label="Increase quantity" (click)="increaseQuantity()" [disabled]="stockCount === 0 || (stockCount !== undefined && quantity >= stockCount)">+</button>
+          </div>
+        </div>
+
+        <button class="primary-action" type="button" (click)="addToCart()" [disabled]="stockCount === 0">
+          <span class="cart-symbol" aria-hidden="true">＋</span>
+          {{ stockCount === 0 ? 'Out of Stock' : 'Add to Cart' }}
+        </button>
+        <button class="secondary-action" type="button" (click)="toggleWishlist()" [attr.aria-pressed]="isWishlisted">
+          <ion-icon [name]="isWishlisted ? 'heart' : 'heart-outline'"></ion-icon>
+          {{ isWishlisted ? 'Saved to Wishlist' : 'Add to Wishlist' }}
+        </button>
+
+        <p class="cart-feedback" role="status" *ngIf="cartMessage">{{ cartMessage }}</p>
+        <div class="delivery-note">
+          <ion-icon name="swap-horizontal"></ion-icon>
+          <div><strong>Fresh delivery within 24 hours</strong><small>Chilled, sealed, and handled with care.</small></div>
+        </div>
+
+        <section class="reviews-section" aria-labelledby="reviews-heading">
+          <div class="reviews-heading-row">
+            <div>
+              <p class="reviews-eyebrow">YOUR FEEDBACK</p>
+              <h2 id="reviews-heading">Ratings &amp; Reviews</h2>
+            </div>
+            <div class="reviews-average" *ngIf="reviews.length">
+              <ion-icon name="star"></ion-icon>
+              <strong>{{ averageRating | number:'1.1-1' }}</strong>
+            </div>
+          </div>
+
+          <form class="review-form" (ngSubmit)="submitReview()">
+            <label class="field-label">Your rating</label>
+            <div class="rating-picker" role="radiogroup" aria-label="Choose a rating">
+              <button
+                *ngFor="let value of [1, 2, 3, 4, 5]"
+                type="button"
+                role="radio"
+                [attr.aria-checked]="reviewRating === value"
+                [attr.aria-label]="value + ' out of 5 stars'"
+                [class.is-selected]="value <= reviewRating"
+                (click)="reviewRating = value; reviewMessage = ''"
+              >
+                <ion-icon [name]="value <= reviewRating ? 'star' : 'star-outline'"></ion-icon>
+              </button>
+            </div>
+
+            <label class="field-label" for="review-name">Name</label>
+            <input id="review-name" name="reviewName" [(ngModel)]="reviewName" maxlength="60" placeholder="Your name" required />
+
+            <label class="field-label" for="review-comment">Review</label>
+            <textarea id="review-comment" name="reviewComment" [(ngModel)]="reviewComment" maxlength="500" rows="3" placeholder="What did you think of this product?" required></textarea>
+
+            <p class="review-message" role="status" *ngIf="reviewMessage">{{ reviewMessage }}</p>
+            <button class="review-submit" type="submit">Submit Review</button>
+          </form>
+
+          <div class="review-list" *ngIf="reviews.length; else emptyReviews">
+            <article class="review-item" *ngFor="let review of reviews">
+              <div class="review-item-heading">
+                <strong>{{ review.name }}</strong>
+                <time [attr.datetime]="review.createdAt">{{ review.createdAt | date:'mediumDate' }}</time>
+              </div>
+              <div class="review-stars" [attr.aria-label]="review.rating + ' out of 5 stars'">
+                <ion-icon *ngFor="let value of [1, 2, 3, 4, 5]" [name]="value <= review.rating ? 'star' : 'star-outline'"></ion-icon>
+              </div>
+              <p>{{ review.comment }}</p>
+            </article>
+          </div>
+          <ng-template #emptyReviews>
+            <p class="empty-reviews">Be the first to share a rating for this product.</p>
+          </ng-template>
+        </section>
+      </div>
+    </article>
+  </ng-container>
+
+  <ng-template #missingProduct>
+    <section class="missing-product">
+      <h1>Product not found</h1>
+      <p>This product may have been removed from the catalog.</p>
+      <a routerLink="/products">Back to products</a>
+    </section>
+  </ng-template>
+</app-page-layout>

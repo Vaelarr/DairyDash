@@ -1,0 +1,108 @@
+.products-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 8px 0 20px;
+}
+
+.products-section-header h2 {
+  margin: 0;
+  font-size: clamp(1.8rem, 2.1vw, 2.4rem);
+  font-weight: 800;
+  color: #2d2927;
+}
+
+.products-see-all {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #e8926b;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.product-tile {
+  color: inherit;
+  text-decoration: none;
+  background: #f9e2d2;
+  border: 1px solid #f0c5a3;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(74, 59, 52, 0.06);
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.product-tile:hover,
+.product-tile:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px rgba(74, 59, 52, 0.12);
+}
+
+.product-tile:focus-visible {
+  outline: 3px solid #e8926b;
+  outline-offset: 3px;
+}
+
+.product-tile-photo {
+  flex: 1 1 auto;
+  min-height: 240px;
+  background: #f7d3b3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.product-tile-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.08));
+}
+
+.product-tile-info {
+  padding: 16px 18px 18px;
+}
+
+.product-tile-info h3 {
+  margin: 0 0 8px;
+  font-size: clamp(1.1rem, 1.6vw, 1.6rem);
+  font-weight: 700;
+  color: #2d2927;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-tile-price {
+  margin: 0 0 10px;
+  font-size: clamp(1.1rem, 1.5vw, 1.5rem);
+  font-weight: 700;
+  color: #e8926b;
+}
+
+.product-tile-desc {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: #6f5d54;
+  min-height: 44px;
+}
+
+@media (max-width: 760px) {
+  .products-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-tile {
+    min-height: 360px;
+  }
+}

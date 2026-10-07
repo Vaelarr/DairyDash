@@ -1,0 +1,37 @@
+<app-page-layout title="Company History">
+  <div class="history-page">
+    <header class="history-heading">
+      <p>THE DAIRY DASH JOURNEY</p>
+      <h1>Our story</h1>
+      <span>Local roots. Fresh possibilities.</span>
+    </header>
+
+    <section class="history-highlight">
+      <span class="history-icon"><ion-icon name="water-outline"></ion-icon></span>
+      <div>
+        <h2>Good dairy, closer to home.</h2>
+        <p>Connecting farms and families with care.</p>
+      </div>
+    </section>
+
+    <section class="history-list" aria-label="Our company journey">
+      <article class="history-point" *ngFor="let point of history">
+        <span class="history-icon"><ion-icon [name]="point.icon"></ion-icon></span>
+        <div>
+          <h2>{{ point.title }}</h2>
+          <p>{{ point.description }}</p>
+        </div>
+      </article>
+    </section>
+
+    <section class="history-return">
+      <ion-icon name="storefront-outline"></ion-icon>
+      <div>
+        <h2>A bottle worth bringing back</h2>
+        <p>Our glass bottles are sanitized and reused, keeping freshness in and plastic waste out.</p>
+      </div>
+    </section>
+
+    <p class="history-note">Company history details can be expanded as the Dairy Dash story grows.</p>
+  </div>
+</app-page-layout>

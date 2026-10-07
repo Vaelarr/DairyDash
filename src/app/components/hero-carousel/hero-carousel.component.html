@@ -1,0 +1,35 @@
+<div
+  class="hero-carousel"
+  (touchstart)="handleTouchStart($event)"
+  (touchend)="handleTouchEnd($event)"
+>
+  <div
+    class="hero-carousel-track"
+    [style.transform]="'translateX(-' + (activeIndex() * 100) + '%)'"
+  >
+    <div class="hero-slide" *ngFor="let slide of slides; let i = index">
+      <img
+        *ngIf="slide.photo"
+        [src]="slide.photo"
+        [alt]="slide.title"
+        class="hero-slide-photo"
+      />
+      <div *ngIf="!slide.photo" class="hero-slide-photo hero-slide-placeholder"></div>
+      <div class="hero-slide-overlay">
+        <p class="hero-slide-tag">{{ slide.tag }}</p>
+        <h2 class="hero-slide-title">{{ slide.title }}</h2>
+        <p class="hero-slide-subtitle">{{ slide.subtitle }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-carousel-dots">
+    <button
+      *ngFor="let _ of slides; let i = index"
+      class="hero-carousel-dot"
+      [class.active]="i === activeIndex()"
+      (click)="goTo(i)"
+      [attr.aria-label]="'Go to slide ' + (i + 1)"
+    ></button>
+  </div>
+</div>

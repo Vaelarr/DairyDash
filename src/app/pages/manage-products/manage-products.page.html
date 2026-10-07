@@ -1,0 +1,70 @@
+<app-page-layout narrow title="Manage Products">
+  <ion-searchbar
+    class="product-search"
+    placeholder="Search products..."
+    [value]="searchQuery()"
+    (ionInput)="handleSearch($event)"
+  ></ion-searchbar>
+
+  <div class="manage-header">
+    <h2>
+      {{ searchQuery().trim() ? 'Results (' + filtered().length + ' of ' + total() + ')' : 'All Products (' + total() + ')' }}
+    </h2>
+    <a routerLink="/add-product" class="manage-add">Add Product</a>
+  </div>
+
+  <ul class="manage-list" *ngIf="filtered().length > 0; else empty">
+    <li class="manage-row" *ngFor="let product of filtered(); trackBy: trackById">
+      <div class="manage-thumb">
+        <img *ngIf="product.photo; else noPhoto" [src]="product.photo" [alt]="product.name" />
+        <ng-template #noPhoto><ion-icon name="image-outline" aria-hidden="true"></ion-icon></ng-template>
+      </div>
+
+      <div class="manage-info">
+        <h3>{{ product.name }}</h3>
+        <p class="manage-price">{{ product.price }}</p>
+        <p class="manage-stock" [class.out]="product.stock === 0">{{ stockLabel(product) }}</p>
+      </div>
+
+      <div class="manage-actions">
+        <a
+          class="icon-btn"
+          [routerLink]="['/edit-product', product.id]"
+          [attr.aria-label]="'Edit ' + product.name"
+        >
+          <ion-icon name="create-outline" aria-hidden="true"></ion-icon>
+        </a>
+        <button
+          type="button"
+          class="icon-btn icon-btn-danger"
+          [attr.aria-label]="'Delete ' + product.name"
+          (click)="askToDelete(product)"
+        >
+          <ion-icon name="trash-outline" aria-hidden="true"></ion-icon>
+        </button>
+      </div>
+    </li>
+  </ul>
+
+  <ng-template #empty>
+    <p class="manage-empty">
+      {{ searchQuery().trim() ? 'No products match your search.' : 'There are no products yet. Use Add Product to create one.' }}
+    </p>
+  </ng-template>
+
+  <ion-modal class="delete-modal" [isOpen]="pendingDelete() !== null" (didDismiss)="cancelDelete()">
+    <ng-template>
+      <div class="delete-dialog" aria-labelledby="delete-title" aria-describedby="delete-message">
+        <div class="delete-icon"><ion-icon name="trash" aria-hidden="true"></ion-icon></div>
+        <h2 id="delete-title">Delete Product?</h2>
+        <p id="delete-message">
+          Are you sure you want to delete {{ pendingDelete()?.name }}? This action cannot be undone.
+        </p>
+        <div class="delete-actions">
+          <button type="button" class="btn btn-outline" (click)="cancelDelete()">Cancel</button>
+          <button type="button" class="btn btn-primary" (click)="confirmDelete()">Delete</button>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+</app-page-layout>

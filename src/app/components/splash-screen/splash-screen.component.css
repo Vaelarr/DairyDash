@@ -1,0 +1,57 @@
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #ff6f54, #ff947d);
+}
+
+.splash-content {
+  text-align: center;
+  color: white;
+  animation: splashAnimation 0.7s ease-out;
+}
+
+.splash-logo {
+  width: 135px;
+  height: 135px;
+  padding: 12px;
+  object-fit: contain;
+  border-radius: 30px;
+  background: white;
+  box-shadow: 0 14px 35px rgba(77, 35, 27, 0.2);
+}
+
+h1 {
+  margin: 22px 0 4px;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 34px;
+  font-weight: 700;
+}
+
+p {
+  margin: 0 0 25px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+ion-spinner {
+  --color: white;
+  width: 28px;
+  height: 28px;
+}
+
+@keyframes splashAnimation {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

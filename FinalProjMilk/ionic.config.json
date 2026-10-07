@@ -1,7 +1,0 @@
-{
-  "name": "FinalProjMilk",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "react-vite"
-}

@@ -1,0 +1,27 @@
+<div class="ion-page">
+  <ion-header>
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-back-button *ngIf="backHref; else menuButton" [defaultHref]="backHref"></ion-back-button>
+        <ng-template #menuButton><ion-menu-button></ion-menu-button></ng-template>
+      </ion-buttons>
+      <ion-title>{{ title }}</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content [fullscreen]="true">
+    <ion-header collapse="condense">
+      <ion-toolbar>
+        <ion-title size="large">{{ title }}</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <main class="page-content" [class.page-content-narrow]="narrow">
+      <section class="page-intro" *ngIf="eyebrow || description">
+        <p class="page-eyebrow" *ngIf="eyebrow">{{ eyebrow }}</p>
+        <h1>{{ heading || title }}</h1>
+        <p *ngIf="description">{{ description }}</p>
+      </section>
+      <ng-content></ng-content>
+    </main>
+  </ion-content>
+</div>

@@ -1,0 +1,33 @@
+<app-page-layout
+  title="List of Products"
+  eyebrow="CATALOG"
+  description="Browse and manage your product line."
+>
+  <ion-searchbar
+    class="product-search"
+    placeholder="Search products..."
+    [value]="searchQuery"
+    (ionInput)="handleSearch($event)"
+  ></ion-searchbar>
+
+  <div class="products-section-header">
+    <h2>Featured Products</h2>
+  </div>
+
+  <div class="products-grid">
+    <a class="product-tile" *ngFor="let product of filteredProducts; trackBy: trackById" [routerLink]="['/view-product', product.id]" [attr.aria-label]="'View ' + product.name + ' details'">
+      <div class="product-tile-photo">
+        <img *ngIf="product.photo" [src]="product.photo" [alt]="product.name" />
+      </div>
+      <div class="product-tile-info">
+        <h3>{{ product.name }}</h3>
+        <p class="product-tile-price">{{ product.price }}</p>
+        <p class="product-tile-desc">{{ product.description }}</p>
+      </div>
+    </a>
+  </div>
+
+  <p class="products-empty" *ngIf="filteredProducts.length === 0">
+    {{ searchQuery.trim() ? 'No products match your search.' : 'There are no products to show.' }}
+  </p>
+</app-page-layout>
