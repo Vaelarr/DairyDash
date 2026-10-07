@@ -2,6 +2,8 @@
 
 MilkSwift is a cross-platform mobile and web application built using **Angular 22** standalone components, **Ionic Framework 9**, and **Capacitor 8**. It features a modern dairy product catalog with real-time filtering, interactive hero promotional banners, developer team profiles, and responsive mobile-first navigation with split-pane support for desktop and tablet screens.
 
+Products and reviews use an **Express API with Supabase Postgres**, and product images use **Supabase Storage**. Follow [the Supabase setup guide](supabase/README.md) to create your project, run the SQL migration, configure `.env`, and upload the catalog. Then run `npm run dev` for the website at `http://localhost:3000` and API at `http://127.0.0.1:3001/api`. See [the backend guide](server/README.md) for API routes and mobile connections. SQLite remains an explicit offline development option.
+
 ---
 
 ## Tech Stack & Architecture
@@ -12,6 +14,7 @@ MilkSwift is a cross-platform mobile and web application built using **Angular 2
 - **Language**: [TypeScript 6](https://www.typescriptlang.org/)
 - **Reactive Programming**: [RxJS 7.8](https://rxjs.dev/)
 - **Styling**: Ionic CSS utilities, custom CSS variables, and modern responsive typography (Nunito & Fredoka fonts)
+- **Backend**: Express 5, Node.js 24+, Supabase Postgres and Storage (optional local SQLite)
 
 ---
 
@@ -19,7 +22,7 @@ MilkSwift is a cross-platform mobile and web application built using **Angular 2
 
 Before setting up the project, ensure you have the following installed on your machine:
 
-1. **Node.js**: `v20.x`, `v22.x`, or `v24.x` (LTS or Current)
+1. **Node.js**: `v24.x` or newer (required for shared TypeScript seed imports and optional SQLite)
    - Verify: `node -v`
 2. **npm**: `v10.x` or `v11.x`
    - Verify: `npm -v`
@@ -56,6 +59,8 @@ npm install
 
 You can launch the development server using any of the following approaches:
 
+Configure your Supabase project first using [supabase/README.md](supabase/README.md). For offline development, set `DATABASE_PROVIDER=sqlite` in `.env`.
+
 ### Option A: Standard npm Scripts (Recommended)
 
 ```bash
@@ -63,11 +68,14 @@ npm run dev
 # or
 npm start
 ```
-- Starts the development server at **`http://localhost:3000/`**.
+- Starts the website at **`http://localhost:3000/`** and the API at **`http://127.0.0.1:3001/api`**.
+- Proxies browser requests from `/api` to the API, which saves products/reviews in Supabase and uploads images to Storage.
 - Configured to bind to `0.0.0.0`, allowing testing from mobile devices on the same local network.
 - Live-reloads automatically when source files change.
 
 ### Option B: Angular CLI
+
+Start `npm run api:dev` in a second terminal when using Angular or Ionic CLI directly.
 
 ```bash
 # Using npx (no global install needed):
@@ -207,8 +215,13 @@ IPT4.2Menu/
 
 | Script | Command | Description |
 | :--- | :--- | :--- |
-| `npm run dev` | `ng serve --host 0.0.0.0 --port 3000` | Starts development server on port 3000 |
-| `npm start` | `ng serve --host 0.0.0.0 --port 3000` | Alias for `npm run dev` |
+| `npm run dev` | `node scripts/dev.js` | Starts the Angular website and API together |
+| `npm start` | `node scripts/dev.js` | Alias for `npm run dev` |
+| `npm run dev:web` | `ng serve --host 0.0.0.0 --port 3000` | Starts only the website |
+| `npm run api` | `node --env-file-if-exists=.env server/index.js` | Starts only the API |
+| `npm run api:dev` | `node --watch --env-file-if-exists=.env server/index.js` | Starts the API with reloads |
+| `npm run test:api` | `node --test server/tests/*.test.js` | Tests API routes and persistence |
+| `npm run db:seed` | `node --env-file-if-exists=.env scripts/seed-supabase.js` | Uploads catalog images and seeds Supabase once |
 | `npm run build` | `ng build` | Produces production-ready bundles in `dist/` |
 | `npm run watch` | `ng build --watch --configuration development` | Builds in watch mode for development |
 | `npm run ionic:serve` | `ng serve` | Invoked automatically by Ionic CLI (`ionic serve`) |

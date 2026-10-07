@@ -4,14 +4,22 @@
   "type": "module",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --host 0.0.0.0 --port 3000",
-    "dev": "ng serve --host 0.0.0.0 --port 3000",
+    "start": "node scripts/dev.js",
+    "dev": "node scripts/dev.js",
+    "dev:web": "ng serve --host 0.0.0.0 --port 3000",
+    "api": "node --env-file-if-exists=.env server/index.js",
+    "api:dev": "node --watch --env-file-if-exists=.env server/index.js",
+    "test:api": "node --test server/tests/*.test.js",
+    "db:seed": "node --env-file-if-exists=.env scripts/seed-supabase.js",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "ionic:serve": "ionic serve",
     "ionic:build": "ionic build"
   },
   "private": true,
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "dependencies": {
     "@angular/animations": "^22.1.7",
     "@angular/common": "^22.1.7",
@@ -22,6 +30,8 @@
     "@angular/platform-browser-dynamic": "^22.1.7",
     "@angular/router": "^22.1.7",
     "@ionic/angular": "^9.0.4",
+    "@supabase/supabase-js": "^2.117.3",
+    "express": "^5.2.1",
     "ionicons": "^8.1.0",
     "rxjs": "~7.8.2",
     "tslib": "^2.8.1",
@@ -31,6 +41,7 @@
     "@angular-devkit/build-angular": "^22.1.8",
     "@angular/cli": "^22.1.8",
     "@angular/compiler-cli": "^22.1.7",
+    "@electric-sql/pglite": "^0.5.8",
     "typescript": "~6.0.3"
   },
   "allowScripts": {

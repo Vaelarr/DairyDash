@@ -5,6 +5,7 @@
     [value]="searchQuery()"
     (ionInput)="handleSearch($event)"
   ></ion-searchbar>
+  <app-catalog-status></app-catalog-status>
 
   <div class="manage-header">
     <h2>
@@ -47,12 +48,12 @@
   </ul>
 
   <ng-template #empty>
-    <p class="manage-empty">
+    <p class="manage-empty" *ngIf="!loading() && !loadError()">
       {{ searchQuery().trim() ? 'No products match your search.' : 'There are no products yet. Use Add Product to create one.' }}
     </p>
   </ng-template>
 
-  <ion-modal class="delete-modal" [isOpen]="pendingDelete() !== null" (didDismiss)="cancelDelete()">
+  <ion-modal class="delete-modal" [isOpen]="pendingDelete() !== null" [backdropDismiss]="!deleting()" (didDismiss)="cancelDelete()">
     <ng-template>
       <div class="delete-dialog" aria-labelledby="delete-title" aria-describedby="delete-message">
         <div class="delete-icon"><ion-icon name="trash" aria-hidden="true"></ion-icon></div>
@@ -60,9 +61,10 @@
         <p id="delete-message">
           Are you sure you want to delete {{ pendingDelete()?.name }}? This action cannot be undone.
         </p>
+        <p *ngIf="deleteError()" role="alert">{{ deleteError() }}</p>
         <div class="delete-actions">
-          <button type="button" class="btn btn-outline" (click)="cancelDelete()">Cancel</button>
-          <button type="button" class="btn btn-primary" (click)="confirmDelete()">Delete</button>
+          <button type="button" class="btn btn-outline" (click)="cancelDelete()" [disabled]="deleting()">Cancel</button>
+          <button type="button" class="btn btn-primary" (click)="confirmDelete()" [disabled]="deleting()">{{ deleting() ? 'Deleting…' : 'Delete' }}</button>
         </div>
       </div>
     </ng-template>

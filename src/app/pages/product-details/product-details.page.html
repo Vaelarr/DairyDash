@@ -1,4 +1,10 @@
 <app-page-layout title="Product Details" backHref="/products">
+  <p class="api-status" *ngIf="loading()" role="status">Loading product…</p>
+  <div class="api-status api-status-error" *ngIf="loadError()" role="alert">
+    <p>{{ loadError() }}</p>
+    <button type="button" (click)="load()">Try again</button>
+  </div>
+  <ng-container *ngIf="!loading() && !loadError()">
   <ng-container *ngIf="product as item; else missingProduct">
     <article class="detail-card">
       <div class="detail-visual">
@@ -63,6 +69,11 @@
         </div>
 
         <section class="reviews-section" aria-labelledby="reviews-heading">
+          <p class="api-status" *ngIf="reviewsLoading()" role="status">Loading reviews…</p>
+          <div class="api-status api-status-error" *ngIf="reviewsError()" role="alert">
+            <p>{{ reviewsError() }}</p>
+            <button type="button" (click)="loadReviews()" [disabled]="reviewsLoading() || reviewBusy()">Try again</button>
+          </div>
           <div class="reviews-heading-row">
             <div>
               <p class="reviews-eyebrow">YOUR FEEDBACK</p>
@@ -97,7 +108,7 @@
             <textarea id="review-comment" name="reviewComment" [(ngModel)]="reviewComment" maxlength="500" rows="3" placeholder="What did you think of this product?" required></textarea>
 
             <p class="review-message" role="status" *ngIf="reviewMessage">{{ reviewMessage }}</p>
-            <button class="review-submit" type="submit">Submit Review</button>
+            <button class="review-submit" type="submit" [disabled]="reviewBusy() || reviewsLoading()">{{ reviewBusy() ? 'Submitting…' : 'Submit Review' }}</button>
           </form>
 
           <div class="review-list" *ngIf="reviews.length; else emptyReviews">
@@ -113,11 +124,12 @@
             </article>
           </div>
           <ng-template #emptyReviews>
-            <p class="empty-reviews">Be the first to share a rating for this product.</p>
+            <p class="empty-reviews" *ngIf="!reviewsLoading() && !reviewsError()">Be the first to share a rating for this product.</p>
           </ng-template>
         </section>
       </div>
     </article>
+  </ng-container>
   </ng-container>
 
   <ng-template #missingProduct>

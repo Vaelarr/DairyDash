@@ -1,16 +1,11 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { firstValueFrom, timeout } from 'rxjs';
+import { environment } from '../../environments/environment';
 import { Product } from '../models/product';
-import { SEED_PRODUCTS } from '../data/seed-products';
+import { ProductReview, ReviewInput } from '../models/product-review';
 
-export const PRODUCT_CATEGORIES = [
-  'Fresh Milk',
-  'Flavored Milk',
-  'Plant-Based Milk',
-  'Yogurt',
-  'Cheese',
-  'Butter & Cream',
-  'Other',
-];
+export { PRODUCT_CATEGORIES } from '../data/product-categories';
 
 export interface ProductInput {
   name: string;
@@ -21,139 +16,150 @@ export interface ProductInput {
   photo?: string;
 }
 
-const CUSTOM_KEY = 'milkswift.custom-products';
-const OVERRIDES_KEY = 'milkswift.product-overrides';
-const DELETED_KEY = 'milkswift.deleted-products';
-const FEATURED_COUNT = 9;
+interface ApiProduct extends Omit<Product, 'price'> {
+  price: number;
+}
 
-/** "₱1,234.50" -> 1234.5 */
+interface ApiResponse<T> {
+  data: T;
+}
+
 export function priceValue(product: Product): number {
   return parseFloat(product.price.replace(/[^\d.]/g, '')) || 0;
 }
 
+export function apiErrorMessage(error: unknown): string {
+  if (error instanceof HttpErrorResponse) {
+    if (error.status === 0) return 'Cannot reach the server. Check your connection and try again.';
+    const message = error.error?.error?.message;
+    if (typeof message === 'string') return message;
+  }
+  return 'The request could not be completed. Please try again.';
+}
+
+function toProduct(product: ApiProduct): Product {
+  return {
+    ...product,
+    price: `₱${product.price.toLocaleString('en-PH', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`,
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class ProductService {
-  /** Products added in the app. */
-  private readonly custom = signal<Product[]>(this.loadCustom());
-  /** Edits to built-in products, keyed by product id (the catalog itself lives in code). */
-  private readonly overrides = signal<Record<string, Product>>(this.loadOverrides());
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = environment.apiUrl.replace(/\/$/, '');
+  private readonly items = signal<Product[]>([]);
+  private refreshRequest: Promise<boolean> | null = null;
+  private revision = 0;
+  private readonly productRevisions = new Map<string, number>();
 
-  /** Ids of built-in products the user deleted (they live in code, so they can only be hidden). */
-  private readonly deleted = signal<string[]>(this.loadDeleted());
+  readonly products = this.items.asReadonly();
+  readonly featured = computed(() => this.items().filter((product) => product.id.startsWith('seed-')).slice(0, 9));
+  readonly loading = signal(false);
+  readonly error = signal('');
 
-  private readonly catalog = computed(() =>
-    SEED_PRODUCTS.filter((p) => !this.deleted().includes(p.id)).map(
-      (p) => this.overrides()[p.id] ?? p
-    )
-  );
-
-  /** Products added in the app (newest first), followed by the built-in catalog. */
-  readonly products = computed(() => [...this.custom(), ...this.catalog()]);
-
-  /** The built-in products shown on the dashboard, with any edits applied. */
-  readonly featured = computed(() => this.catalog().slice(0, FEATURED_COUNT));
+  constructor() {
+    void this.refresh();
+  }
 
   getById(id: string): Product | undefined {
-    return this.products().find((p) => p.id === id);
+    return this.items().find((product) => product.id === id);
   }
 
-  /** Returns false when the product couldn't be saved (e.g. browser storage is full). */
-  add(input: ProductInput): boolean {
-    const next = [this.build(newId(), input), ...this.custom()];
-    if (!save(CUSTOM_KEY, next)) return false;
-    this.custom.set(next);
-    return true;
+  /** Share an in-flight catalog request between Ionic pages. */
+  refresh(): Promise<boolean> {
+    if (this.refreshRequest) return this.refreshRequest;
+    this.loading.set(true);
+    this.error.set('');
+    const revision = this.revision;
+    this.refreshRequest = firstValueFrom(
+      this.http.get<ApiResponse<ApiProduct[]>>(`${this.baseUrl}/products`).pipe(timeout(15000))
+    ).then((response) => {
+      // A slow catalog response must not undo a subsequently confirmed save or deletion.
+      if (revision === this.revision) this.items.set(response.data.map(toProduct));
+      return true;
+    }).catch((error: unknown) => {
+      this.error.set(apiErrorMessage(error));
+      return false;
+    }).finally(() => {
+      this.loading.set(false);
+      this.refreshRequest = null;
+    });
+    return this.refreshRequest;
   }
 
-  /** Returns false when the product doesn't exist or couldn't be saved. */
-  update(id: string, input: ProductInput): boolean {
-    if (!this.getById(id)) return false;
-    const updated = this.build(id, input);
-
-    if (this.custom().some((p) => p.id === id)) {
-      const next = this.custom().map((p) => (p.id === id ? updated : p));
-      if (!save(CUSTOM_KEY, next)) return false;
-      this.custom.set(next);
-    } else {
-      const next = { ...this.overrides(), [id]: updated };
-      if (!save(OVERRIDES_KEY, next)) return false;
-      this.overrides.set(next);
+  async fetchById(id: string): Promise<Product | undefined> {
+    const revision = this.productRevisions.get(id) ?? 0;
+    try {
+      const response = await firstValueFrom(
+        this.http.get<ApiResponse<ApiProduct>>(`${this.baseUrl}/products/${encodeURIComponent(id)}`).pipe(timeout(15000))
+      );
+      if (revision !== (this.productRevisions.get(id) ?? 0)) return this.getById(id);
+      const product = toProduct(response.data);
+      this.putInCatalog(product);
+      return product;
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.status === 404) {
+        if (revision !== (this.productRevisions.get(id) ?? 0)) return this.getById(id);
+        this.recordMutation(id);
+        this.items.update((items) => items.filter((product) => product.id !== id));
+        return undefined;
+      }
+      throw error;
     }
-    return true;
   }
 
-  /** Returns false when the product doesn't exist or the change couldn't be saved. */
-  remove(id: string): boolean {
-    if (!this.getById(id)) return false;
-
-    if (this.custom().some((p) => p.id === id)) {
-      const next = this.custom().filter((p) => p.id !== id);
-      if (!save(CUSTOM_KEY, next)) return false;
-      this.custom.set(next);
-    } else {
-      const next = [...this.deleted(), id];
-      if (!save(DELETED_KEY, next)) return false;
-      this.deleted.set(next);
-    }
-    return true;
+  async add(input: ProductInput): Promise<Product> {
+    const response = await firstValueFrom(
+      this.http.post<ApiResponse<ApiProduct>>(`${this.baseUrl}/products`, input).pipe(timeout(15000))
+    );
+    const product = toProduct(response.data);
+    this.recordMutation(product.id);
+    this.items.update((items) => [product, ...items]);
+    return product;
   }
 
-  private build(id: string, input: ProductInput): Product {
-    return {
-      id,
-      name: input.name.trim(),
-      price: `₱${input.price.toLocaleString('en-PH', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })}`,
-      description: input.description.trim(),
-      ...(input.category ? { category: input.category } : {}),
-      ...(input.stock !== undefined ? { stock: input.stock } : {}),
-      ...(input.photo ? { photo: input.photo } : {}),
-    };
+  async update(id: string, input: ProductInput): Promise<Product> {
+    const response = await firstValueFrom(
+      this.http.put<ApiResponse<ApiProduct>>(`${this.baseUrl}/products/${encodeURIComponent(id)}`, input).pipe(timeout(15000))
+    );
+    const product = toProduct(response.data);
+    this.recordMutation(id);
+    this.putInCatalog(product);
+    return product;
   }
 
-  private loadCustom(): Product[] {
-    const stored = read<Partial<Product>[]>(CUSTOM_KEY, []);
-    if (!Array.isArray(stored)) return [];
-
-    const valid = stored.filter((p): p is Product => typeof p?.name === 'string');
-    // Products saved before ids existed get one now.
-    const withIds = valid.map((p) => (p.id ? p : { ...p, id: newId() }));
-    if (withIds.some((p, i) => p !== valid[i])) save(CUSTOM_KEY, withIds);
-    return withIds;
+  async remove(id: string): Promise<void> {
+    await firstValueFrom(this.http.delete(`${this.baseUrl}/products/${encodeURIComponent(id)}`).pipe(timeout(15000)));
+    this.recordMutation(id);
+    this.items.update((items) => items.filter((product) => product.id !== id));
   }
 
-  private loadDeleted(): string[] {
-    const stored = read<unknown>(DELETED_KEY, []);
-    return Array.isArray(stored) ? stored.filter((id): id is string => typeof id === 'string') : [];
+  async getReviews(id: string): Promise<ProductReview[]> {
+    const response = await firstValueFrom(
+      this.http.get<ApiResponse<ProductReview[]>>(`${this.baseUrl}/products/${encodeURIComponent(id)}/reviews`).pipe(timeout(15000))
+    );
+    return response.data;
   }
 
-  private loadOverrides(): Record<string, Product> {
-    const stored = read<Record<string, Product>>(OVERRIDES_KEY, {});
-    return stored && typeof stored === 'object' && !Array.isArray(stored) ? stored : {};
+  async addReview(id: string, input: ReviewInput): Promise<ProductReview> {
+    const response = await firstValueFrom(
+      this.http.post<ApiResponse<ProductReview>>(`${this.baseUrl}/products/${encodeURIComponent(id)}/reviews`, input).pipe(timeout(15000))
+    );
+    return response.data;
   }
-}
 
-// Not crypto.randomUUID(): it only exists on secure origins, and the dev server is often opened
-// over plain http from a phone on the local network.
-function newId(): string {
-  return `custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function read<T>(key: string, fallback: T): T {
-  try {
-    return JSON.parse(localStorage.getItem(key) ?? 'null') ?? fallback;
-  } catch {
-    return fallback;
+  private putInCatalog(product: Product) {
+    this.items.update((items) => items.some((item) => item.id === product.id)
+      ? items.map((item) => item.id === product.id ? product : item)
+      : [...items, product]);
   }
-}
 
-function save(key: string, value: unknown): boolean {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-    return true;
-  } catch {
-    return false;
+  private recordMutation(id: string) {
+    this.revision++;
+    this.productRevisions.set(id, (this.productRevisions.get(id) ?? 0) + 1);
   }
 }

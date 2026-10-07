@@ -6,7 +6,12 @@
   [description]="description()"
   [backHref]="isEdit ? '/manage-products' : ''"
 >
-  <form class="product-form" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+  <p class="api-status" *ngIf="loadBusy()" role="status">Loading product…</p>
+  <div class="api-status api-status-error" *ngIf="loadError()" role="alert">
+    <p>{{ loadError() }}</p>
+    <button type="button" (click)="load()">Try again</button>
+  </div>
+  <form *ngIf="!loadBusy() && !loadError()" class="product-form" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
     <input
       #fileInput
       type="file"
@@ -104,13 +109,14 @@
           inputmode="decimal"
           step="0.01"
           min="0"
+          max="999999.99"
           formControlName="price"
           placeholder="₱0.00"
           [attr.aria-invalid]="showError('price')"
           aria-describedby="product-price-error"
         />
         <p class="field-error" id="product-price-error" *ngIf="showError('price')">
-          Enter a price above 0.
+          Enter a price from 0.01 to 999,999.99.
         </p>
       </div>
 
@@ -122,13 +128,14 @@
           inputmode="numeric"
           step="1"
           min="0"
+          max="1000000000"
           formControlName="stock"
           placeholder="0"
           [attr.aria-invalid]="showError('stock')"
           aria-describedby="product-stock-error"
         />
         <p class="field-error" id="product-stock-error" *ngIf="showError('stock')">
-          Use a whole number.
+          Use a whole number from 0 to 1,000,000,000.
         </p>
       </div>
     </div>
@@ -147,10 +154,10 @@
     <p class="field-error" *ngIf="saveError()" role="alert">{{ saveError() }}</p>
 
     <div class="form-actions">
-      <button type="submit" class="btn btn-primary" [disabled]="imageBusy()">
-        {{ isEdit ? 'Save Changes' : 'Add Product' }}
+      <button type="submit" class="btn btn-primary" [disabled]="imageBusy() || saving()">
+        {{ saving() ? 'Saving…' : isEdit ? 'Save Changes' : 'Add Product' }}
       </button>
-      <button type="button" class="btn btn-outline" (click)="cancel()">Cancel</button>
+      <button type="button" class="btn btn-outline" (click)="cancel()" [disabled]="saving()">Cancel</button>
     </div>
   </form>
 </app-page-layout>

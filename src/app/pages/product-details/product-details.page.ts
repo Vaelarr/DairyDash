@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -7,14 +7,8 @@ import { addIcons } from 'ionicons';
 import { heart, heartOutline, star, starOutline, swapHorizontal } from 'ionicons/icons';
 import { PageLayoutComponent } from '../../components/page-layout/page-layout.component';
 import { Product } from '../../models/product';
-import { ProductService } from '../../services/product.service';
-
-interface ProductReview {
-  name: string;
-  rating: number;
-  comment: string;
-  createdAt: string;
-}
+import { ProductReview } from '../../models/product-review';
+import { ProductService, apiErrorMessage } from '../../services/product.service';
 
 @Component({
   selector: 'app-product-details',
@@ -27,9 +21,16 @@ export class ProductDetailsPage {
   private readonly route = inject(ActivatedRoute);
   private readonly productService = inject(ProductService);
 
-  readonly product: Product | undefined = this.productService.getById(
-    this.route.snapshot.paramMap.get('id') ?? ''
-  );
+  private readonly productId = this.route.snapshot.paramMap.get('id') ?? '';
+  readonly loading = signal(false);
+  readonly loadError = signal('');
+  readonly reviewBusy = signal(false);
+  readonly reviewsLoading = signal(false);
+  readonly reviewsError = signal('');
+
+  get product(): Product | undefined {
+    return this.productService.getById(this.productId);
+  }
   quantity = 1;
   isWishlisted = false;
   cartMessage = '';
@@ -51,7 +52,40 @@ export class ProductDetailsPage {
       'swap-horizontal': swapHorizontal,
     });
 
-    this.reviews = this.loadReviews();
+    void this.load();
+  }
+
+  ionViewWillEnter() {
+    void this.load();
+  }
+
+  async load() {
+    if (this.loading()) return;
+    this.loading.set(true);
+    this.loadError.set('');
+    try {
+      const product = await this.productService.fetchById(this.productId);
+      if (product) {
+        this.quantity = Math.max(1, Math.min(this.quantity, product.stock ?? 99));
+        await this.loadReviews();
+      }
+    } catch (error) {
+      this.loadError.set(apiErrorMessage(error));
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async loadReviews() {
+    this.reviewsLoading.set(true);
+    this.reviewsError.set('');
+    try {
+      this.reviews = await this.productService.getReviews(this.productId);
+    } catch (error) {
+      this.reviewsError.set(apiErrorMessage(error));
+    } finally {
+      this.reviewsLoading.set(false);
+    }
   }
 
   get averageRating(): number {
@@ -81,7 +115,8 @@ export class ProductDetailsPage {
     this.isWishlisted = !this.isWishlisted;
   }
 
-  submitReview(): void {
+  async submitReview(): Promise<void> {
+    if (this.reviewBusy() || this.reviewsLoading()) return;
     const name = this.reviewName.trim();
     const comment = this.reviewComment.trim();
     if (!name || !comment || this.reviewRating < 1) {
@@ -90,44 +125,19 @@ export class ProductDetailsPage {
     }
     if (!this.product) return;
 
-    const review: ProductReview = {
-      name,
-      rating: this.reviewRating,
-      comment,
-      createdAt: new Date().toISOString(),
-    };
-    const nextReviews = [review, ...this.reviews];
+    this.reviewBusy.set(true);
+    this.reviewMessage = '';
     try {
-      localStorage.setItem(this.reviewStorageKey, JSON.stringify(nextReviews));
-      this.reviews = nextReviews;
+      const review = await this.productService.addReview(this.productId, { name, rating: this.reviewRating, comment });
+      this.reviews = [review, ...this.reviews];
       this.reviewName = '';
       this.reviewComment = '';
       this.reviewRating = 0;
       this.reviewMessage = 'Thanks for sharing your review.';
-    } catch {
-      this.reviewMessage = 'Your review could not be saved in this browser.';
-    }
-  }
-
-  private get reviewStorageKey(): string {
-    return `milkswift.product-reviews.${this.product?.id ?? 'missing'}`;
-  }
-
-  private loadReviews(): ProductReview[] {
-    try {
-      const saved: unknown = JSON.parse(localStorage.getItem(this.reviewStorageKey) ?? '[]');
-      if (!Array.isArray(saved)) return [];
-      return saved.filter(
-        (review): review is ProductReview =>
-          typeof review?.name === 'string' &&
-          typeof review?.comment === 'string' &&
-          Number.isInteger(review?.rating) &&
-          review.rating >= 1 &&
-          review.rating <= 5 &&
-          typeof review?.createdAt === 'string'
-      );
-    } catch {
-      return [];
+    } catch (error) {
+      this.reviewMessage = apiErrorMessage(error);
+    } finally {
+      this.reviewBusy.set(false);
     }
   }
 }

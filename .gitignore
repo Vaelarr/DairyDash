@@ -13,6 +13,8 @@
 /.angular
 
 # misc
+.env
+/server/data/
 .DS_Store
 .env.local
 .env.development.local
