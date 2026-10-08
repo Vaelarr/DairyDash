@@ -1,0 +1,16 @@
+.orders-list { display: grid; gap: 20px; }
+article { padding: 24px; border: 1px solid #e8d5c7; border-radius: 18px; background: #fff8f3; color: #573f34; }
+header, li, .total { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+h2 { font-size: 20px; margin: 0; }
+header span { background: #f5dfcd; padding: 6px 12px; border-radius: 20px; text-transform: capitalize; }
+ul { padding: 0; list-style: none; }
+li { padding: 10px 0; border-bottom: 1px solid #e8d5c7; }
+p, small { overflow-wrap: anywhere; line-height: 1.6; }
+.total { font-size: 18px; }
+.order-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+button { border: 1px solid #ab7960; border-radius: 9px; padding: 10px 14px; background: #fff; color: #573f34; cursor: pointer; }
+button:disabled { opacity: .5; cursor: wait; }
+.delivery-form, .confirmation { border-top: 1px solid #e8d5c7; margin-top: 20px; padding-top: 16px; }
+.delivery-form label { display: grid; gap: 6px; margin-bottom: 12px; }
+input, textarea { width: 100%; padding: 10px; border: 1px solid #ab7960; border-radius: 8px; background: #fff; color: #573f34; }
+.delivery-form button, .confirmation button { margin: 0 8px 8px 0; }

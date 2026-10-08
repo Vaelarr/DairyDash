@@ -11,6 +11,7 @@
     "api:dev": "node --watch --env-file-if-exists=.env server/index.js",
     "test:api": "node --test server/tests/*.test.js",
     "db:seed": "node --env-file-if-exists=.env scripts/seed-supabase.js",
+    "db:check": "node --env-file-if-exists=.env scripts/check-supabase.js",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "ionic:serve": "ionic serve",

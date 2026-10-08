@@ -7,4 +7,6 @@ export interface ReviewInput {
 export interface ProductReview extends ReviewInput {
   id: string;
   createdAt: string;
+  updatedAt: string;
+  userId: string | null;
 }

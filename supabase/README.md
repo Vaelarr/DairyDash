@@ -15,6 +15,10 @@ This integration uses a server key because database/storage writes run inside Ex
 
 Open **SQL Editor** in the new project, create a query, paste the entire contents of [202610070001_dairydash.sql](migrations/202610070001_dairydash.sql), and run it.
 
+Then run [202610080001_orders.sql](migrations/202610080001_orders.sql) to add orders, order items, and transactional checkout functions. If your project already has the catalog migration, run only this new migration. It preserves existing records and can be rerun.
+
+Finally run [202610090001_review_order_crud.sql](migrations/202610090001_review_order_crud.sql) for review ownership, edit/delete, order delivery/status updates, stock restoration, and deletion. Apply migrations in filename order. Each migration preserves existing records.
+
 The migration creates:
 
 - `dairydash_products` for products, prices in centavos, stock and cloud image references.
@@ -51,6 +55,7 @@ From the project root:
 ```sh
 npm install
 npm run db:seed
+npm run db:check
 npm run dev
 ```
 
@@ -64,7 +69,7 @@ Choosing Supabase leaves any SQLite database and browser localStorage intact. Th
 
 A packaged Capacitor app needs an absolute HTTPS **Express API URL** in `src/environments/environment.ts`. Deploy the API with its Supabase environment variables, and add the website/native origins to `CORS_ORIGINS`. Supabase hosts the database and images; this change does not deploy the Express API or website.
 
-The current API retains its development CRUD behavior. User authentication and admin authorization are still needed before exposing product management as a public service. RLS protects direct Supabase access; it does not authenticate callers of Express.
+The Angular app now uses the project's publishable key for Supabase Auth. Express verifies user access tokens: catalog writes require a trusted admin role, reviews require sign-in, and checkout/order history belong to the signed-in customer. RLS still prevents browser access to the private tables and RPCs. See [the account and order setup guide](../server/README.md#accounts-and-orders-setup) for email confirmation, admin assignment, checkout rules, and remaining scope.
 
 ## Troubleshooting
 
@@ -75,6 +80,9 @@ The current API retains its development CRUD behavior. User authentication and a
 | Cloud database/storage unavailable | Verify the project is active, the key belongs to that project, and the complete SQL migration ran |
 | Product image bucket must be public | Check the `dairydash-product-images` bucket's public setting |
 | Catalog is empty | Run `npm run db:seed`; repeating it after deleting products intentionally does not restore them |
+| Checkout/order history reports cloud unavailable | Run the new order migration, then `npm run db:check` |
+| Review edit/delete or order management reports cloud unavailable | Apply `202610090001_review_order_crud.sql`, then run `npm run db:check` |
+| Product management returns 403 | Assign `app_metadata.role = 'admin'` to the trusted user and sign in again |
 | Browser cannot reach API | Ensure `npm run dev` started both services and the proxy points to the API port |
 
 For offline development, explicitly set `DATABASE_PROVIDER=sqlite`; its old local database implementation remains available. Supabase mode never silently saves to SQLite when cloud configuration or network access fails.

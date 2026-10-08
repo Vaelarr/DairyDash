@@ -13,10 +13,10 @@ try {
   console.error(`API setup failed: ${error.message}`);
   process.exit(1);
 }
-const { database, provider } = repository;
+const { database, provider, authenticate } = repository;
 const allowedOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:3000,http://127.0.0.1:3000')
   .split(',').map((origin) => origin.trim()).filter(Boolean);
-const server = createApp(database, { allowedOrigins }).listen(port, host, () => {
+const server = createApp(database, { allowedOrigins, authenticate }).listen(port, host, () => {
   console.log(`DairyDash API listening at http://${host}:${port}/api (${provider})`);
 });
 server.on('error', (error) => {
