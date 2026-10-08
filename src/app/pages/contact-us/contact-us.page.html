@@ -1,0 +1,190 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+
+    <ion-title>Dairy Dash</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <main class="contact-container">
+    <header class="page-heading">
+      <p class="page-eyebrow">WE'RE HERE TO HELP</p>
+      <h1>Contact Us</h1>
+      <p>
+        Have a question about our products or your order?
+        We would love to hear from you.
+      </p>
+    </header>
+
+    <div class="contact-layout">
+      <!-- Contact information -->
+      <section class="contact-card" aria-labelledby="contact-details-title">
+        <h2 id="contact-details-title">Get in touch</h2>
+        <p class="section-description">
+          Connect with the Dairy Dash team.
+        </p>
+
+        <div class="contact-row">
+          <div class="contact-icon">
+            <ion-icon name="mail-outline" aria-hidden="true"></ion-icon>
+          </div>
+
+          <div>
+            <h3>Email us</h3>
+
+            @if (business.email) {
+              <a [href]="'mailto:' + business.email">
+                {{ business.email }}
+              </a>
+            } @else {
+              <p>Email not provided yet.</p>
+            }
+          </div>
+        </div>
+
+        <div class="contact-row">
+          <div class="contact-icon">
+            <ion-icon name="call-outline" aria-hidden="true"></ion-icon>
+          </div>
+
+          <div>
+            <h3>Call us</h3>
+
+            @if (business.phone) {
+              <a [href]="phoneLink">{{ business.phone }}</a>
+            } @else {
+              <p>Phone number not provided yet.</p>
+            }
+          </div>
+        </div>
+
+        <div class="contact-row">
+          <div class="contact-icon">
+            <ion-icon name="location-outline" aria-hidden="true"></ion-icon>
+          </div>
+
+          <div>
+            <h3>Our address</h3>
+            <p>{{ business.address || 'Address not provided yet.' }}</p>
+          </div>
+        </div>
+
+        <div class="brand-note">
+          <span class="brand-mark" aria-hidden="true">DD</span>
+
+          <div>
+            <strong>Fresh from the farm.</strong>
+            <p>Thank you for choosing Dairy Dash.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Email draft form -->
+      <section class="contact-card" aria-labelledby="message-title">
+        <h2 id="message-title">Write us a message</h2>
+
+        <p class="section-description">
+          Complete the fields below, then continue in your email app.
+          All fields are required.
+        </p>
+
+        <form
+          #contactForm="ngForm"
+          (ngSubmit)="openEmail(contactForm)"
+          novalidate
+        >
+          <ion-input
+            name="name"
+            label="Your name"
+            labelPlacement="stacked"
+            placeholder="Enter your full name"
+            fill="outline"
+            mode="md"
+            autocomplete="name"
+            [(ngModel)]="message.name"
+            [maxlength]="80"
+            required
+            errorText="Please enter your name."
+          ></ion-input>
+
+          <ion-input
+            name="email"
+            type="email"
+            label="Your email"
+            labelPlacement="stacked"
+            placeholder="Enter your email address"
+            fill="outline"
+            mode="md"
+            autocomplete="email"
+            [(ngModel)]="message.email"
+            [maxlength]="254"
+            required
+            email
+            errorText="Please enter a valid email address."
+          ></ion-input>
+
+          <ion-input
+            name="subject"
+            label="Subject"
+            labelPlacement="stacked"
+            placeholder="What can we help you with?"
+            fill="outline"
+            mode="md"
+            [(ngModel)]="message.subject"
+            [maxlength]="100"
+            required
+            errorText="Please enter a subject."
+          ></ion-input>
+
+          <ion-textarea
+            name="body"
+            label="Your message"
+            labelPlacement="stacked"
+            placeholder="Write your question or feedback..."
+            fill="outline"
+            mode="md"
+            [rows]="5"
+            [autoGrow]="true"
+            [maxlength]="1000"
+            [(ngModel)]="message.body"
+            required
+            errorText="Please enter your message."
+          ></ion-textarea>
+
+          @if (!business.email.trim()) {
+            <p class="setup-note">
+              Add your support email in contact-us.page.ts to enable
+              email drafts.
+            </p>
+          }
+
+          <ion-button
+            class="send-button"
+            type="submit"
+            expand="block"
+            [disabled]="!business.email.trim()"
+          >
+            <ion-icon
+              name="paper-plane-outline"
+              slot="start"
+              aria-hidden="true"
+            ></ion-icon>
+            Open Email App
+          </ion-button>
+
+          <p class="form-note">
+            Nothing is sent automatically. Review your draft and press
+            Send in your email app.
+          </p>
+
+          <p class="form-feedback" role="status" aria-live="polite">
+            {{ feedback() }}
+          </p>
+        </form>
+      </section>
+    </div>
+  </main>
+</ion-content>
