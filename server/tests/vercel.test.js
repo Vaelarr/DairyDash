@@ -58,7 +58,7 @@ test('Vercel serves nested catalog routes and query filters as cloud JSON', asyn
 
 test('Vercel accepts trusted deployment origins and rejects unrelated origins', async (t) => {
   const request = await fixture(t);
-  for (const origin of ['https://dairy-dash.vercel.app', 'https://dairy-dash-preview.vercel.app']) {
+  for (const origin of ['https://dairy-dash.vercel.app', 'https://dairy-dash-preview.vercel.app', 'https://localhost']) {
     const response = await request('/api/categories', { headers: { Origin: origin } });
     assert.equal(response.status, 200);
     assert.equal(response.headers.get('access-control-allow-origin'), origin);

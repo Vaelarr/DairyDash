@@ -14,6 +14,8 @@ export function createVercelHandler(env = process.env) {
           (env.CORS_ORIGINS ?? 'http://localhost:3000,http://127.0.0.1:3000')
             .split(',').map((origin) => origin.trim()).filter(Boolean)
         );
+        // Capacitor serves bundled Android assets from this HTTPS origin.
+        allowedOrigins.add('https://localhost');
         // Vercel supplies these trusted hosts for production and preview deployments.
         for (const host of [env.VERCEL_PROJECT_PRODUCTION_URL, env.VERCEL_URL]) {
           if (host) allowedOrigins.add(`https://${host}`);
