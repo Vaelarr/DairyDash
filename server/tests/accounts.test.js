@@ -5,7 +5,7 @@ import { createApp } from '../app.js';
 import { createAuthenticator } from '../auth.js';
 import { createSupabaseClient } from '../supabase-client.js';
 import {
-  accountErrorMessage, emailError, normalizeEmail, passwordError, safeAccountReturnUrl, validateAccount,
+  accountErrorMessage, cleanAuthCallbackPath, emailError, normalizeEmail, passwordError, safeAccountReturnUrl, validateAccount,
 } from '../../src/app/services/account-validation.ts';
 
 const details = {
@@ -59,6 +59,14 @@ test('auth failures give actionable messages without exposing provider diagnosti
   assert.match(accountErrorMessage({ code: 'otp_expired' }), /expired/);
   assert.match(accountErrorMessage({ name: 'AuthImplicitGrantRedirectError', details: { code: 'otp_expired' } }), /expired/);
   assert.match(accountErrorMessage({ status: 429 }), /Wait/);
+});
+
+test('callback cleanup removes session tokens and diagnostics while retaining normal routes and recovery intent', () => {
+  assert.equal(cleanAuthCallbackPath('/account?action=reset#access_token=secret&refresh_token=secret&type=recovery'), '/account?action=reset');
+  assert.equal(cleanAuthCallbackPath('/account#error=access_denied&error_code=otp_expired&error_description=private'), '/account');
+  assert.equal(cleanAuthCallbackPath('/account?error=denied&error_code=otp_expired&error_description=private&returnUrl=%2Fcart'), '/account?returnUrl=%2Fcart');
+  assert.equal(cleanAuthCallbackPath('/account?code=secret'), '/account');
+  assert.equal(cleanAuthCallbackPath('/products?q=Fresh%20Milk#reviews'), '/products?q=Fresh%20Milk#reviews');
 });
 
 test('verified account endpoint reads persisted Auth data, stays private, and never returns credentials', async (t) => {

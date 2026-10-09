@@ -1,7 +1,8 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { createClient, type Session, type User } from '@supabase/supabase-js';
+import { Capacitor } from '@capacitor/core';
 import { environment } from '../environments/environment';
-import { AccountValidationError, emailError, normalizeEmail, passwordError } from './services/account-validation';
+import { AccountValidationError, cleanAuthCallbackPath, emailError, normalizeEmail, passwordError } from './services/account-validation';
 
 @Injectable({ providedIn: 'root' })
 export class SupabaseService {
@@ -40,11 +41,7 @@ export class SupabaseService {
       this.currentSession.set(null);
     } finally {
       // The SDK consumes successful callback tokens; also remove failed-link diagnostics.
-      const url = new URL(window.location.href);
-      for (const key of ['code', 'error', 'error_code', 'error_description']) url.searchParams.delete(key);
-      const hash = new URLSearchParams(url.hash.slice(1));
-      if (['access_token', 'refresh_token', 'error', 'error_code', 'error_description'].some((key) => hash.has(key))) url.hash = '';
-      window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+      window.history.replaceState(window.history.state, '', cleanAuthCallbackPath(window.location.href));
       this.initializing.set(false);
     }
   }
@@ -57,7 +54,7 @@ export class SupabaseService {
 
   private redirectUrl(recovery = false): string {
     // Native email links open the deployed website; users can then sign in in the app.
-    const origin = environment.apiUrl.startsWith('https://') ? new URL(environment.apiUrl).origin : window.location.origin;
+    const origin = Capacitor.isNativePlatform() ? new URL(environment.apiUrl).origin : window.location.origin;
     return `${origin}/account${recovery ? '?action=reset' : ''}`;
   }
 

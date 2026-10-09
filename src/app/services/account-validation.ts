@@ -64,6 +64,16 @@ export function safeAccountReturnUrl(value: string | null): string | null {
   return value;
 }
 
+export function cleanAuthCallbackPath(path: string): string {
+  const url = new URL(path, 'https://dairydash.invalid');
+  for (const key of ['code', 'error', 'error_code', 'error_description']) {
+    if (url.searchParams.has(key)) url.searchParams.delete(key);
+  }
+  const hash = new URLSearchParams(url.hash.slice(1));
+  if (['access_token', 'refresh_token', 'error', 'error_code', 'error_description'].some((key) => hash.has(key))) url.hash = '';
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
 export class AccountValidationError extends Error {
   readonly fields: AccountErrors;
   constructor(fields: AccountErrors) {
