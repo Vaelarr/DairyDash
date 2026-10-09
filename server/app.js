@@ -114,7 +114,15 @@ export function createApp(database, {
   });
   app.get('/api/account', async (req, res) => {
     const user = await requireUser(req);
-    res.json({ data: { id: user.id, email: user.email, isAdmin: user.app_metadata?.role === 'admin' } });
+    // requireUser reads the persisted auth.users record through Supabase getUser,
+    // rather than trusting local session metadata or copying credentials into a second table.
+    res.set('Cache-Control', 'no-store').json({ data: {
+      id: user.id, email: user.email,
+      displayName: typeof user.user_metadata?.display_name === 'string' ? user.user_metadata.display_name.trim().slice(0, 80) : '',
+      emailVerified: Boolean(user.email_confirmed_at),
+      createdAt: user.created_at ?? null,
+      isAdmin: user.app_metadata?.role === 'admin',
+    } });
   });
   app.get('/api/orders', async (req, res) => {
     const user = await requireUser(req);

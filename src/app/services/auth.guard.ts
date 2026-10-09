@@ -6,6 +6,7 @@ export const accountGuard: CanActivateFn = async (_route, state) => {
   const auth = inject(SupabaseService);
   const router = inject(Router);
   await auth.ready.catch(() => undefined);
+  if (auth.recoveringPassword()) return router.createUrlTree(['/account'], { queryParams: { action: 'reset' } });
   return auth.user() !== null || router.createUrlTree(['/account'], { queryParams: { returnUrl: state.url } });
 };
 
@@ -13,6 +14,7 @@ export const adminGuard: CanActivateFn = async (_route, state) => {
   const auth = inject(SupabaseService);
   const router = inject(Router);
   await auth.ready.catch(() => undefined);
+  if (auth.recoveringPassword()) return router.createUrlTree(['/account'], { queryParams: { action: 'reset' } });
   if (!auth.user()) return router.createUrlTree(['/account'], { queryParams: { returnUrl: state.url } });
   return auth.isAdmin() || router.createUrlTree(['/account'], { queryParams: { adminRequired: 'true' } });
 };

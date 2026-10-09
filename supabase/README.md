@@ -71,6 +71,8 @@ A packaged Capacitor app needs an absolute HTTPS **Express API URL** in `src/env
 
 The Angular app now uses the project's publishable key for Supabase Auth. Express verifies user access tokens: catalog writes require a trusted admin role, reviews require sign-in, and checkout/order history belong to the signed-in customer. RLS still prevents browser access to the private tables and RPCs. See [the account and order setup guide](../server/README.md#accounts-and-orders-setup) for email confirmation, admin assignment, checkout rules, and remaining scope.
 
+Customer accounts already persist in the project's `auth.users` table; no separate account migration is required. `npm run db:check` also verifies server access to this account database. Complete [the email/password configuration](../server/README.md#account-creation-email-and-password-handling), including confirmation, a provider password minimum of 12, and the `/account` confirmation/recovery redirect URLs. The app's **Account connected** indicator verifies the current saved account through the authenticated API.
+
 ## Troubleshooting
 
 | Symptom | Check |

@@ -1,9 +1,28 @@
 .account-card { padding: 24px; border: 1px solid #e8d5c7; border-radius: 18px; background: #fff8f3; }
 h2 { margin-top: 0; color: #573f34; }
 form, .account-actions { display: grid; gap: 16px; }
-label { display: grid; gap: 8px; color: #573f34; font-weight: 700; }
+.field { display: grid; gap: 8px; }
+label { color: #573f34; font-weight: 700; }
 input { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #d8bfae; border-radius: 8px; background: white; color: #35271f; }
 button, a { padding: 12px 16px; border: 0; border-radius: 10px; background: #ed9e77; color: #573f34; text-align: center; font-weight: 800; text-decoration: none; cursor: pointer; }
 button.secondary { background: transparent; text-decoration: underline; }
 button:disabled { opacity: .6; cursor: default; }
 p { line-height: 1.6; overflow-wrap: anywhere; }
+.intro { margin-bottom: 24px; color: #6c5548; }
+.password-input { display: flex; align-items: stretch; gap: 8px; }
+.password-input input { min-width: 0; flex: 1; }
+.password-toggle { padding: 8px 12px; background: #f5e5da; min-width: 64px; }
+.hint { margin: 0; font-size: .85rem; color: #6c5548; font-weight: 400; }
+.field-error { margin: 0; color: #9b2828; font-size: .85rem; }
+.field-error:empty { display: none; }
+input[aria-invalid="true"] { border-color: #b53636; }
+input:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid #a94f24; outline-offset: 3px; }
+button.text-button { padding: 4px 0; color: #80411f; background: transparent; text-decoration: underline; }
+.form-divider { height: 1px; background: #e8d5c7; }
+.error, .feedback { padding: 12px 16px; border-radius: 8px; }
+.error { color: #9b2828; background: #ffeded; }
+.feedback { color: #355c3a; background: #edf6ec; }
+.connection-status { color: #355c3a; font-weight: 700; }
+.account-email { color: #6c5548; }
+.account-actions { margin-top: 24px; }
+@media (max-width: 400px) { .account-card { padding: 18px; } }

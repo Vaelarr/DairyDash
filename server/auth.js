@@ -16,6 +16,9 @@ export function createAuthenticator(client) {
       throw new ApiError(401, 'Your session has expired. Sign in again.');
     }
     if (!result.data.user) throw new ApiError(401, 'Sign in to continue.');
+    if (!result.data.user.email || !result.data.user.email_confirmed_at) {
+      throw new ApiError(403, 'Confirm your email before using your account.');
+    }
     return result.data.user;
   };
 }

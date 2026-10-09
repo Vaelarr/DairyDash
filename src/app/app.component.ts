@@ -1,6 +1,8 @@
 import {
   Component,
   signal,
+  effect,
+  inject,
   type OnInit,
   type OnDestroy,
 } from '@angular/core';
@@ -13,6 +15,8 @@ import {
 
 import { MenuComponent } from './components/menu/menu.component';
 import { SplashScreenComponent } from './components/splash-screen/splash-screen.component';
+import { Router } from '@angular/router';
+import { SupabaseService } from './supabase.service';
 
 import { addIcons } from 'ionicons';
 import {
@@ -46,6 +50,13 @@ export class AppComponent implements OnInit, OnDestroy {
   private splashTimer?: ReturnType<typeof setTimeout>;
 
   constructor() {
+    const auth = inject(SupabaseService);
+    const router = inject(Router);
+    effect(() => {
+      if (auth.recoveringPassword()) {
+        void router.navigate(['/account'], { queryParams: { action: 'reset' }, replaceUrl: true });
+      }
+    });
     addIcons({
       gridOutline,
       cubeOutline,

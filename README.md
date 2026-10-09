@@ -128,6 +128,18 @@ npm run build
 
 MilkSwift is pre-configured with Capacitor for native deployment on iOS and Android.
 
+### Android test build
+
+```sh
+npm run mobile:build
+```
+
+This builds the web assets, creates the Android project on first use, syncs Capacitor, and assembles a debug APK at `artifacts/DairyDash-debug.apk`. The native bundle stays in `.angular/mobile/browser`, separate from the browser build in `www`. Android uses the live API at `https://dairy-dash.vercel.app/api`; browser builds keep their same-origin `/api` requests. Server secrets remain in the backend.
+
+Install Android Studio and Android SDK 36 first. The build script uses a JDK 21 or newer from `JAVA_HOME` or Android Studio's bundled runtime on Windows. Set `ANDROID_HOME` to your SDK location if needed.
+
+Use `npm run mobile:run` to build and run on a connected Android device or emulator, `npm run mobile:open` to open Android Studio, or `npm run mobile:sync` to rebuild and sync the native project without assembling an APK. The debug APK is for testing and is not signed for Play Store release.
+
 ### 1. Add Native Platforms
 
 To add Android or iOS native projects (run once):

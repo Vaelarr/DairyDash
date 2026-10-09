@@ -13,6 +13,10 @@
     "db:seed": "node --env-file-if-exists=.env scripts/seed-supabase.js",
     "db:check": "node --env-file-if-exists=.env scripts/check-supabase.js",
     "build": "ng build",
+    "mobile:sync": "node scripts/mobile.js sync",
+    "mobile:build": "node scripts/mobile.js build",
+    "mobile:run": "node scripts/mobile.js run",
+    "mobile:open": "node scripts/mobile.js open",
     "watch": "ng build --watch --configuration development",
     "ionic:serve": "ionic serve",
     "ionic:build": "ionic build"
@@ -30,6 +34,8 @@
     "@angular/platform-browser": "^22.1.7",
     "@angular/platform-browser-dynamic": "^22.1.7",
     "@angular/router": "^22.1.7",
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
     "@ionic/angular": "^9.0.4",
     "@supabase/supabase-js": "^2.117.3",
     "express": "^5.2.1",
@@ -42,6 +48,7 @@
     "@angular-devkit/build-angular": "^22.1.8",
     "@angular/cli": "^22.1.8",
     "@angular/compiler-cli": "^22.1.7",
+    "@capacitor/cli": "^8.5.3",
     "@electric-sql/pglite": "^0.5.8",
     "typescript": "~6.0.3"
   },

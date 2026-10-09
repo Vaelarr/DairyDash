@@ -1,35 +1,100 @@
-<app-page-layout title="My Account" eyebrow="DAIRY DASH" description="Sign in to place orders and view your purchases." narrow>
-  <section class="account-card">
-    @if (auth.user(); as user) {
-      <h2>Welcome, {{ user.user_metadata['display_name'] || user.email }}</h2>
-      <p>{{ user.email }}</p>
-      @if (adminRequired && !auth.isAdmin()) {
-        <p role="alert">Management requires an admin account.</p>
+<app-page-layout title="My Account" eyebrow="DAIRY DASH" description="Create an account to place orders and keep track of your purchases." narrow>
+  <section class="account-card" [attr.aria-busy]="busy() || auth.initializing()">
+    @if (auth.initializing()) {
+      <p role="status">Checking your session…</p>
+    } @else if (auth.user() && mode() !== 'reset') {
+      <h2>Welcome, {{ account()?.displayName || auth.user()?.email }}</h2>
+      <p class="account-email">{{ account()?.email || auth.user()?.email }}</p>
+      @if (accountLoading()) {
+        <p role="status">Checking your account connection…</p>
+      } @else if (accountError()) {
+        <p class="error" role="alert">{{ accountError() }}</p>
+        <button type="button" class="secondary" (click)="loadAccount()" [disabled]="busy()">Retry account connection</button>
+      } @else if (account(); as profile) {
+        <p class="connection-status">Account connected · {{ profile.emailVerified ? 'Email verified' : 'Email verification pending' }}</p>
+        @if (profile.createdAt) {
+          <p class="hint">Member since {{ profile.createdAt | date:'mediumDate' }}</p>
+        }
+      }
+      @if (adminRequired && !account()?.isAdmin) {
+        <p class="error" role="alert">Management requires an admin account.</p>
       }
       <div class="account-actions">
         <a routerLink="/orders">My Orders</a>
         <a routerLink="/cart">View Cart</a>
-        @if (auth.isAdmin()) {
+        @if (account()?.isAdmin) {
           <a routerLink="/manage-products">Manage Products</a>
           <a routerLink="/manage-orders">Manage Orders</a>
         }
-        <button type="button" (click)="signOut()" [disabled]="busy()">Sign Out</button>
+        <button type="button" class="secondary" (click)="signOut()" [disabled]="busy()">Sign Out</button>
       </div>
     } @else {
-      <h2>{{ registering ? 'Create an account' : 'Sign in' }}</h2>
-      <form #accountForm="ngForm" (ngSubmit)="submit(accountForm)">
-        @if (registering) {
-          <label>Your name<input name="name" [(ngModel)]="name" autocomplete="name" maxlength="80" required /></label>
+      <h2>{{ mode() === 'signup' ? 'Create an account' : mode() === 'forgot' ? 'Forgot your password?' : mode() === 'reset' ? 'Set a new password' : 'Welcome back' }}</h2>
+      <p class="intro">{{ mode() === 'signup' ? 'Enter your details, then confirm your email to get started.' : mode() === 'forgot' ? 'Enter your account email and we’ll send you a reset link.' : mode() === 'reset' ? 'Choose a unique password for your account.' : 'Sign in with your email and password.' }}</p>
+      <form #accountForm="ngForm" (ngSubmit)="submit(accountForm)" novalidate>
+        @if (mode() === 'signup') {
+          <div class="field">
+            <label for="account-name">Your name</label>
+            <input id="account-name" name="name" [(ngModel)]="name" autocomplete="name" maxlength="80" required
+              (blur)="validateField('name')" [attr.aria-invalid]="!!errors().name" aria-describedby="name-error" [disabled]="busy()" />
+            <p id="name-error" class="field-error">{{ errors().name }}</p>
+          </div>
         }
-        <label>Email<input name="email" type="email" [(ngModel)]="email" autocomplete="email" maxlength="254" required email /></label>
-        <label>Password<input name="password" type="password" [(ngModel)]="password"
-          [autocomplete]="registering ? 'new-password' : 'current-password'" [minlength]="registering ? 8 : 1" maxlength="128" required /></label>
-        <button type="submit" [disabled]="busy() || accountForm.invalid">{{ busy() ? 'Please wait…' : registering ? 'Create Account' : 'Sign In' }}</button>
-        <button type="button" class="secondary" [disabled]="busy()" (click)="registering = !registering; feedback.set('')">
-          {{ registering ? 'Already have an account? Sign in' : 'Create an account' }}
+        @if (mode() !== 'reset') {
+          <div class="field">
+            <label for="account-email">Email address</label>
+            <input id="account-email" name="email" type="email" [(ngModel)]="email" autocomplete="email" inputmode="email"
+              autocapitalize="none" spellcheck="false" maxlength="254" required (blur)="validateField('email')"
+              [attr.aria-invalid]="!!errors().email" aria-describedby="email-error" [disabled]="busy()" />
+            <p id="email-error" class="field-error">{{ errors().email }}</p>
+          </div>
+        }
+        @if (mode() !== 'forgot') {
+          <div class="field">
+            <label for="account-password">{{ mode() === 'reset' ? 'New password' : 'Password' }}</label>
+            <div class="password-input">
+              <input id="account-password" name="password" [type]="showPassword ? 'text' : 'password'" [(ngModel)]="password"
+                [autocomplete]="mode() === 'signin' ? 'current-password' : 'new-password'" required
+                (blur)="validateField('password'); capsLock = false" (keyup)="checkCapsLock($event)"
+                [attr.aria-invalid]="!!errors().password" aria-describedby="password-hint password-error" [disabled]="busy()" />
+              <button type="button" class="password-toggle" (click)="showPassword = !showPassword" [attr.aria-pressed]="showPassword"
+                aria-label="Show passwords" [disabled]="busy()">{{ showPassword ? 'Hide' : 'Show' }}</button>
+            </div>
+            <p id="password-hint" class="hint">{{ mode() === 'signin' ? 'Enter the password you used to create your account.' : 'Use 12 or more characters. Try a unique passphrase or a password manager.' }}</p>
+            @if (capsLock) { <p class="hint" role="status">Caps Lock is on.</p> }
+            <p id="password-error" class="field-error">{{ errors().password }}</p>
+          </div>
+        }
+        @if (mode() === 'signup' || mode() === 'reset') {
+          <div class="field">
+            <label for="account-confirm-password">Confirm password</label>
+            <input id="account-confirm-password" name="confirmPassword" [type]="showPassword ? 'text' : 'password'" [(ngModel)]="confirmPassword"
+              autocomplete="new-password" required (blur)="validateField('confirmPassword')"
+              [attr.aria-invalid]="!!errors().confirmPassword" aria-describedby="confirm-password-error" [disabled]="busy()" />
+            <p id="confirm-password-error" class="field-error">{{ errors().confirmPassword }}</p>
+          </div>
+        }
+        <button type="submit" [disabled]="busy() || (mode() === 'forgot' && emailCooldown() > 0)">
+          {{ busy() ? 'Please wait…' : mode() === 'signup' ? 'Create Account' : mode() === 'forgot' ? 'Send Reset Link' : mode() === 'reset' ? 'Save New Password' : 'Sign In' }}
         </button>
+        @if (mode() === 'signin') {
+          <button type="button" class="text-button" (click)="switchMode('forgot')" [disabled]="busy()">Forgot password?</button>
+          <div class="form-divider"></div>
+          <button type="button" class="secondary" (click)="switchMode('signup')" [disabled]="busy()">Create an account</button>
+          <button type="button" class="text-button" (click)="resendConfirmation()" [disabled]="busy() || emailCooldown() > 0">Resend confirmation email</button>
+        } @else if (mode() !== 'reset') {
+          <button type="button" class="text-button" (click)="switchMode('signin')" [disabled]="busy()">Back to sign in</button>
+        }
+        @if (emailCooldown()) {
+          <p class="hint">You can request another email in {{ emailCooldown() }} seconds.</p>
+        }
       </form>
     }
-    <p role="status" aria-live="polite">{{ feedback() }}</p>
+    @if (callbackMessage()) {
+      <p class="error" role="alert">{{ callbackMessage() }}</p>
+      <button type="button" class="text-button" (click)="auth.callbackError.set(null)">Dismiss</button>
+    }
+    @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+    @if (feedback()) { <p class="feedback" role="status" aria-live="polite">{{ feedback() }}</p> }
   </section>
 </app-page-layout>

@@ -12,7 +12,12 @@ try {
     headers: { apikey: environment.supabaseKey }, signal: AbortSignal.timeout(12000),
   });
   if (!auth.ok) throw new Error('The frontend publishable key could not connect to Supabase Auth.');
-  console.log('Frontend Supabase Auth: connected.');
+  const settings = await auth.json();
+  if (!settings.external?.email) throw new Error('Enable the Email provider in Supabase Authentication settings.');
+  console.log(`Frontend Supabase Auth: connected. Email confirmation: ${settings.mailer_autoconfirm ? 'disabled (enable Confirm email in Supabase)' : 'enabled'}.`);
+  const accounts = await client.auth.admin.listUsers({ page: 1, perPage: 1 });
+  if (accounts.error) throw new Error('The API server key could not read persisted Supabase Auth accounts.');
+  console.log('Account database (auth.users): connected. Passwords are managed by Supabase Auth.');
   for (const table of ['dairydash_orders', 'dairydash_order_items']) {
     const { error } = await client.from(table).select('*').limit(0);
     if (error) throw new Error('Order schema is not ready. Run supabase/migrations/202610080001_orders.sql in the Supabase SQL Editor.');

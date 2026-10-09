@@ -72,7 +72,7 @@ Successful record/list responses use `{ "data": ... }`. Errors use `{ "error": {
 | GET | `/api/products/:id/reviews/:reviewId` | Read one review, or 404 |
 | PUT | `/api/products/:id/reviews/:reviewId` | Author/admin replaces name, rating and comment using the latest `updatedAt` |
 | DELETE | `/api/products/:id/reviews/:reviewId` | Author/admin deletes a review using `If-Match` (204) |
-| GET | `/api/account` | Verified signed-in user and admin flag |
+| GET | `/api/account` | Persisted account ID, email, display name, email verification, creation date and trusted admin flag (never cached) |
 | POST | `/api/orders` | Save a signed-in customer's order and decrement stock in one transaction |
 | GET | `/api/orders` | Signed-in customer's order history |
 | GET | `/api/orders/:id` | Customer's own order, or 404 |
@@ -118,6 +118,25 @@ In Supabase mode, catalog reads remain public. Product create/update/delete requ
 Apply [202610080001_orders.sql](../supabase/migrations/202610080001_orders.sql) after the original migration, followed by [202610090001_review_order_crud.sql](../supabase/migrations/202610090001_review_order_crud.sql), then run `npm run db:check`. The check reads cloud configuration without creating users or changing records. The frontend publishable key lives in `src/environments/environment.ts`; the server secret stays in ignored `.env`. The frontend sends the user's access token only to its configured Express API. Supabase tables and order RPCs remain restricted to the server role.
 
 Open `/account` to create an account or sign in. Supabase email confirmation is supported: users confirm their email before signing in if enabled in the project. Enable the Email provider in Supabase Auth and configure its Site URL and allowed redirect URLs for your deployment. For local browser development, use `http://localhost:3000`.
+
+### Account creation, email and password handling
+
+Accounts are stored in Supabase Postgres in **`auth.users`**, with the name in `raw_user_meta_data.display_name`. Supabase Auth hashes and manages passwords; the app does not copy passwords into a public table, logs, or browser storage. Orders and reviews use the verified Auth UUID. No additional account SQL migration is needed. View accounts in **Authentication > Users**. The account page fetches `/api/account`, which reads the current persisted user through Supabase Auth and displays **Account connected** only after the API succeeds. A failed check has a retry action and does not navigate away as a successful sign-in.
+
+Sign-up validates a trimmed name (1–80 characters), normalizes email by trimming and lowercasing, and requires matching passwords of at least 12 characters and at most 72 UTF-8 bytes. Passwords are passed unchanged, including spaces. Existing users can still sign in with their original passwords. The form supports password managers, show/hide, inline validation, confirmation resend, and password recovery. Email requests have a 60-second UI cooldown; Supabase also enforces its own rate limits. Duplicate sign-ups and reset requests do not claim whether an address belongs to another account.
+
+In **Authentication > Providers > Email**, enable **Confirm email** and set the **minimum password length to 12** so the provider enforces the same minimum even for direct Auth requests. Enable leaked-password protection if your Supabase plan supports it. The API refuses unconfirmed email accounts. Keep the standard confirmation/reset email templates using `{{ .ConfirmationURL }}` and configure SMTP for delivery to real customers.
+
+In **Authentication > URL Configuration**, set the production Site URL and allow these exact redirects:
+
+- `http://localhost:3000/account`
+- `http://localhost:3000/account?action=reset`
+- `https://dairy-dash.vercel.app/account`
+- `https://dairy-dash.vercel.app/account?action=reset`
+
+Add equivalent URLs for any other website origins you use. Email links from a bundled native app open the deployed website to confirm an email or finish a password reset; the customer can then sign in in the native app. These flows require the updated website to be deployed. The client consumes callback tokens with the Supabase SDK, clears them from the URL, and directs password recovery sessions to the new-password form. Expired links give a request-new-link message. `npm run db:check` verifies both frontend Auth connectivity and server access to persisted accounts without creating users or sending email.
+
+References: [Supabase user storage](https://supabase.com/docs/guides/auth/managing-user-data), [password security](https://supabase.com/docs/guides/auth/password-security), and [email redirects](https://supabase.com/docs/guides/auth/redirect-urls).
 
 To grant a trusted user catalog admin access, find their UUID in Supabase **Authentication > Users**, then run this in the SQL Editor with the actual UUID. Sign out and back in to refresh their session after changing the role:
 
