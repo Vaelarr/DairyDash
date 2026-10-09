@@ -6,7 +6,7 @@
   "functions": {
     "api/index.js": {
       "maxDuration": 60,
-      "includeFiles": "src/app/data/product-categories.ts"
+      "includeFiles": "src/app/{data/product-categories,models/checkout}.ts"
     }
   },
   "rewrites": [

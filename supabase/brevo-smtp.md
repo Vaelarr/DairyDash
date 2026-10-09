@@ -45,11 +45,13 @@ Keep **Confirm email** enabled under **Authentication > Providers > Email**. In 
 
 Add equivalent account URLs if you deploy to another origin. Keep Supabase's standard confirmation and recovery templates using `{{ .ConfirmationURL }}`. Disable email link tracking in Brevo if enabled, so account links are delivered unchanged. See [Supabase production email configuration](https://supabase.com/docs/guides/deployment/going-into-prod).
 
+For a formal confirmation email, apply [the DairyDash confirmation template](templates/README.md) to **Confirm sign up** in Supabase. It uses the same verification link. The updated website displays **Account confirmed** and **You may exit this tab** after successful verification.
+
 ## 4. Verify delivery from the app
 
 1. Open DairyDash's `/account` page and create a test account with an email you control that is outside the Supabase project team.
 2. Check **Brevo > Transactional > Logs** for the confirmation email, then check the recipient's inbox and spam folder.
-3. Open the confirmation link and sign in. The account page should display **Account connected** after the API verifies the saved user.
+3. Open the confirmation link. The updated website should display **Account confirmed** and **You may exit this tab.** Return to DairyDash and sign in; an ordinary account visit displays **Account connected** after the API verifies the saved user.
 4. Sign out, request **Forgot password?**, open the recovery email, set a new password and sign in with it.
 
 `npm run db:check` checks database and Auth connectivity without creating users or sending emails. It cannot verify custom SMTP credentials or mailbox delivery. Complete the checks above after saving the dashboard settings.

@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 import { Order, OrderCustomer } from '../models/order';
 import { SupabaseService } from '../supabase.service';
 import { CartItem } from './cart.service';
+import { CheckoutOptions, CheckoutSelection, PaymentStatus } from '../models/checkout';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
@@ -13,11 +14,17 @@ export class OrderService {
   private readonly base = environment.apiUrl.replace(/\/$/, '');
   private pending: { fingerprint: string; requestId: string } | null = null;
 
-  async place(customer: OrderCustomer, cart: CartItem[]): Promise<Order> {
+  async checkoutOptions(): Promise<CheckoutOptions> {
+    const response = await firstValueFrom(this.http.get<{ data: CheckoutOptions }>(`${this.base}/checkout/options`).pipe(timeout(15000)));
+    return response.data;
+  }
+
+  async place(customer: OrderCustomer, cart: CartItem[], selection: CheckoutSelection): Promise<Order> {
     await this.auth.ready.catch(() => undefined);
     const userId = this.auth.user()?.id;
     if (!userId) throw new Error('Sign in to place an order.');
     const body = {
+      ...selection,
       customer: { name: customer.name.trim(), email: customer.email.trim(), phone: customer.phone.trim(), address: customer.address.trim() },
       items: cart.map((item) => ({ productId: String(item.id), quantity: item.quantity, price: item.price }))
         .sort((a, b) => a.productId.localeCompare(b.productId)),
@@ -66,7 +73,7 @@ export class OrderService {
     return response.data;
   }
 
-  async update(order: Order, change: { customer?: OrderCustomer; status?: Order['status'] }, admin = false): Promise<Order> {
+  async update(order: Order, change: { customer?: OrderCustomer; status?: Order['status']; paymentStatus?: PaymentStatus }, admin = false): Promise<Order> {
     const response = await firstValueFrom(this.http.put<{ data: Order }>(`${this.ordersUrl(admin)}/${order.id}`,
       { ...change, updatedAt: order.updatedAt }).pipe(timeout(20000)));
     return response.data;

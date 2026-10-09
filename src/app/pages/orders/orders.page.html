@@ -14,16 +14,33 @@
     <div class="orders-list">
       @for (order of orders(); track order.id) {
         <article [attr.data-order-id]="order.id">
-          <header><h2>Order {{ order.id.slice(0, 8) }}</h2><span>{{ order.status }}</span></header>
+          <header><h2>Order {{ order.id.slice(0, 8) }}</h2><span>{{ statusLabels[order.status] }}</span></header>
           <p>{{ order.createdAt | date:'medium' }}</p>
+          @if (order.status !== 'cancelled') {
+            <ol class="order-progress" aria-label="Order progress">
+              @for (status of progress; track status) {
+                <li [class.done]="$index <= progressIndex(order)" [attr.aria-current]="order.status === status ? 'step' : null"><b>{{ $index + 1 }}</b><span>{{ statusLabels[status] }}</span></li>
+              }
+            </ol>
+          }
           <ul>
             @for (item of order.items; track $index) {
               <li><span>{{ item.quantity }} × {{ item.name }}</span><strong>{{ item.total | currency:'PHP':'symbol':'1.2-2' }}</strong></li>
             }
           </ul>
-          <p class="total">Total <strong>{{ order.total | currency:'PHP':'symbol':'1.2-2' }}</strong></p>
+          <div class="totals"><p>Items subtotal <strong>{{ order.subtotal | currency:'PHP':'symbol':'1.2-2' }}</strong></p>
+            <p>Delivery <strong>{{ order.deliveryFee === 0 ? 'Free' : (order.deliveryFee | currency:'PHP':'symbol':'1.2-2') }}</strong></p>
+            <p class="total">Total <strong>{{ order.total | currency:'PHP':'symbol':'1.2-2' }}</strong></p></div>
           <p>Delivery to {{ order.customer.name }} · {{ order.customer.address }}</p>
           <p>{{ order.customer.email }} · {{ order.customer.phone }}</p>
+          @if (order.delivery.notes) { <p>Delivery instructions: {{ order.delivery.notes }}</p> }
+          <div class="payment-details"><p><strong>{{ order.payment.method ? paymentLabels[order.payment.method] : 'Payment method not recorded' }}</strong> · {{ !order.payment.method && order.payment.status === 'unpaid' ? 'Payment not recorded' : paymentStatusLabels[order.payment.status] }}</p>
+            @if (order.payment.status === 'unpaid' && order.status !== 'completed') {
+              <p class="instructions">{{ order.payment.instructions }}</p>
+              @if (order.payment.method && order.payment.method !== 'cash_on_delivery') { <p>Include your order reference in the transfer. Preparation starts after payment is verified.</p> }
+            }
+            @if (order.payment.status === 'refund_pending') { <p>The payment needs to be returned. A refund is recorded after our team verifies it.</p> }
+          </div>
           <small>Order reference: {{ order.id }}</small>
           <div class="order-actions">
             @if (canEdit(order)) { <button type="button" (click)="edit(order)" [disabled]="busy()">Edit Delivery</button> }
@@ -31,13 +48,25 @@
               <button type="button" (click)="update(order, { status: 'confirmed' })" [disabled]="busy()">Confirm Order</button>
             }
             @if (admin && order.status === 'confirmed') {
-              <button type="button" (click)="update(order, { status: 'completed' })" [disabled]="busy()">Complete Order</button>
+              <button type="button" (click)="update(order, { status: 'preparing' })" [disabled]="busy() || !canPrepare(order)">Start Preparation</button>
+            }
+            @if (admin && order.status === 'preparing') {
+              <button type="button" (click)="update(order, { status: 'out_for_delivery' })" [disabled]="busy()">Dispatch Order</button>
+            }
+            @if (admin && order.status === 'out_for_delivery') {
+              <button type="button" (click)="ask(order, 'deliver')" [disabled]="busy()">{{ order.payment.status === 'unpaid' ? 'Record Delivery & Cash Payment' : 'Mark Delivered' }}</button>
+            }
+            @if (canRecordPayment(order)) {
+              <button type="button" (click)="ask(order, 'paid')" [disabled]="busy()">Verify Payment Received</button>
+            }
+            @if (admin && order.payment.status === 'refund_pending') {
+              <button type="button" (click)="ask(order, 'refunded')" [disabled]="busy()">Record Completed Refund</button>
             }
             @if (canCancel(order)) {
-              <button type="button" (click)="confirmation = { order, action: 'cancel' }; editing = null" [disabled]="busy()">Cancel Order</button>
+              <button type="button" (click)="ask(order, 'cancel')" [disabled]="busy()">Cancel Order</button>
             }
             @if (canDelete(order)) {
-              <button type="button" (click)="confirmation = { order, action: 'delete' }; editing = null" [disabled]="busy()">Delete Order</button>
+              <button type="button" (click)="ask(order, 'delete')" [disabled]="busy()">Delete Order</button>
             }
           </div>
           @if (editing?.id === order.id) {
@@ -54,12 +83,9 @@
           }
           @if (confirmation?.order?.id === order.id) {
             <div class="confirmation" role="group" aria-label="Confirm order action">
-              <p>{{ confirmation?.action === 'cancel' ? 'Cancel this order? Reserved stock will be released.' : 'Delete this order from order history?' }}</p>
-              @if (confirmation?.action === 'delete' && (order.status === 'pending' || order.status === 'confirmed')) {
-                <p>The order will be cancelled and its reserved stock released.</p>
-              }
-              <button type="button" (click)="confirm()" [disabled]="busy()">{{ confirmation?.action === 'cancel' ? 'Confirm Cancellation' : 'Confirm Delete Order' }}</button>
-              <button type="button" (click)="confirmation = null" [disabled]="busy()">Keep Order</button>
+              <p>{{ confirmationText() }}</p>
+              <button type="button" (click)="confirm()" [disabled]="busy()">Confirm</button>
+              <button type="button" (click)="confirmation = null" [disabled]="busy()">Go Back</button>
             </div>
           }
         </article>

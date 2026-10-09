@@ -5,7 +5,7 @@ import { createApp } from '../app.js';
 import { createAuthenticator } from '../auth.js';
 import { createSupabaseClient } from '../supabase-client.js';
 import {
-  accountErrorMessage, cleanAuthCallbackPath, emailError, normalizeEmail, passwordError, safeAccountReturnUrl, validateAccount,
+  accountErrorMessage, cleanAuthCallbackPath, emailError, isEmailConfirmationCallback, normalizeEmail, passwordError, safeAccountReturnUrl, validateAccount,
 } from '../../src/app/services/account-validation.ts';
 
 const details = {
@@ -67,6 +67,20 @@ test('callback cleanup removes session tokens and diagnostics while retaining no
   assert.equal(cleanAuthCallbackPath('/account?error=denied&error_code=otp_expired&error_description=private&returnUrl=%2Fcart'), '/account?returnUrl=%2Fcart');
   assert.equal(cleanAuthCallbackPath('/account?code=secret'), '/account');
   assert.equal(cleanAuthCallbackPath('/products?q=Fresh%20Milk#reviews'), '/products?q=Fresh%20Milk#reviews');
+});
+
+test('confirmation results require a signup callback and do not replace normal sign-in or recovery', () => {
+  assert.equal(isEmailConfirmationCallback('/account#access_token=test&refresh_token=test&type=signup'), true);
+  assert.equal(isEmailConfirmationCallback('/account#access_token=test&refresh_token=test&type=email'), true);
+  assert.equal(isEmailConfirmationCallback('/account?code=test&type=signup'), true);
+  for (const path of ['/account', '/account?confirmed=true', '/account#type=signup',
+    '/account#access_token=test&type=signup', '/account?code=test',
+    '/account#access_token=test&refresh_token=test&type=magiclink',
+    '/account?action=reset#access_token=test&refresh_token=test&type=signup',
+    '/account#access_token=test&refresh_token=test&type=recovery',
+    '/account#error=access_denied&error_code=otp_expired']) {
+    assert.equal(isEmailConfirmationCallback(path), false, path);
+  }
 });
 
 test('verified account endpoint reads persisted Auth data, stays private, and never returns credentials', async (t) => {

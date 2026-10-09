@@ -1,3 +1,5 @@
+import { OrderStatus, PaymentMethod, PaymentStatus, ShippingAddress } from './checkout';
+
 export interface OrderCustomer {
   name: string;
   email: string;
@@ -7,7 +9,11 @@ export interface OrderCustomer {
 
 export interface Order {
   id: string;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  status: OrderStatus;
+  subtotal: number;
+  deliveryFee: number;
+  payment: { method: PaymentMethod | null; status: PaymentStatus; instructions: string };
+  delivery: { address: ShippingAddress | null; notes: string };
   total: number;
   createdAt: string;
   updatedAt: string;

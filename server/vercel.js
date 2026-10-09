@@ -2,6 +2,7 @@ import { createApp } from './app.js';
 import { createAuthenticator } from './auth.js';
 import { createSupabaseClient, supabaseConfig } from './supabase-client.js';
 import { openSupabaseDatabase } from './supabase-database.js';
+import { checkoutOptions } from './checkout.js';
 
 export function createVercelHandler(env = process.env) {
   let app;
@@ -22,7 +23,7 @@ export function createVercelHandler(env = process.env) {
         }
         // Serverless deployments always use the shared cloud database and verified Auth.
         app = createApp(openSupabaseDatabase(client, { bucket: config.bucket }), {
-          allowedOrigins: [...allowedOrigins], authenticate: createAuthenticator(client),
+          allowedOrigins: [...allowedOrigins], authenticate: createAuthenticator(client), checkout: checkoutOptions(env),
         });
       } catch {
         console.error('Vercel API setup failed. Check the server Supabase environment variables.');

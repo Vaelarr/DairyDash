@@ -16,6 +16,7 @@ function checked(result) {
       DD007: 'This order cannot be changed at its current stage.',
       DD008: 'This checkout order was deleted. Start a new checkout request.',
       DD009: 'Stock restoration needs an administrator to verify the inventory reservation.',
+      DD010: 'Verify payment before preparing a prepaid order or completing delivery. Only admins can record payments and refunds.',
     };
     if (checkoutErrors[result.error.code]) throw new ApiError(409, checkoutErrors[result.error.code], undefined,
       result.error.code === 'DD008' ? 'CHECKOUT_DELETED' : undefined);
@@ -173,7 +174,7 @@ export function openSupabaseDatabase(client, { bucket = 'dairydash-product-image
     async createOrder(userId, input) {
       return checked(await client.rpc('dairydash_create_order', {
         customer_id: userId, checkout_id: input.requestId, payload_hash: input.requestHash,
-        customer: input.customer, lines: input.items,
+        customer: input.customer, lines: input.items, checkout: input.checkout,
       }));
     },
     async getOrder(id, userId) {

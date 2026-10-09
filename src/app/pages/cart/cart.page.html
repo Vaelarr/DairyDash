@@ -13,7 +13,7 @@
     @if (confirmation()) {
       <p class="checkout-message" role="status">{{ confirmation() }} <a routerLink="/orders">View your orders</a></p>
     }
-    @if (feedback()) { <p class="checkout-message" role="alert">{{ feedback() }}</p> }
+    @if (feedback()) { <p class="checkout-message" role="alert">{{ feedback() }} <button type="button" (click)="refreshCart()" [disabled]="refreshing()">Refresh cart</button></p> }
     @if (cart.items().length === 0) {
       <div class="empty-cart">
         <div class="empty-icon">
@@ -65,11 +65,12 @@
                   type="button"
                   class="add-button"
                   (click)="cart.increaseQuantity(item.id)"
-                  [disabled]="submitting() || item.quantity >= 99"
+                  [disabled]="submitting() || item.quantity >= maxQuantity(item)"
                 >
                   <ion-icon name="add-outline"></ion-icon>
                 </button>
               </div>
+              @if (itemIssue(item)) { <p class="cart-issue" role="alert">{{ itemIssue(item) }}</p> }
             </div>
 
             <button
@@ -94,23 +95,15 @@
         </div>
 
         @if (auth.user()) {
-          <form #checkoutForm="ngForm" (ngSubmit)="checkout(checkoutForm)" class="checkout-form">
-            <h2>Delivery details</h2>
-            <fieldset [disabled]="submitting()">
-              <label>Full name<input name="name" [(ngModel)]="customer.name" autocomplete="name" maxlength="80" required /></label>
-              <label>Email<input name="email" type="email" [(ngModel)]="customer.email" autocomplete="email" maxlength="254" email required /></label>
-              <label>Contact number<input name="phone" type="tel" [(ngModel)]="customer.phone" autocomplete="tel" minlength="7" maxlength="30" required /></label>
-              <label>Delivery address<textarea name="address" [(ngModel)]="customer.address" autocomplete="street-address" maxlength="500" rows="3" required></textarea></label>
-            </fieldset>
-            <p>Your order will be saved for confirmation. Payment is arranged separately.</p>
-            <ion-button expand="block" type="submit" [disabled]="submitting() || refreshing() || checkoutForm.invalid">
-              <ion-icon slot="start" name="bag-check-outline"></ion-icon>
-              {{ submitting() ? 'Placing Order…' : 'Place Order' }}
-            </ion-button>
-          </form>
+          <ion-button expand="block" routerLink="/checkout" [disabled]="refreshing() || !catalogReady() || cartIssues().length > 0">
+            <ion-icon slot="start" name="bag-check-outline"></ion-icon>
+            Continue to checkout
+          </ion-button>
         } @else {
-          <ion-button expand="block" routerLink="/account" [queryParams]="{ returnUrl: '/cart' }">Sign In to Checkout</ion-button>
+          <ion-button expand="block" routerLink="/account" [queryParams]="{ returnUrl: '/checkout' }">Sign In to Checkout</ion-button>
         }
+        @if (cartIssues().length) { <p class="cart-issue" role="alert">Update the unavailable items or quantities above to continue.</p> }
+        <p class="checkout-note">Choose your delivery address and payment method at checkout. You can review everything before placing your order.</p>
       </div>
     }
   </div>

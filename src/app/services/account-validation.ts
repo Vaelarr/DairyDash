@@ -64,6 +64,16 @@ export function safeAccountReturnUrl(value: string | null): string | null {
   return value;
 }
 
+export function isEmailConfirmationCallback(path: string): boolean {
+  const url = new URL(path, 'https://dairydash.invalid');
+  const hash = new URLSearchParams(url.hash.slice(1));
+  const type = hash.get('type') ?? url.searchParams.get('type');
+  if (url.searchParams.get('action') === 'reset' || type === 'recovery') return false;
+  if (type !== 'signup' && type !== 'email') return false;
+  // A type or query flag alone must never turn an existing session into a confirmation.
+  return Boolean((hash.get('access_token') && hash.get('refresh_token')) || url.searchParams.get('code'));
+}
+
 export function cleanAuthCallbackPath(path: string): string {
   const url = new URL(path, 'https://dairydash.invalid');
   for (const key of ['code', 'error', 'error_code', 'error_description']) {

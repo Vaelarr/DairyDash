@@ -29,6 +29,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'checkout',
+    canActivate: [accountGuard],
+    loadComponent: () =>
+      import('./pages/checkout/checkout.page').then(
+        (m) => m.CheckoutPage
+      ),
+  },
+  {
     path: 'view-product/:id',
     loadComponent: () =>
       import('./pages/product-details/product-details.page').then(

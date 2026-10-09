@@ -113,8 +113,8 @@ export async function createSupabaseHarness() {
           return json(result.rows.map((row) => row.result));
         }
         if (url.pathname.endsWith('/dairydash_create_order')) {
-          const result = await postgres.query('select public.dairydash_create_order($1::uuid, $2::uuid, $3, $4::jsonb, $5::jsonb) as result',
-            [body.customer_id, body.checkout_id, body.payload_hash, JSON.stringify(body.customer), JSON.stringify(body.lines)]);
+          const result = await postgres.query('select public.dairydash_create_order($1::uuid, $2::uuid, $3, $4::jsonb, $5::jsonb, $6::jsonb) as result',
+            [body.customer_id, body.checkout_id, body.payload_hash, JSON.stringify(body.customer), JSON.stringify(body.lines), JSON.stringify(body.checkout ?? {})]);
           if (state.loseOrderResponse) return json({ code: 'TEST_LOST_RESPONSE', message: 'Response lost after commit' }, 400);
           return json(result.rows[0].result);
         }

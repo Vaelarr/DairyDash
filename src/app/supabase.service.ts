@@ -2,10 +2,13 @@ import { Injectable, computed, signal } from '@angular/core';
 import { createClient, type Session, type User } from '@supabase/supabase-js';
 import { Capacitor } from '@capacitor/core';
 import { environment } from '../environments/environment';
-import { AccountValidationError, cleanAuthCallbackPath, emailError, normalizeEmail, passwordError } from './services/account-validation';
+import { AccountValidationError, cleanAuthCallbackPath, emailError, isEmailConfirmationCallback, normalizeEmail, passwordError } from './services/account-validation';
 
 @Injectable({ providedIn: 'root' })
 export class SupabaseService {
+  // Capture callback intent before the SDK consumes and removes the URL fragment.
+  private readonly initialCallbackUrl = window.location.href;
+  private readonly confirmingEmail = isEmailConfirmationCallback(this.initialCallbackUrl);
   private readonly client = createClient(environment.supabaseUrl, environment.supabaseKey);
   private readonly currentSession = signal<Session | null>(null);
 
@@ -15,6 +18,7 @@ export class SupabaseService {
   readonly recoveringPassword = signal(false);
   readonly callbackError = signal<unknown>(null);
   readonly initializing = signal(true);
+  readonly emailConfirmation = signal<'none' | 'verifying' | 'confirmed' | 'failed'>(this.confirmingEmail ? 'verifying' : 'none');
 
   constructor() {
     // Keep the callback synchronous: awaiting Auth calls here can deadlock token refresh.
@@ -36,9 +40,24 @@ export class SupabaseService {
       if (data.session && !callbackError && new URL(window.location.href).searchParams.get('action') === 'reset') {
         this.recoveringPassword.set(true);
       }
+      if (this.confirmingEmail) {
+        if (callbackError || !data.session) {
+          this.emailConfirmation.set('failed');
+        } else {
+          // Verify the callback's account with Auth before displaying a success message.
+          const { data: verified, error: verificationError } = await this.client.auth.getUser(data.session.access_token);
+          if (verificationError) throw verificationError;
+          if (!verified.user?.email || !verified.user.email_confirmed_at || verified.user.id !== data.session.user.id) {
+            throw { code: 'email_not_confirmed' };
+          }
+          this.currentSession.set({ ...data.session, user: verified.user });
+          this.emailConfirmation.set('confirmed');
+        }
+      }
     } catch (error) {
       this.callbackError.set(error);
       this.currentSession.set(null);
+      if (this.confirmingEmail) this.emailConfirmation.set('failed');
     } finally {
       // The SDK consumes successful callback tokens; also remove failed-link diagnostics.
       window.history.replaceState(window.history.state, '', cleanAuthCallbackPath(window.location.href));

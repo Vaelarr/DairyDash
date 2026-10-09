@@ -17,7 +17,7 @@ Open **SQL Editor** in the new project, create a query, paste the entire content
 
 Then run [202610080001_orders.sql](migrations/202610080001_orders.sql) to add orders, order items, and transactional checkout functions. If your project already has the catalog migration, run only this new migration. It preserves existing records and can be rerun.
 
-Finally run [202610090001_review_order_crud.sql](migrations/202610090001_review_order_crud.sql) for review ownership, edit/delete, order delivery/status updates, stock restoration, and deletion. Apply migrations in filename order. Each migration preserves existing records.
+Run [202610090001_review_order_crud.sql](migrations/202610090001_review_order_crud.sql) for review ownership, edit/delete, order delivery/status updates, stock restoration, and deletion. Then apply [202610090002_checkout_workflow.sql](migrations/202610090002_checkout_workflow.sql) for saved order delivery details, itemized fees, payment methods/statuses, refunds, and preparation/delivery stages. Apply migrations in filename order. Each migration preserves existing records.
 
 The migration creates:
 
@@ -86,6 +86,8 @@ For confirmation and password recovery delivery, follow [the Brevo SMTP setup gu
 | Catalog is empty | Run `npm run db:seed`; repeating it after deleting products intentionally does not restore them |
 | Checkout/order history reports cloud unavailable | Run the new order migration, then `npm run db:check` |
 | Review edit/delete or order management reports cloud unavailable | Apply `202610090001_review_order_crud.sql`, then run `npm run db:check` |
+| Checkout/payment details report cloud unavailable | Apply `202610090002_checkout_workflow.sql`, then run `npm run db:check` |
+| GCash, Maya or bank transfer is unavailable | Configure the matching `PAYMENT_*_INSTRUCTIONS` server variable and restart/redeploy the API |
 | Product management returns 403 | Assign `app_metadata.role = 'admin'` to the trusted user and sign in again |
 | Browser cannot reach API | Ensure `npm run dev` started both services and the proxy points to the API port |
 

@@ -103,7 +103,9 @@ for (const provider of ['sqlite', 'supabase']) {
       await assert.rejects(async () => db.manageOrder(order.id, author, order.updatedAt, change, remove), conflict);
     }
     order = await db.manageOrder(order.id, admin, order.updatedAt, { customer: { ...customer, phone: '09999999999' } });
-    order = await db.manageOrder(order.id, admin, order.updatedAt, { status: 'completed' });
+    order = await db.manageOrder(order.id, admin, order.updatedAt, { status: 'preparing' });
+    order = await db.manageOrder(order.id, admin, order.updatedAt, { status: 'out_for_delivery' });
+    order = await db.manageOrder(order.id, admin, order.updatedAt, { status: 'completed', paymentStatus: 'paid' });
     await assert.rejects(async () => db.manageOrder(order.id, admin, order.updatedAt, { status: 'cancelled' }), conflict);
     await db.manageOrder(order.id, admin, order.updatedAt, {}, true);
     assert.equal((await db.getProduct(product.id)).stock, 8, 'Completed orders consumed stock');

@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { FormsModule, type NgForm } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PageLayoutComponent } from '../../components/page-layout/page-layout.component';
+import { EmailConfirmationComponent } from '../../components/email-confirmation/email-confirmation.component';
 import { SupabaseService } from '../../supabase.service';
 import { Account } from '../../models/account';
 import { AccountService } from '../../services/account.service';
@@ -14,7 +15,7 @@ import {
 
 @Component({
   selector: 'app-account', standalone: true,
-  imports: [DatePipe, FormsModule, RouterLink, PageLayoutComponent],
+  imports: [DatePipe, FormsModule, RouterLink, PageLayoutComponent, EmailConfirmationComponent],
   templateUrl: './account.page.html', styleUrl: './account.page.css',
 })
 export class AccountPage {
@@ -55,8 +56,8 @@ export class AccountPage {
         this.account.set(null);
         this.accountError.set('');
         this.accountRequest = null;
-        if (this.active && userId) void this.loadAccount();
       }
+      if (this.active && userId && this.auth.emailConfirmation() === 'none') void this.loadAccount();
     });
   }
 
@@ -107,6 +108,7 @@ export class AccountPage {
 
   async loadAccount(): Promise<Account | null> {
     await this.auth.ready;
+    if (this.auth.emailConfirmation() !== 'none') return null;
     const userId = this.auth.user()?.id;
     if (!userId || !this.active) return null;
     if (this.accountRequest?.userId === userId) return this.accountRequest.promise;

@@ -1,0 +1,10 @@
+.git/
+.angular/
+artifacts/
+android/
+dist/
+node_modules/
+www/
+.env
+.env.*
+server/data/

@@ -1,3 +1,6 @@
+@if (auth.emailConfirmation() !== 'none' && !auth.recoveringPassword()) {
+  <app-email-confirmation></app-email-confirmation>
+} @else {
 <app-page-layout title="My Account" eyebrow="DAIRY DASH" description="Create an account to place orders and keep track of your purchases." narrow>
   <section class="account-card" [attr.aria-busy]="busy() || auth.initializing()">
     @if (auth.initializing()) {
@@ -98,3 +101,4 @@
     @if (feedback()) { <p class="feedback" role="status" aria-live="polite">{{ feedback() }}</p> }
   </section>
 </app-page-layout>
+}

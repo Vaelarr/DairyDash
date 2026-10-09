@@ -2,11 +2,13 @@ import express from 'express';
 import { PRODUCT_CATEGORIES } from '../src/app/data/product-categories.ts';
 import { ApiError } from './errors.js';
 import { validateProduct, validateReview, validateOrder, validateVersion, validateDeleteVersion, validateOrderUpdate } from './validation.js';
+import { checkoutOptions } from './checkout.js';
 
 export function createApp(database, {
   allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'],
   logError = console.error,
   authenticate,
+  checkout = checkoutOptions(process.env),
 } = {}) {
   const app = express();
   app.disable('x-powered-by');
@@ -59,6 +61,7 @@ export function createApp(database, {
     res.status(healthy ? 200 : 503).json({ status: healthy ? 'ok' : 'unavailable' });
   });
   app.get('/api/categories', (req, res) => res.json({ data: PRODUCT_CATEGORIES }));
+  app.get('/api/checkout/options', (req, res) => res.json({ data: checkout }));
   app.get('/api/products', async (req, res) => {
     const { q = '', category = '', featured = 'false' } = req.query;
     if (typeof q !== 'string' || q.length > 100 || typeof category !== 'string' ||
@@ -137,7 +140,7 @@ export function createApp(database, {
   });
   app.post('/api/orders', async (req, res) => {
     const user = await requireUser(req);
-    const order = await database.createOrder(user.id, validateOrder(req.body));
+    const order = await database.createOrder(user.id, validateOrder(req.body, checkout));
     res.location(`/api/orders/${order.id}`).status(201).json({ data: order });
   });
   app.get('/api/admin/orders', async (req, res) => {

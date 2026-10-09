@@ -31,7 +31,12 @@ try {
   if (reviewColumns.error || reservations.error || crud.error) {
     throw new Error('Review/order CRUD schema is not ready. Run supabase/migrations/202610090001_review_order_crud.sql in the Supabase SQL Editor.');
   }
-  console.log('Review/order CRUD: ready. No cloud data was changed.');
+  console.log('Review/order CRUD: ready.');
+  const checkoutColumns = await client.from('dairydash_orders').select('checkout_details,delivery_fee_cents,payment_status').limit(0);
+  if (checkoutColumns.error) {
+    throw new Error('Checkout workflow schema is not ready. Run supabase/migrations/202610090002_checkout_workflow.sql in the Supabase SQL Editor.');
+  }
+  console.log('Checkout delivery and payment schema: ready. No cloud data was changed.');
 } catch (error) {
   console.error(`Supabase check failed: ${error.message}`);
   process.exitCode = 1;

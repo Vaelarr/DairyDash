@@ -14,3 +14,12 @@ button:disabled { opacity: .5; cursor: wait; }
 .delivery-form label { display: grid; gap: 6px; margin-bottom: 12px; }
 input, textarea { width: 100%; padding: 10px; border: 1px solid #ab7960; border-radius: 8px; background: #fff; color: #573f34; }
 .delivery-form button, .confirmation button { margin: 0 8px 8px 0; }
+.order-progress { display: flex; padding: 0; margin: 24px 0; list-style: none; gap: 8px; }
+.order-progress li { display: flex; flex: 1; flex-direction: column; gap: 8px; padding: 10px 0; border-bottom: 3px solid #e8d5c7; color: #806455; font-size: 11px; text-align: center; }
+.order-progress b { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #f5dfcd; }
+.order-progress .done { border-color: #a66d50; color: #573f34; font-weight: 800; }
+.order-progress .done b { background: #ecc2a8; }
+.totals { max-width: 380px; margin-left: auto; } .totals p { display: flex; justify-content: space-between; gap: 12px; margin: 8px 0; }
+.payment-details { padding: 12px 16px; margin: 16px 0; border-radius: 12px; background: #f5e7dc; } .payment-details p { margin: 4px 0; font-size: 13px; }
+.instructions { white-space: pre-line; }
+@media (max-width: 520px) { article { padding: 18px 14px; } .order-progress { gap: 4px; } .order-progress li { font-size: 10px; } }

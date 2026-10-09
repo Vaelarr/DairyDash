@@ -25,7 +25,7 @@ export function openDatabase(path) {
   const db = new DatabaseSync(path);
   db.exec('PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000; PRAGMA journal_mode = WAL;');
   const version = db.prepare('PRAGMA user_version').get().user_version;
-  if (version > 3) {
+  if (version > 4) {
     db.close();
     throw new Error('This database requires a newer version of the API.');
   }
@@ -115,14 +115,29 @@ export function openDatabase(path) {
     }
   }
 
+  if (version < 4) {
+    try {
+      db.exec(`BEGIN IMMEDIATE;
+        ALTER TABLE orders ADD COLUMN checkout_details TEXT NOT NULL DEFAULT '{}';
+        ALTER TABLE orders ADD COLUMN delivery_fee_cents INTEGER NOT NULL DEFAULT 0 CHECK(delivery_fee_cents BETWEEN 0 AND 99999999);
+        ALTER TABLE orders ADD COLUMN payment_status TEXT NOT NULL DEFAULT 'unpaid' CHECK(payment_status IN ('unpaid', 'paid', 'cancelled', 'refund_pending', 'refunded'));
+        UPDATE orders SET payment_status = 'cancelled' WHERE status = 'cancelled';
+        PRAGMA user_version = 4; COMMIT;`);
+    } catch (error) { db.exec('ROLLBACK'); db.close(); throw error; }
+  }
+
   const find = db.prepare('SELECT * FROM products WHERE id = ?');
   const reviewColumns = 'id, name, rating, comment, user_id AS userId, created_at AS createdAt, updated_at AS updatedAt';
   const findReview = db.prepare(`SELECT ${reviewColumns} FROM reviews WHERE id = ?`);
   const nextVersion = (previous) => new Date(Math.max(Date.now(), Date.parse(previous) + 1)).toISOString();
   function orderFromRow(row) {
     if (!row) return undefined;
+    const checkout = JSON.parse(row.checkout_details);
     return {
       id: row.id, status: row.status, total: row.total_cents / 100, createdAt: row.created_at, updatedAt: row.updated_at,
+      subtotal: (row.total_cents - row.delivery_fee_cents) / 100, deliveryFee: row.delivery_fee_cents / 100,
+      payment: { method: checkout.paymentMethod ?? null, status: row.payment_status, instructions: checkout.paymentInstructions ?? '' },
+      delivery: { address: checkout.shippingAddress ?? null, notes: checkout.deliveryNotes ?? '' },
       customer: { name: row.customer_name, email: row.customer_email, phone: row.customer_phone, address: row.delivery_address },
       items: db.prepare('SELECT * FROM order_items WHERE order_id = ? ORDER BY line_number').all(row.id).map((item) => ({
         productId: item.product_id, name: item.product_name, price: item.unit_price_cents / 100,
@@ -203,17 +218,33 @@ export function openDatabase(path) {
         if (!saved || (!actor.isAdmin && saved.user_id !== actor.id)) { db.exec('COMMIT'); return undefined; }
         if (Date.parse(saved.updated_at) !== Date.parse(updatedAt)) throw new ApiError(409, 'This record changed. Reload it before saving or deleting.');
         let status = change.status ?? saved.status;
-        if (remove && ['pending', 'confirmed'].includes(saved.status)) status = 'cancelled';
+        const active = ['pending', 'confirmed', 'preparing', 'out_for_delivery'];
+        if (remove && active.includes(saved.status)) status = 'cancelled';
+        let paymentStatus = saved.payment_status;
+        if (change.paymentStatus) {
+          if (!actor.isAdmin || !((paymentStatus === 'unpaid' && change.paymentStatus === 'paid' && active.includes(saved.status)) ||
+              (paymentStatus === 'refund_pending' && change.paymentStatus === 'refunded' && saved.status === 'cancelled'))) {
+            throw new ApiError(409, 'Only admins can verify an outstanding payment or refund.');
+          }
+          paymentStatus = change.paymentStatus;
+        }
         if (!actor.isAdmin && ((remove && !['pending', 'cancelled'].includes(saved.status)) ||
             (!remove && (saved.status !== 'pending' || !['pending', 'cancelled'].includes(status))))) {
           throw new ApiError(409, 'This order cannot be changed at its current stage.');
         }
         if ((change.customer && !['pending', 'confirmed'].includes(saved.status)) ||
             (status !== saved.status && !((saved.status === 'pending' && ['confirmed', 'cancelled'].includes(status)) ||
-              (saved.status === 'confirmed' && ['completed', 'cancelled'].includes(status))))) {
+              (saved.status === 'confirmed' && ['preparing', 'cancelled'].includes(status)) ||
+              (saved.status === 'preparing' && ['out_for_delivery', 'cancelled'].includes(status)) ||
+              (saved.status === 'out_for_delivery' && ['completed', 'cancelled'].includes(status))))) {
           throw new ApiError(409, 'This order cannot be changed at its current stage.');
         }
-        if (['pending', 'confirmed'].includes(saved.status) && status === 'cancelled') {
+        const checkout = JSON.parse(saved.checkout_details);
+        if ((status === 'completed' || (['preparing', 'out_for_delivery'].includes(status) && checkout.paymentMethod && checkout.paymentMethod !== 'cash_on_delivery')) && paymentStatus !== 'paid') {
+          throw new ApiError(409, 'Verify payment before preparing a prepaid order or completing delivery.');
+        }
+        if (active.includes(saved.status) && status === 'cancelled') {
+          paymentStatus = paymentStatus === 'paid' ? 'refund_pending' : 'cancelled';
           const reservations = db.prepare(`SELECT p.id, p.stock, i.quantity, i.stock_deducted FROM order_items i
             JOIN products p ON p.id = i.product_id WHERE i.order_id = ? ORDER BY p.id`).all(id);
           for (const item of reservations) {
@@ -225,10 +256,12 @@ export function openDatabase(path) {
               .run(item.quantity, new Date().toISOString(), item.id);
           }
         }
+        if (remove && paymentStatus === 'refund_pending') throw new ApiError(409, 'Record the refund before deleting this order.');
+        if (change.customer) checkout.shippingAddress = null;
         const customer = change.customer ?? { name: saved.customer_name, email: saved.customer_email, phone: saved.customer_phone, address: saved.delivery_address };
         db.prepare(`UPDATE orders SET status = ?, customer_name = ?, customer_email = ?, customer_phone = ?, delivery_address = ?,
-          updated_at = ?, deleted_at = ? WHERE id = ?`).run(status, customer.name, customer.email, customer.phone, customer.address,
-            nextVersion(saved.updated_at), remove ? new Date().toISOString() : null, id);
+          updated_at = ?, deleted_at = ?, payment_status = ?, checkout_details = ? WHERE id = ?`).run(status, customer.name, customer.email, customer.phone, customer.address,
+            nextVersion(saved.updated_at), remove ? new Date().toISOString() : null, paymentStatus, JSON.stringify(checkout), id);
         const result = orderFromRow(db.prepare('SELECT * FROM orders WHERE id = ?').get(id));
         db.exec('COMMIT');
         return result;
@@ -247,9 +280,9 @@ export function openDatabase(path) {
         }
         const id = randomUUID();
         db.prepare(`INSERT INTO orders (id, user_id, request_id, request_hash, customer_name, customer_email,
-          customer_phone, delivery_address, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+          customer_phone, delivery_address, created_at, updated_at, checkout_details, delivery_fee_cents) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
             id, userId, input.requestId, input.requestHash, input.customer.name, input.customer.email,
-            input.customer.phone, input.customer.address, new Date().toISOString(), new Date().toISOString()
+            input.customer.phone, input.customer.address, new Date().toISOString(), new Date().toISOString(), JSON.stringify(input.checkout ?? {}), input.checkout?.deliveryFeeCents ?? 0
           );
         let totalCents = 0;
         for (const [index, item] of input.items.entries()) {
@@ -265,7 +298,7 @@ export function openDatabase(path) {
           if (product.stock !== null) db.prepare('UPDATE products SET stock = stock - ?, updated_at = ? WHERE id = ?')
             .run(item.quantity, new Date().toISOString(), product.id);
         }
-        db.prepare('UPDATE orders SET total_cents = ? WHERE id = ?').run(totalCents, id);
+        db.prepare('UPDATE orders SET total_cents = ? WHERE id = ?').run(totalCents + (input.checkout?.deliveryFeeCents ?? 0), id);
         const order = orderFromRow(db.prepare('SELECT * FROM orders WHERE id = ?').get(id));
         db.exec('COMMIT');
         return order;

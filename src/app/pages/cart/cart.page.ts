@@ -1,8 +1,7 @@
-import { Component, effect, inject, signal } from '@angular/core';
-import { FormsModule, type NgForm } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http';
+import { Component, computed, effect, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { CurrencyPipe } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 
 import {
   IonButton,
@@ -26,11 +25,9 @@ import {
   bagCheckOutline,
 } from 'ionicons/icons';
 
-import { CartService } from '../../services/cart.service';
+import { CartItem, CartService } from '../../services/cart.service';
 import { SupabaseService } from '../../supabase.service';
-import { OrderCustomer } from '../../models/order';
-import { OrderService } from '../../services/order.service';
-import { apiErrorMessage, priceValue, ProductService } from '../../services/product.service';
+import { priceValue, ProductService } from '../../services/product.service';
 
 @Component({
   selector: 'app-cart',
@@ -55,14 +52,13 @@ import { apiErrorMessage, priceValue, ProductService } from '../../services/prod
 })
 export class CartPage {
   readonly auth = inject(SupabaseService);
-  private readonly orders = inject(OrderService);
   private readonly products = inject(ProductService);
-  private readonly router = inject(Router);
   readonly submitting = signal(false);
   readonly refreshing = signal(false);
   readonly feedback = signal('');
   readonly confirmation = signal('');
-  customer: OrderCustomer = { name: '', email: '', phone: '', address: '' };
+  readonly catalogReady = signal(false);
+  readonly cartIssues = computed(() => this.cart.items().map((item) => this.itemIssue(item)).filter(Boolean));
 
   constructor(
     public cart: CartService,
@@ -72,7 +68,6 @@ export class CartPage {
       const user = this.auth.user();
       if (user?.id !== customerUserId) {
         customerUserId = user?.id;
-        this.customer = { name: user?.user_metadata?.['display_name'] ?? '', email: user?.email ?? '', phone: '', address: '' };
         this.confirmation.set('');
         this.feedback.set('');
       }
@@ -87,42 +82,35 @@ export class CartPage {
   }
 
   ionViewWillEnter(): void {
-    this.customer.name ||= this.auth.user()?.user_metadata?.['display_name'] ?? '';
-    this.customer.email ||= this.auth.user()?.email ?? '';
     void this.refreshCart();
   }
 
   async refreshCart(): Promise<void> {
     if (this.refreshing()) return;
     this.refreshing.set(true);
+    this.catalogReady.set(false);
     try {
       if (await this.products.refresh()) {
+        this.catalogReady.set(true);
         this.cart.refreshProducts(this.products.products().map((product) => ({
           id: product.id, name: product.name, price: priceValue(product), image: product.photo ?? 'assets/Products/AlmondBliss.webp',
         })));
-      }
+        this.feedback.set('');
+      } else this.feedback.set(this.products.error());
     } finally { this.refreshing.set(false); }
   }
 
-  async checkout(form: NgForm): Promise<void> {
-    form.form.markAllAsTouched();
-    if (form.invalid || this.submitting() || this.refreshing() || this.cart.items().length === 0) return;
-    if (!this.auth.user()) {
-      await this.router.navigate(['/account'], { queryParams: { returnUrl: '/cart' } });
-      return;
-    }
-    const purchased = this.cart.items().map((item) => ({ ...item }));
-    const userId = this.auth.user()?.id;
-    this.submitting.set(true);
-    this.feedback.set('');
-    this.confirmation.set('');
-    try {
-      const order = await this.orders.place(this.customer, purchased);
-      this.cart.completeCheckout(purchased);
-      if (userId === this.auth.user()?.id) this.confirmation.set(`Order ${order.id.slice(0, 8)} was placed. Total: ₱${order.total.toFixed(2)}.`);
-    } catch (error) {
-      this.feedback.set(apiErrorMessage(error));
-      if (error instanceof HttpErrorResponse && error.status === 409) await this.refreshCart();
-    } finally { this.submitting.set(false); }
+  itemIssue(item: CartItem): string {
+    if (!this.catalogReady()) return '';
+    const product = this.products.getById(String(item.id));
+    if (!product) return `${item.name} is no longer available. Remove it to continue.`;
+    if (product.stock === 0) return `${item.name} is out of stock. Remove it to continue.`;
+    if (product.stock !== undefined && item.quantity > product.stock) return `${item.name}: only ${product.stock} available. Reduce the quantity to continue.`;
+    return '';
   }
+
+  maxQuantity(item: CartItem): number {
+    return Math.min(99, this.products.getById(String(item.id))?.stock ?? 99);
+  }
+
 }

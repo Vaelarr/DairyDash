@@ -327,3 +327,5 @@ ion-thumbnail img {
 .checkout-form input, .checkout-form textarea { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid var(--cart-border); border-radius: 8px; background: white; color: var(--cart-text); }
 .checkout-form p, .checkout-message { line-height: 1.6; color: var(--cart-heading); }
 .checkout-message { padding: 16px; border: 1px solid var(--cart-border); border-radius: 12px; background: var(--cart-soft); }
+.cart-issue { color: #a3372f; font-size: 13px; line-height: 1.5; }
+.checkout-note { color: var(--cart-muted); font-size: 13px; line-height: 1.5; }

@@ -1,6 +1,8 @@
 import { PRODUCT_CATEGORIES } from '../src/app/data/product-categories.ts';
 import { ApiError } from './errors.js';
 import { createHash } from 'node:crypto';
+import { checkoutOptions } from './checkout.js';
+import { formatAddress, ORDER_STATUS_LABELS } from '../src/app/models/checkout.ts';
 
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 const MAX_PRICE = 999999.99;
@@ -101,7 +103,7 @@ function orderCustomer(value, fields) {
     address: text(source.address, 'address', 500, true, fields),
   };
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)) fields.email = 'Enter a valid email address.';
-  if (!/^[+\d\s().-]{7,30}$/.test(customer.phone)) fields.phone = 'Enter a valid contact number.';
+  if (!/^[+\d\s().-]{7,30}$/.test(customer.phone) || customer.phone.replace(/\D/g, '').length < 7) fields.phone = 'Enter a valid contact number.';
   return customer;
 }
 
@@ -126,10 +128,14 @@ export function validateOrderUpdate(body) {
   const change = {};
   if (Object.hasOwn(body, 'customer')) change.customer = orderCustomer(body.customer, fields);
   if (Object.hasOwn(body, 'status')) {
-    if (!['pending', 'confirmed', 'completed', 'cancelled'].includes(body.status)) fields.status = 'Choose a supported order status.';
+    if (!Object.hasOwn(ORDER_STATUS_LABELS, body.status)) fields.status = 'Choose a supported order status.';
     change.status = body.status;
   }
-  if (Object.keys(body).some((key) => !['updatedAt', 'customer', 'status'].includes(key))) {
+  if (Object.hasOwn(body, 'paymentStatus')) {
+    if (!['paid', 'refunded'].includes(body.paymentStatus)) fields.paymentStatus = 'Record a verified payment or refund.';
+    change.paymentStatus = body.paymentStatus;
+  }
+  if (Object.keys(body).some((key) => !['updatedAt', 'customer', 'status', 'paymentStatus'].includes(key))) {
     fields.order = 'Only delivery details and status can be edited. Cancel and place a new order to change products.';
   }
   if (!Object.keys(change).length) fields.order = 'Send delivery details or an order status to update.';
@@ -137,7 +143,7 @@ export function validateOrderUpdate(body) {
   return { updatedAt, change };
 }
 
-export function validateOrder(body) {
+export function validateOrder(body, options = checkoutOptions()) {
   objectBody(body);
   const fields = {};
   const requestId = body.requestId;
@@ -145,6 +151,31 @@ export function validateOrder(body) {
     fields.requestId = 'Use a UUID for this checkout request.';
   }
   const customer = orderCustomer(body.customer, fields);
+  const paymentMethod = body.paymentMethod === undefined ? 'cash_on_delivery' : body.paymentMethod;
+  const method = options.paymentMethods.find((entry) => entry.id === paymentMethod && entry.enabled);
+  if (!method) fields.paymentMethod = 'Choose an available payment method.';
+  let shippingAddress = null;
+  if (body.shippingAddress !== undefined) {
+    const source = body.shippingAddress && typeof body.shippingAddress === 'object' && !Array.isArray(body.shippingAddress) ? body.shippingAddress : {};
+    shippingAddress = {
+      line1: text(source.line1, 'street address', 150, true, fields),
+      line2: text(source.line2 ?? '', 'apartment / unit', 100, false, fields),
+      barangay: text(source.barangay, 'barangay', 80, true, fields),
+      city: text(source.city, 'city', 80, true, fields),
+      province: text(source.province, 'province', 80, true, fields),
+      postalCode: text(source.postalCode, 'postal code', 4, true, fields),
+      country: 'PH',
+    };
+    if (!/^\d{4}$/.test(shippingAddress.postalCode)) fields.postalCode = 'Enter a four-digit Philippine postal code.';
+    if (source.country !== 'PH') fields.country = 'Delivery is available within the Philippines.';
+    customer.address = formatAddress(shippingAddress);
+    if (customer.address.length > 500) fields.address = 'Keep the complete address within 500 characters.';
+  }
+  const deliveryNotes = text(body.deliveryNotes === undefined ? '' : body.deliveryNotes, 'delivery notes', 300, false, fields);
+  if (body.deliveryFee !== undefined && body.deliveryFee !== options.deliveryFee) {
+    throw new ApiError(409, 'The delivery fee changed. Refresh checkout and review the new total.');
+  }
+  const checkout = { paymentMethod, paymentInstructions: method?.instructions ?? '', shippingAddress, deliveryNotes, deliveryFeeCents: Math.round(options.deliveryFee * 100) };
   const items = [];
   const seen = new Set();
   if (!Array.isArray(body.items) || body.items.length < 1 || body.items.length > 50) {
@@ -165,6 +196,7 @@ export function validateOrder(body) {
   }
   if (Object.keys(fields).length) throw new ApiError(400, Object.values(fields)[0], fields);
   items.sort((a, b) => a.productId < b.productId ? -1 : a.productId > b.productId ? 1 : 0);
-  const requestHash = createHash('sha256').update(JSON.stringify({ customer, items })).digest('hex');
-  return { requestId: requestId.toLowerCase(), requestHash, customer, items };
+  const { paymentInstructions, ...selection } = checkout;
+  const requestHash = createHash('sha256').update(JSON.stringify({ customer, items, checkout: selection })).digest('hex');
+  return { requestId: requestId.toLowerCase(), requestHash, customer, items, checkout };
 }
