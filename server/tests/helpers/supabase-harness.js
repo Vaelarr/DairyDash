@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
 import { createSupabaseClient } from '../../supabase-client.js';
 import { openSupabaseDatabase } from '../../supabase-database.js';
@@ -6,7 +6,7 @@ import { openSupabaseDatabase } from '../../supabase-database.js';
 // A local Postgres engine behind a Supabase HTTP test transport. The real SDK, SQL migration,
 // constraints, RPCs and repository run here; no Supabase account or credentials are used.
 export async function createSupabaseHarness() {
-  const migration = await readFile(new URL('../../../supabase/migrations/202610070001_dairydash.sql', import.meta.url), 'utf8');
+  const migrationDirectory = new URL('../../../supabase/migrations/', import.meta.url);
   const postgres = new PGlite();
   await postgres.exec(`
     create role anon;
@@ -15,17 +15,20 @@ export async function createSupabaseHarness() {
     create schema storage;
     create table storage.buckets (id text primary key, name text, public boolean, file_size_limit bigint, allowed_mime_types text[]);
   `);
-  await postgres.exec(migration);
+  for (const file of (await readdir(migrationDirectory)).filter((name) => name.endsWith('.sql')).sort()) {
+    await postgres.exec(await readFile(new URL(file, migrationDirectory), 'utf8'));
+  }
   const bucket = (await postgres.query('select * from storage.buckets')).rows[0];
   await postgres.exec('set role service_role');
   const objects = new Map();
   const warnings = [];
   const calls = [];
-  const state = { failInsert: false, loseInsertResponse: false, failRemove: false, failUpload: false, onUpload: null, bucketPublic: true };
+  const state = { failInsert: false, loseInsertResponse: false, loseOrderResponse: false, failRemove: false, failUpload: false, onUpload: null, bucketPublic: true };
   const tables = {
     dairydash_products: ['id', 'name', 'category', 'price_cents', 'stock', 'description', 'photo', 'photo_storage_path', 'catalog_position', 'created_at', 'updated_at'],
-    dairydash_reviews: ['id', 'product_id', 'name', 'rating', 'comment', 'created_at'],
+    dairydash_reviews: ['id', 'product_id', 'name', 'rating', 'comment', 'created_at', 'user_id', 'updated_at'],
     dairydash_settings: ['key', 'created_at'],
+    dairydash_orders: ['id', 'user_id', 'request_id', 'request_hash', 'customer_name', 'customer_email', 'customer_phone', 'delivery_address', 'status', 'total_cents', 'created_at'],
   };
   const json = (value, status = 200) => new Response(JSON.stringify(value), { status, headers: { 'Content-Type': 'application/json' } });
 
@@ -87,7 +90,45 @@ export async function createSupabaseHarness() {
         }
       }
       if (url.pathname.startsWith('/rest/v1/rpc/')) {
-        const body = JSON.parse(init.body);
+        const body = JSON.parse(init.body || '{}');
+        if (url.pathname.endsWith('/dairydash_manage_review')) {
+          const result = await postgres.query('select public.dairydash_manage_review($1::uuid, $2, $3::uuid, $4::boolean, $5::timestamptz, $6::jsonb, $7::boolean) as result',
+            [body.review_id, body.product_id, body.actor_id, body.actor_is_admin, body.expected_updated_at, JSON.stringify(body.change), body.delete_review]);
+          return json(result.rows[0].result);
+        }
+        if (url.pathname.endsWith('/dairydash_manage_order')) {
+          const result = await postgres.query('select public.dairydash_manage_order($1::uuid, $2::uuid, $3::boolean, $4::timestamptz, $5::jsonb, $6::boolean) as result',
+            [body.order_id, body.actor_id, body.actor_is_admin, body.expected_updated_at, JSON.stringify(body.change), body.delete_order]);
+          if (state.loseOrderResponse) return json({ code: 'TEST_LOST_RESPONSE', message: 'Response lost after commit' }, 400);
+          return json(result.rows[0].result);
+        }
+        if (url.pathname.endsWith('/dairydash_admin_get_order')) {
+          const result = await postgres.query('select public.dairydash_admin_get_order($1::uuid) as result', [body.order_id]);
+          return json(result.rows[0].result);
+        }
+        if (url.pathname.endsWith('/dairydash_admin_list_orders')) {
+          const limit = Number(url.searchParams.get('limit') ?? 1000);
+          const offset = Number(url.searchParams.get('offset') ?? 0);
+          const result = await postgres.query('select result from public.dairydash_admin_list_orders() as result limit $1 offset $2', [limit, offset]);
+          return json(result.rows.map((row) => row.result));
+        }
+        if (url.pathname.endsWith('/dairydash_create_order')) {
+          const result = await postgres.query('select public.dairydash_create_order($1::uuid, $2::uuid, $3, $4::jsonb, $5::jsonb) as result',
+            [body.customer_id, body.checkout_id, body.payload_hash, JSON.stringify(body.customer), JSON.stringify(body.lines)]);
+          if (state.loseOrderResponse) return json({ code: 'TEST_LOST_RESPONSE', message: 'Response lost after commit' }, 400);
+          return json(result.rows[0].result);
+        }
+        if (url.pathname.endsWith('/dairydash_get_order')) {
+          const result = await postgres.query('select public.dairydash_get_order($1::uuid, $2::uuid) as result', [body.order_id, body.customer_id]);
+          return json(result.rows[0].result);
+        }
+        if (url.pathname.endsWith('/dairydash_list_orders')) {
+          const limit = Number(url.searchParams.get('limit') ?? 1000);
+          const offset = Number(url.searchParams.get('offset') ?? 0);
+          const result = await postgres.query('select result from public.dairydash_list_orders($1::uuid) as result limit $2 offset $3',
+            [body.customer_id, limit, offset]);
+          return json(result.rows.map((row) => row.result));
+        }
         if (url.pathname.endsWith('/dairydash_seed_catalog')) {
           const result = await postgres.query('select public.dairydash_seed_catalog($1::jsonb) as result', [JSON.stringify(body.catalog)]);
           return json(result.rows[0].result);
@@ -138,9 +179,9 @@ export async function createSupabaseHarness() {
   return {
     database, postgres, objects, warnings, calls, state,
     async reset() {
-      await postgres.exec('reset role; truncate public.dairydash_products, public.dairydash_reviews, public.dairydash_settings; set role service_role;');
+      await postgres.exec('reset role; truncate public.dairydash_products, public.dairydash_reviews, public.dairydash_settings, public.dairydash_orders, public.dairydash_order_items; set role service_role;');
       objects.clear(); warnings.length = 0; calls.length = 0;
-      Object.assign(state, { failInsert: false, loseInsertResponse: false, failRemove: false, failUpload: false, onUpload: null, bucketPublic: true });
+      Object.assign(state, { failInsert: false, loseInsertResponse: false, loseOrderResponse: false, failRemove: false, failUpload: false, onUpload: null, bucketPublic: true });
     },
     close: () => postgres.close(),
   };

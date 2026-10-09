@@ -1,0 +1,69 @@
+﻿<app-page-layout [title]="admin ? 'Manage Orders' : 'My Orders'" eyebrow="YOUR PURCHASES"
+  [description]="admin ? 'Manage customer delivery details and order status.' : 'View your orders and update pending deliveries.'">
+  <p role="status" aria-live="polite">{{ feedback() }}</p>
+  @if (!auth.user()) {
+    <p><a routerLink="/account">Sign in to view your orders.</a></p>
+  } @else if (loading()) {
+    <p role="status">Loading orders…</p>
+  } @else if (error()) {
+    <p role="alert">{{ error() }}</p>
+    <button type="button" (click)="load()" [disabled]="busy()">Try Again</button>
+  } @else if (orders().length === 0) {
+    <p>{{ admin ? 'No orders to manage.' : 'You haven’t placed an order yet.' }} <a routerLink="/products">Browse products</a></p>
+  } @else {
+    <div class="orders-list">
+      @for (order of orders(); track order.id) {
+        <article [attr.data-order-id]="order.id">
+          <header><h2>Order {{ order.id.slice(0, 8) }}</h2><span>{{ order.status }}</span></header>
+          <p>{{ order.createdAt | date:'medium' }}</p>
+          <ul>
+            @for (item of order.items; track $index) {
+              <li><span>{{ item.quantity }} × {{ item.name }}</span><strong>{{ item.total | currency:'PHP':'symbol':'1.2-2' }}</strong></li>
+            }
+          </ul>
+          <p class="total">Total <strong>{{ order.total | currency:'PHP':'symbol':'1.2-2' }}</strong></p>
+          <p>Delivery to {{ order.customer.name }} · {{ order.customer.address }}</p>
+          <p>{{ order.customer.email }} · {{ order.customer.phone }}</p>
+          <small>Order reference: {{ order.id }}</small>
+          <div class="order-actions">
+            @if (canEdit(order)) { <button type="button" (click)="edit(order)" [disabled]="busy()">Edit Delivery</button> }
+            @if (admin && order.status === 'pending') {
+              <button type="button" (click)="update(order, { status: 'confirmed' })" [disabled]="busy()">Confirm Order</button>
+            }
+            @if (admin && order.status === 'confirmed') {
+              <button type="button" (click)="update(order, { status: 'completed' })" [disabled]="busy()">Complete Order</button>
+            }
+            @if (canCancel(order)) {
+              <button type="button" (click)="confirmation = { order, action: 'cancel' }; editing = null" [disabled]="busy()">Cancel Order</button>
+            }
+            @if (canDelete(order)) {
+              <button type="button" (click)="confirmation = { order, action: 'delete' }; editing = null" [disabled]="busy()">Delete Order</button>
+            }
+          </div>
+          @if (editing?.id === order.id) {
+            <form #deliveryForm="ngForm" (ngSubmit)="save()" class="delivery-form">
+              <h3>Edit delivery details</h3>
+              <label>Name<input name="name" [(ngModel)]="customer.name" autocomplete="name" maxlength="80" required /></label>
+              <label>Email<input name="email" type="email" [(ngModel)]="customer.email" autocomplete="email" maxlength="254" email required /></label>
+              <label>Phone<input name="phone" type="tel" [(ngModel)]="customer.phone" autocomplete="tel" maxlength="30" required /></label>
+              <label>Address<textarea name="address" [(ngModel)]="customer.address" autocomplete="street-address" maxlength="500" required></textarea></label>
+              <p>To change products or quantities, cancel this order and place a new one.</p>
+              <button type="submit" [disabled]="busy() || deliveryForm.invalid">{{ busy() ? 'Saving…' : 'Save Delivery' }}</button>
+              <button type="button" (click)="clearDraft()" [disabled]="busy()">Cancel Edit</button>
+            </form>
+          }
+          @if (confirmation?.order?.id === order.id) {
+            <div class="confirmation" role="group" aria-label="Confirm order action">
+              <p>{{ confirmation?.action === 'cancel' ? 'Cancel this order? Reserved stock will be released.' : 'Delete this order from order history?' }}</p>
+              @if (confirmation?.action === 'delete' && (order.status === 'pending' || order.status === 'confirmed')) {
+                <p>The order will be cancelled and its reserved stock released.</p>
+              }
+              <button type="button" (click)="confirm()" [disabled]="busy()">{{ confirmation?.action === 'cancel' ? 'Confirm Cancellation' : 'Confirm Delete Order' }}</button>
+              <button type="button" (click)="confirmation = null" [disabled]="busy()">Keep Order</button>
+            </div>
+          }
+        </article>
+      }
+    </div>
+  }
+</app-page-layout>

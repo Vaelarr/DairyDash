@@ -59,6 +59,19 @@ Successful record/list responses use `{ "data": ... }`. Errors use `{ "error": {
 | DELETE | `/api/products/:id` | Delete the product and reviews (204) |
 | GET | `/api/products/:id/reviews` | Product reviews, newest first |
 | POST | `/api/products/:id/reviews` | Create a review (201, server-generated ID/timestamp) |
+| GET | `/api/products/:id/reviews/:reviewId` | Read one review, or 404 |
+| PUT | `/api/products/:id/reviews/:reviewId` | Author/admin replaces name, rating and comment using the latest `updatedAt` |
+| DELETE | `/api/products/:id/reviews/:reviewId` | Author/admin deletes a review using `If-Match` (204) |
+| GET | `/api/account` | Verified signed-in user and admin flag |
+| POST | `/api/orders` | Save a signed-in customer's order and decrement stock in one transaction |
+| GET | `/api/orders` | Signed-in customer's order history |
+| GET | `/api/orders/:id` | Customer's own order, or 404 |
+| PUT | `/api/orders/:id` | Customer edits pending delivery details or cancels a pending order |
+| DELETE | `/api/orders/:id` | Customer deletes a pending/cancelled order from history (204) |
+| GET | `/api/admin/orders` | Admin lists all active customer orders |
+| GET | `/api/admin/orders/:id` | Admin reads any active order |
+| PUT | `/api/admin/orders/:id` | Admin edits delivery details or progresses/cancels an order |
+| DELETE | `/api/admin/orders/:id` | Admin deletes any order from history (204) |
 
 Example product request:
 
@@ -86,9 +99,39 @@ Reviews require a name (up to 60 characters), an integer rating from 1 to 5, and
 
 ## Current scope
 
-This first backend implementation covers the existing catalog management and review flows. Cart and wishlist controls still have their existing presentation behavior; accounts, authentication, admin permissions, checkout, orders, payments, review moderation, and automatic real-time updates are future work. Clients refresh the catalog when visiting a catalog page and refresh product details/reviews when reopening a product.
+The backend covers product/review/order CRUD, Supabase email/password accounts, admin permissions, checkout, order history, review moderation, and order status management. The cart stays in browser storage; product-details buttons add the selected quantity. Checkout collects delivery details, saves a pending order, and clears purchased quantities only after confirmation from the API. Payments, wishlist persistence, delivery integrations, and automatic real-time updates remain future work. Clients refresh the catalog when visiting a catalog page and refresh product details/reviews when reopening a product.
 
-The API defaults to local development. Product writes and reviews currently have no authentication; add identity, authorization, and abuse controls before exposing it as a public service. CORS is an origin policy, not an authentication mechanism.
+In Supabase mode, catalog reads remain public. Product create/update/delete require a verified Supabase access token and `app_metadata.role = 'admin'`. New reviews require sign-in. Accounts and orders always require a verified token. Express verifies the token through Supabase Auth and takes the order owner from that verified identity; client-supplied ownership fields are ignored. User-editable `user_metadata` cannot grant admin access. The optional SQLite development provider retains unauthenticated catalog editing and does not configure account verification, so checkout requires Supabase mode. CORS is an origin policy, not an authentication mechanism. Abuse controls are still needed for a public production deployment.
+
+## Accounts and orders setup
+
+Apply [202610080001_orders.sql](../supabase/migrations/202610080001_orders.sql) after the original migration, followed by [202610090001_review_order_crud.sql](../supabase/migrations/202610090001_review_order_crud.sql), then run `npm run db:check`. The check reads cloud configuration without creating users or changing records. The frontend publishable key lives in `src/environments/environment.ts`; the server secret stays in ignored `.env`. The frontend sends the user's access token only to its configured Express API. Supabase tables and order RPCs remain restricted to the server role.
+
+Open `/account` to create an account or sign in. Supabase email confirmation is supported: users confirm their email before signing in if enabled in the project. Enable the Email provider in Supabase Auth and configure its Site URL and allowed redirect URLs for your deployment. For local browser development, use `http://localhost:3000`.
+
+To grant a trusted user catalog admin access, find their UUID in Supabase **Authentication > Users**, then run this in the SQL Editor with the actual UUID. Sign out and back in to refresh their session after changing the role:
+
+```sql
+update auth.users
+set raw_app_meta_data = coalesce(raw_app_meta_data, '{}'::jsonb) || '{"role":"admin"}'::jsonb
+where id = 'REPLACE_WITH_USER_UUID'::uuid;
+```
+
+An order request includes a UUID `requestId`, `customer` (`name`, `email`, `phone`, `address`), and 1–50 unique `items` (`productId`, `quantity`, `price`). Quantities are whole numbers from 1–99; `price` is the unit price the customer reviewed. The server compares displayed prices with current database prices and computes all totals from database centavos. A price change, missing product, or insufficient stock returns 409 without saving an order or changing any stock. Unknown/null stock stays untracked. Row locks and a transaction protect stock during simultaneous checkouts.
+
+Retries with the same request ID and normalized body return the original order without consuming stock again. Reusing that ID with different details returns 409. The client retains retry IDs across connection failures and reloads in browser storage, and preserves the cart on failure. Customer order history is private, including the individual order endpoint. Order lines retain names/prices after catalog edits and product deletion. Orders start as `pending`; no payment is collected by this implementation.
+
+## Editing and deleting reviews/orders
+
+New reviews record the verified author's ID. Authors and admins can edit/delete them from product details; older reviews with no recorded author can only be moderated by admins. Ownership cannot be changed by a request body.
+
+Customers edit delivery/contact details on `/orders` while an order is pending. Admins use `/manage-orders` to edit pending/confirmed deliveries and change status: `pending → confirmed → completed`, or `pending/confirmed → cancelled`. Completed/cancelled orders cannot be reopened. Product lines and charged prices remain immutable; cancel and place a new order to change products or quantities. Customer routes remain private even for admins; cross-customer management uses the separate admin routes.
+
+Review/order responses include `updatedAt`. Every update supplies that exact value in its JSON body. Every delete supplies `If-Match: "<updatedAt>"`. Missing versions return 400; stale versions return 409. The frontend reloads after conflicts so a stale save cannot overwrite another user's changes.
+
+Cancelling or deleting a pending/confirmed order restores its recorded finite-stock reservation in the same transaction. Deleting an already cancelled order never restores it twice, and deleting a completed order leaves consumed stock unchanged. Deletion hides the order from customer/admin reads while retaining its checkout ID internally, so an old checkout retry returns 409 rather than creating the order again. Missing/deleted products keep their historical item snapshots and are not recreated.
+
+Legacy orders predate the stock reservation flag. The migration leaves `stock_deducted` NULL for those lines rather than guessing whether stock was tracked at checkout. Before cancelling/deleting such an active order, verify each original reservation and set its line's `stock_deducted` to `true` if stock was deducted, or `false` if it was untracked, in Supabase's Table Editor. Unknown reservations and restoration beyond the stock limit return 409 without partially changing the order or inventory. New checkouts record this automatically.
 
 Existing browser-only products, edits, hidden products, and reviews remain in localStorage but are not automatically imported into the shared database. The app now reads the API's catalog and reviews. This avoids treating one browser's private edits as changes for every user; a deliberate migration can be added if that data is needed.
 

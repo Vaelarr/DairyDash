@@ -1,5 +1,6 @@
 import { PRODUCT_CATEGORIES } from '../src/app/data/product-categories.ts';
 import { ApiError } from './errors.js';
+import { createHash } from 'node:crypto';
 
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 const MAX_PRICE = 999999.99;
@@ -89,4 +90,81 @@ export function validateReview(body) {
   }
   if (Object.keys(fields).length) throw new ApiError(400, Object.values(fields)[0], fields);
   return { name, comment, rating: body.rating };
+}
+
+function orderCustomer(value, fields) {
+  const source = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  const customer = {
+    name: text(source.name, 'name', 80, true, fields),
+    email: text(source.email, 'email', 254, true, fields),
+    phone: text(source.phone, 'phone', 30, true, fields),
+    address: text(source.address, 'address', 500, true, fields),
+  };
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)) fields.email = 'Enter a valid email address.';
+  if (!/^[+\d\s().-]{7,30}$/.test(customer.phone)) fields.phone = 'Enter a valid contact number.';
+  return customer;
+}
+
+export function validateVersion(value) {
+  if (typeof value !== 'string' || value.length > 64 ||
+      !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/.test(value) || !Number.isFinite(Date.parse(value))) {
+    throw new ApiError(400, 'Send the latest updatedAt value. Reload the record and try again.');
+  }
+  // Keep Postgres microseconds intact for optimistic concurrency checks.
+  return value;
+}
+
+export function validateDeleteVersion(header) {
+  const match = typeof header === 'string' && /^"([^"]+)"$/.exec(header);
+  return validateVersion(match ? match[1] : undefined);
+}
+
+export function validateOrderUpdate(body) {
+  objectBody(body);
+  const updatedAt = validateVersion(body.updatedAt);
+  const fields = {};
+  const change = {};
+  if (Object.hasOwn(body, 'customer')) change.customer = orderCustomer(body.customer, fields);
+  if (Object.hasOwn(body, 'status')) {
+    if (!['pending', 'confirmed', 'completed', 'cancelled'].includes(body.status)) fields.status = 'Choose a supported order status.';
+    change.status = body.status;
+  }
+  if (Object.keys(body).some((key) => !['updatedAt', 'customer', 'status'].includes(key))) {
+    fields.order = 'Only delivery details and status can be edited. Cancel and place a new order to change products.';
+  }
+  if (!Object.keys(change).length) fields.order = 'Send delivery details or an order status to update.';
+  if (Object.keys(fields).length) throw new ApiError(400, Object.values(fields)[0], fields);
+  return { updatedAt, change };
+}
+
+export function validateOrder(body) {
+  objectBody(body);
+  const fields = {};
+  const requestId = body.requestId;
+  if (typeof requestId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestId)) {
+    fields.requestId = 'Use a UUID for this checkout request.';
+  }
+  const customer = orderCustomer(body.customer, fields);
+  const items = [];
+  const seen = new Set();
+  if (!Array.isArray(body.items) || body.items.length < 1 || body.items.length > 50) {
+    fields.items = 'Choose between 1 and 50 different products.';
+  } else {
+    for (const item of body.items) {
+      if (!item || typeof item !== 'object' || typeof item.productId !== 'string' ||
+          !item.productId.trim() || item.productId.length > 100 || seen.has(item.productId) ||
+          !Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 99 ||
+          typeof item.price !== 'number' || !Number.isFinite(item.price) || item.price < 0.01 || item.price > MAX_PRICE ||
+          Math.abs(item.price * 100 - Math.round(item.price * 100)) > 0.000001) {
+        fields.items = 'Use unique product IDs, quantities from 1 to 99, and valid displayed prices.';
+        continue;
+      }
+      seen.add(item.productId);
+      items.push({ productId: item.productId, quantity: item.quantity, priceCents: Math.round(item.price * 100) });
+    }
+  }
+  if (Object.keys(fields).length) throw new ApiError(400, Object.values(fields)[0], fields);
+  items.sort((a, b) => a.productId < b.productId ? -1 : a.productId > b.productId ? 1 : 0);
+  const requestHash = createHash('sha256').update(JSON.stringify({ customer, items })).digest('hex');
+  return { requestId: requestId.toLowerCase(), requestHash, customer, items };
 }

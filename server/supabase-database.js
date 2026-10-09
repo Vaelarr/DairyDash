@@ -7,6 +7,19 @@ const PAGE_SIZE = 500;
 
 function checked(result) {
   if (result.error) {
+    const checkoutErrors = {
+      DD001: 'A product is no longer available. Review your cart.',
+      DD002: 'There is not enough stock for this order. Review your quantities.',
+      DD003: 'A product price changed. Refresh your cart before placing the order.',
+      DD004: 'This checkout request was already used for a different order.',
+      DD006: 'This record changed. Reload it before saving or deleting.',
+      DD007: 'This order cannot be changed at its current stage.',
+      DD008: 'This checkout order was deleted. Start a new checkout request.',
+      DD009: 'Stock restoration needs an administrator to verify the inventory reservation.',
+    };
+    if (checkoutErrors[result.error.code]) throw new ApiError(409, checkoutErrors[result.error.code], undefined,
+      result.error.code === 'DD008' ? 'CHECKOUT_DELETED' : undefined);
+    if (result.error.code === 'DD005') throw new ApiError(403, 'Only the review author or an admin can change this review.');
     if (result.error.code === '23503') throw new ApiError(404, 'Product not found.');
     // Supabase's diagnostic details stay off the public API (including schema and project details).
     throw new ApiError(503, 'The cloud database or storage is unavailable. Check the Supabase configuration and try again.');
@@ -26,7 +39,9 @@ function productFromRow(row) {
 }
 
 function reviewFromRow(row) {
-  return { id: row.id, name: row.name, rating: row.rating, comment: row.comment, createdAt: row.created_at };
+  if (!row) return undefined;
+  return { id: row.id, name: row.name, rating: row.rating, comment: row.comment,
+    userId: row.user_id ?? null, createdAt: row.created_at, updatedAt: row.updated_at };
 }
 
 async function allPages(query) {
@@ -143,8 +158,41 @@ export function openSupabaseDatabase(client, { bucket = 'dairydash-product-image
         .order('created_at', { ascending: false }).order('id', { ascending: false }));
       return rows.map(reviewFromRow);
     },
-    async createReview(id, input) {
-      return reviewFromRow(checked(await client.from(REVIEWS).insert({ product_id: id, ...input }).select('*').single()));
+    async getReview(productId, id) {
+      return reviewFromRow(checked(await client.from(REVIEWS).select('*').eq('product_id', productId).eq('id', id).maybeSingle()));
+    },
+    async createReview(id, input, userId = null) {
+      return reviewFromRow(checked(await client.from(REVIEWS).insert({ product_id: id, ...input, user_id: userId }).select('*').single()));
+    },
+    async manageReview(productId, id, actor, updatedAt, change, remove = false) {
+      return reviewFromRow(checked(await client.rpc('dairydash_manage_review', {
+        product_id: productId, review_id: id, actor_id: actor.id, actor_is_admin: actor.isAdmin,
+        expected_updated_at: updatedAt, change, delete_review: remove,
+      })));
+    },
+    async createOrder(userId, input) {
+      return checked(await client.rpc('dairydash_create_order', {
+        customer_id: userId, checkout_id: input.requestId, payload_hash: input.requestHash,
+        customer: input.customer, lines: input.items,
+      }));
+    },
+    async getOrder(id, userId) {
+      return checked(await client.rpc('dairydash_get_order', { order_id: id, customer_id: userId }));
+    },
+    async listOrders(userId) {
+      return allPages(() => client.rpc('dairydash_list_orders', { customer_id: userId }));
+    },
+    async adminGetOrder(id) {
+      return checked(await client.rpc('dairydash_admin_get_order', { order_id: id }));
+    },
+    async adminListOrders() {
+      return allPages(() => client.rpc('dairydash_admin_list_orders'));
+    },
+    async manageOrder(id, actor, updatedAt, change, remove = false) {
+      return checked(await client.rpc('dairydash_manage_order', {
+        order_id: id, actor_id: actor.id, actor_is_admin: actor.isAdmin,
+        expected_updated_at: updatedAt, change, delete_order: remove,
+      }));
     },
     async seedCatalog(catalog) {
       const seeded = checked(await client.from('dairydash_settings').select('key').eq('key', 'catalog_seeded').maybeSingle());

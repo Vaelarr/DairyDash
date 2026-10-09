@@ -152,6 +152,21 @@ export class ProductService {
     return response.data;
   }
 
+  async updateReview(productId: string, review: ProductReview, input: ReviewInput): Promise<ProductReview> {
+    const response = await firstValueFrom(this.http.put<ApiResponse<ProductReview>>(
+      `${this.baseUrl}/products/${encodeURIComponent(productId)}/reviews/${review.id}`,
+      { ...input, updatedAt: review.updatedAt }
+    ).pipe(timeout(15000)));
+    return response.data;
+  }
+
+  async removeReview(productId: string, review: ProductReview): Promise<void> {
+    await firstValueFrom(this.http.delete(
+      `${this.baseUrl}/products/${encodeURIComponent(productId)}/reviews/${review.id}`,
+      { headers: { 'If-Match': `"${review.updatedAt}"` } }
+    ).pipe(timeout(15000)));
+  }
+
   private putInCatalog(product: Product) {
     this.items.update((items) => items.some((item) => item.id === product.id)
       ? items.map((item) => item.id === product.id ? product : item)

@@ -164,7 +164,7 @@ test('CORS allows configured origins and rejects other browser origins', async (
     Origin: 'http://localhost:3000', 'Access-Control-Request-Method': 'POST',
   });
   assert.equal(preflight.status, 204);
-  assert.equal(preflight.headers.get('access-control-allow-headers'), 'Content-Type');
+  assert.equal(preflight.headers.get('access-control-allow-headers'), 'Content-Type, Authorization, If-Match');
   const denied = await request('/api/products', 'POST', productInput, { Origin: 'https://untrusted.example' });
   assert.equal(denied.status, 403);
   assert.equal(denied.headers.get('access-control-allow-origin'), null);
