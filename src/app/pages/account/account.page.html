@@ -1,0 +1,35 @@
+<app-page-layout title="My Account" eyebrow="DAIRY DASH" description="Sign in to place orders and view your purchases." narrow>
+  <section class="account-card">
+    @if (auth.user(); as user) {
+      <h2>Welcome, {{ user.user_metadata['display_name'] || user.email }}</h2>
+      <p>{{ user.email }}</p>
+      @if (adminRequired && !auth.isAdmin()) {
+        <p role="alert">Management requires an admin account.</p>
+      }
+      <div class="account-actions">
+        <a routerLink="/orders">My Orders</a>
+        <a routerLink="/cart">View Cart</a>
+        @if (auth.isAdmin()) {
+          <a routerLink="/manage-products">Manage Products</a>
+          <a routerLink="/manage-orders">Manage Orders</a>
+        }
+        <button type="button" (click)="signOut()" [disabled]="busy()">Sign Out</button>
+      </div>
+    } @else {
+      <h2>{{ registering ? 'Create an account' : 'Sign in' }}</h2>
+      <form #accountForm="ngForm" (ngSubmit)="submit(accountForm)">
+        @if (registering) {
+          <label>Your name<input name="name" [(ngModel)]="name" autocomplete="name" maxlength="80" required /></label>
+        }
+        <label>Email<input name="email" type="email" [(ngModel)]="email" autocomplete="email" maxlength="254" required email /></label>
+        <label>Password<input name="password" type="password" [(ngModel)]="password"
+          [autocomplete]="registering ? 'new-password' : 'current-password'" [minlength]="registering ? 8 : 1" maxlength="128" required /></label>
+        <button type="submit" [disabled]="busy() || accountForm.invalid">{{ busy() ? 'Please wait…' : registering ? 'Create Account' : 'Sign In' }}</button>
+        <button type="button" class="secondary" [disabled]="busy()" (click)="registering = !registering; feedback.set('')">
+          {{ registering ? 'Already have an account? Sign in' : 'Create an account' }}
+        </button>
+      </form>
+    }
+    <p role="status" aria-live="polite">{{ feedback() }}</p>
+  </section>
+</app-page-layout>

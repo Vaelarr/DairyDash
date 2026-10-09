@@ -4,6 +4,8 @@ MilkSwift is a cross-platform mobile and web application built using **Angular 2
 
 Products and reviews use an **Express API with Supabase Postgres**, and product images use **Supabase Storage**. Follow [the Supabase setup guide](supabase/README.md) to create your project, run the SQL migration, configure `.env`, and upload the catalog. Then run `npm run dev` for the website at `http://localhost:3000` and API at `http://127.0.0.1:3001/api`. See [the backend guide](server/README.md) for API routes and mobile connections. SQLite remains an explicit offline development option.
 
+Supabase Auth supports email/password accounts. Products, reviews and orders have create/read/update/delete flows with author/customer/admin permissions. Customers edit pending deliveries and cancel/delete orders; admins manage fulfillment from `/manage-orders`. Checkout verifies prices and stock in a transaction, and cancellation releases reserved stock once. For an existing project, apply [the order migration](supabase/migrations/202610080001_orders.sql), then [the review/order CRUD migration](supabase/migrations/202610090001_review_order_crud.sql), run `npm run db:check`, and follow [account/admin setup](server/README.md#accounts-and-orders-setup).
+
 ---
 
 ## Tech Stack & Architecture

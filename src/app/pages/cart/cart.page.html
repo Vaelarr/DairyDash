@@ -10,6 +10,10 @@
 
 <ion-content>
   <div class="cart-container">
+    @if (confirmation()) {
+      <p class="checkout-message" role="status">{{ confirmation() }} <a routerLink="/orders">View your orders</a></p>
+    }
+    @if (feedback()) { <p class="checkout-message" role="alert">{{ feedback() }}</p> }
     @if (cart.items().length === 0) {
       <div class="empty-cart">
         <div class="empty-icon">
@@ -50,6 +54,7 @@
                 <button
                   type="button"
                   (click)="cart.decreaseQuantity(item.id)"
+                  [disabled]="submitting()"
                 >
                   <ion-icon name="remove-outline"></ion-icon>
                 </button>
@@ -60,6 +65,7 @@
                   type="button"
                   class="add-button"
                   (click)="cart.increaseQuantity(item.id)"
+                  [disabled]="submitting() || item.quantity >= 99"
                 >
                   <ion-icon name="add-outline"></ion-icon>
                 </button>
@@ -70,6 +76,7 @@
               type="button"
               class="remove-button"
               (click)="cart.removeProduct(item.id)"
+              [disabled]="submitting()"
               aria-label="Remove product"
             >
               <ion-icon name="trash-outline"></ion-icon>
@@ -86,10 +93,24 @@
           </strong>
         </div>
 
-        <ion-button expand="block" (click)="checkout()">
-          <ion-icon slot="start" name="bag-check-outline"></ion-icon>
-          Proceed to Checkout
-        </ion-button>
+        @if (auth.user()) {
+          <form #checkoutForm="ngForm" (ngSubmit)="checkout(checkoutForm)" class="checkout-form">
+            <h2>Delivery details</h2>
+            <fieldset [disabled]="submitting()">
+              <label>Full name<input name="name" [(ngModel)]="customer.name" autocomplete="name" maxlength="80" required /></label>
+              <label>Email<input name="email" type="email" [(ngModel)]="customer.email" autocomplete="email" maxlength="254" email required /></label>
+              <label>Contact number<input name="phone" type="tel" [(ngModel)]="customer.phone" autocomplete="tel" minlength="7" maxlength="30" required /></label>
+              <label>Delivery address<textarea name="address" [(ngModel)]="customer.address" autocomplete="street-address" maxlength="500" rows="3" required></textarea></label>
+            </fieldset>
+            <p>Your order will be saved for confirmation. Payment is arranged separately.</p>
+            <ion-button expand="block" type="submit" [disabled]="submitting() || refreshing() || checkoutForm.invalid">
+              <ion-icon slot="start" name="bag-check-outline"></ion-icon>
+              {{ submitting() ? 'Placing Order…' : 'Place Order' }}
+            </ion-button>
+          </form>
+        } @else {
+          <ion-button expand="block" routerLink="/account" [queryParams]="{ returnUrl: '/cart' }">Sign In to Checkout</ion-button>
+        }
       </div>
     }
   </div>
