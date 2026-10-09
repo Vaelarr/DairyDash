@@ -1,0 +1,16 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "angular",
+  "buildCommand": "npm run build",
+  "outputDirectory": "www",
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 60,
+      "includeFiles": "src/app/data/product-categories.ts"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/index" },
+    { "source": "/((?!api(?:/|$)).*)", "destination": "/index.html" }
+  ]
+}

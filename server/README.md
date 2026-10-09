@@ -40,7 +40,17 @@ The Angular development server uses `proxy.conf.json` to forward `/api/**` to po
 
 `src/environments/environment.ts` sets the client's API URL. Browser development uses `/api`. A separately hosted website needs a reverse proxy for `/api` or an absolute API URL. A bundled Capacitor build needs an **absolute HTTPS API URL** because Angular's development proxy is not included in the native app. Add the actual native origin, such as `capacitor://localhost` or `http://localhost`, to `CORS_ORIGINS`. For direct LAN API testing, bind `API_HOST=0.0.0.0` and use your computer's LAN IP; a phone's `localhost` refers to the phone.
 
-The production web build does not start or bundle the API. Deploy the API separately with its server-only Supabase configuration. No local database volume is required in Supabase mode. If using SQLite instead, retain its database on persistent storage and stop the API before copying it for backups.
+The production web build does not start the API. Vercel runs it through the serverless entrypoint described below; other hosts need a separately running API with its server-only Supabase configuration. No local database volume is required in Supabase mode. If using SQLite instead, retain its database on persistent storage and stop the API before copying it for backups.
+
+## Deploy on Vercel
+
+Import the repository with the repository root as the project root. The checked-in `vercel.json` builds Angular into `www`, routes `/api/**` to `api/index.js`, and serves Angular's `index.html` for page routes such as `/dashboard`. The function reuses the Express routes and Supabase connection without starting a local listener. Keep the frontend `apiUrl` as `/api`.
+
+In **Settings > Environment Variables**, set `SUPABASE_URL` and `SUPABASE_SECRET_KEY` for Production (and Preview if you use preview deployments). Use the same values as your local `.env`. Optionally set `SUPABASE_STORAGE_BUCKET` for a different bucket and `CORS_ORIGINS` for additional application origins. The API includes the production and preview origins supplied by Vercel automatically. Local `.env` files stay out of Git and are not copied to Vercel.
+
+Use Node.js 24 or newer. Supabase migrations and the catalog seed need to run only once for the shared project; do not run the seed during every deployment. Vercel always uses Supabase with verified account permissions, even if a local SQLite setting was copied into the deployment environment.
+
+After setting environment variables, redeploy. Verify `/api/health` returns JSON with `status: "ok"` and `/api/products` returns JSON containing the catalog. If an API URL returns HTML, check that the deployment includes `vercel.json` and `api/index.js` and that the project root is correct. A JSON 503 configuration error means the server environment variables still need to be set.
 
 ## API
 
