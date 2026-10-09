@@ -73,6 +73,8 @@ The Angular app now uses the project's publishable key for Supabase Auth. Expres
 
 Customer accounts already persist in the project's `auth.users` table; no separate account migration is required. `npm run db:check` also verifies server access to this account database. Complete [the email/password configuration](../server/README.md#account-creation-email-and-password-handling), including confirmation, a provider password minimum of 12, and the `/account` confirmation/recovery redirect URLs. The app's **Account connected** indicator verifies the current saved account through the authenticated API.
 
+For confirmation and password recovery delivery, follow [the Brevo SMTP setup guide](brevo-smtp.md). It replaces Supabase's built-in email service through custom SMTP while keeping the existing account system.
+
 ## Troubleshooting
 
 | Symptom | Check |

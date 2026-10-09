@@ -127,6 +127,8 @@ Sign-up validates a trimmed name (1–80 characters), normalizes email by trimmi
 
 In **Authentication > Providers > Email**, enable **Confirm email** and set the **minimum password length to 12** so the provider enforces the same minimum even for direct Auth requests. Enable leaked-password protection if your Supabase plan supports it. The API refuses unconfirmed email accounts. Keep the standard confirmation/reset email templates using `{{ .ConfirmationURL }}` and configure SMTP for delivery to real customers.
 
+Use [the Brevo SMTP setup guide](../supabase/brevo-smtp.md) for account email delivery. It lists the sender/domain setup, Supabase SMTP fields, email quotas and confirmation/recovery checks. This is a dashboard configuration; the existing account flow uses it without application changes.
+
 In **Authentication > URL Configuration**, set the production Site URL and allow these exact redirects:
 
 - `http://localhost:3000/account`
