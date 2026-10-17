@@ -439,3 +439,7 @@
     font-size: 0.62rem;
   }
 }
+.review-actions { display: flex; gap: 10px; margin-top: 12px; }
+.review-actions button, .review-confirm button { border: 1px solid #ab7960; border-radius: 8px; padding: 8px 12px; color: #573f34; background: #fff; cursor: pointer; }
+.review-actions button:disabled, .review-confirm button:disabled { opacity: .5; }
+.review-confirm { padding: 12px; margin-top: 12px; border: 1px solid #e8d5c7; border-radius: 8px; }

@@ -1,15 +1,16 @@
 <ion-app>
   <ion-split-pane
     contentId="main"
-    [attr.inert]="showSplash() ? '' : null"
-    [attr.aria-hidden]="showSplash() ? 'true' : null"
+    [when]="confirmationView() ? false : 'lg'"
+    [attr.inert]="showSplash() && !confirmationView() ? '' : null"
+    [attr.aria-hidden]="showSplash() && !confirmationView() ? 'true' : null"
   >
-    <app-menu></app-menu>
+    @if (!confirmationView()) { <app-menu></app-menu> }
 
     <ion-router-outlet id="main"></ion-router-outlet>
   </ion-split-pane>
 
-  @if (showSplash()) {
+  @if (showSplash() && !confirmationView()) {
     <app-splash-screen></app-splash-screen>
   }
 </ion-app>

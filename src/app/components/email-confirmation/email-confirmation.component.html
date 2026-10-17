@@ -1,0 +1,32 @@
+<div class="confirmation-screen">
+  <header class="brand" aria-label="DairyDash">
+    <span class="brand-mark" aria-hidden="true">DD</span>
+    <span>DairyDash</span>
+  </header>
+
+  <main class="confirmation-card" role="status" aria-live="polite" [attr.aria-busy]="auth.emailConfirmation() === 'verifying'">
+    @if (auth.emailConfirmation() === 'verifying') {
+      <span class="status-icon pending" aria-hidden="true"></span>
+      <p class="eyebrow">EMAIL VERIFICATION</p>
+      <h1>Confirming your account</h1>
+      <p>Please wait while we verify your email address.</p>
+    } @else if (auth.emailConfirmation() === 'confirmed') {
+      <span class="status-icon success" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="m6 12 4 4 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </span>
+      <p class="eyebrow">EMAIL VERIFICATION COMPLETE</p>
+      <h1>Account confirmed</h1>
+      <p>Your email address has been successfully verified.</p>
+      <p class="completion-message">You may exit this tab.</p>
+      <p class="return-note">Return to the DairyDash website or app to continue.</p>
+    } @else {
+      <span class="status-icon failed" aria-hidden="true">!</span>
+      <p class="eyebrow">EMAIL VERIFICATION</p>
+      <h1>Unable to confirm your account</h1>
+      <p>{{ errorMessage() }}</p>
+      <button type="button" (click)="returnToAccount()">Return to My Account</button>
+    }
+  </main>
+
+  <footer>DairyDash &middot; Account verification</footer>
+</div>

@@ -11,6 +11,8 @@
 # production
 /dist
 /.angular
+/www/
+/artifacts/
 
 # misc
 .DS_Store

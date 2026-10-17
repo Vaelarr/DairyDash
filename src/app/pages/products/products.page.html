@@ -9,6 +9,7 @@
     [value]="searchQuery"
     (ionInput)="handleSearch($event)"
   ></ion-searchbar>
+  <app-catalog-status></app-catalog-status>
 
   <div class="products-section-header">
     <h2>Featured Products</h2>
@@ -27,7 +28,7 @@
     </a>
   </div>
 
-  <p class="products-empty" *ngIf="filteredProducts.length === 0">
+  <p class="products-empty" *ngIf="!loading() && !loadError() && filteredProducts.length === 0">
     {{ searchQuery.trim() ? 'No products match your search.' : 'There are no products to show.' }}
   </p>
 </app-page-layout>

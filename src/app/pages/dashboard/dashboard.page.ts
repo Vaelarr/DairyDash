@@ -7,13 +7,14 @@ import {
   HeroSlide,
 } from '../../components/hero-carousel/hero-carousel.component';
 import { ProductService } from '../../services/product.service';
+import { CatalogStatusComponent } from '../../components/catalog-status/catalog-status.component';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.css'],
   standalone: true,
-  imports: [CommonModule, RouterModule, PageLayoutComponent, HeroCarouselComponent],
+  imports: [CommonModule, RouterModule, PageLayoutComponent, HeroCarouselComponent, CatalogStatusComponent],
 })
 export class DashboardPage {
   heroSlides: HeroSlide[] = [
@@ -38,5 +39,10 @@ export class DashboardPage {
   ];
 
   /** The dashboard's featured products come from the shared catalog, so edits show up here too. */
-  featuredProducts = inject(ProductService).featured;
+  private readonly productService = inject(ProductService);
+  featuredProducts = this.productService.featured;
+
+  ionViewWillEnter() {
+    void this.productService.refresh();
+  }
 }

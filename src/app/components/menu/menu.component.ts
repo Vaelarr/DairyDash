@@ -1,4 +1,5 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { SupabaseService } from '../../supabase.service';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import {
   IonMenu,
@@ -53,16 +54,19 @@ interface AppPage {
   ],
 })
 export class MenuComponent {
-  // Sample profile details. Replace these with your own.
-  readonly user = {
-    name: 'Your Name',
-    phone: '09XX XXX XXXX',
-    image: 'assets/Profiles/user.jpg',
-  };
+  readonly auth = inject(SupabaseService);
+  readonly user = computed(() => ({
+    name: this.auth.user()?.user_metadata?.['display_name'] || this.auth.user()?.email || 'Guest',
+    email: this.auth.user()?.email || 'Sign in to place an order',
+    image: '',
+  }));
 
   readonly profileImageFailed = signal(false);
 
   readonly appPages: AppPage[] = [
+    { title: 'My Account', url: '/account', icon: 'person-outline' },
+    { title: 'My Orders', url: '/orders', icon: 'time-outline' },
+    { title: 'Manage Orders', url: '/manage-orders', icon: 'settings-outline' },
     {
       title: 'Dashboard',
       url: '/dashboard',
@@ -104,6 +108,7 @@ export class MenuComponent {
       icon: 'call-outline',
     },
   ];
+  readonly visiblePages = computed(() => this.appPages.filter((page) => !page.url.startsWith('/manage-') || this.auth.isAdmin()));
 
   constructor() {
     addIcons({

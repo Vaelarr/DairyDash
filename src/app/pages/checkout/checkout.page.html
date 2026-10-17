@@ -1,0 +1,133 @@
+<ion-header><ion-toolbar class="brand-toolbar">
+  <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons><ion-title>Checkout</ion-title>
+</ion-toolbar></ion-header>
+<ion-content>
+  <main class="checkout-container">
+    <div class="checkout-heading"><a routerLink="/cart">← Back to cart</a><span>YOUR DAIRY DASH ORDER</span><h1>Complete your order</h1>
+      <p>Choose your delivery address and payment method, then review everything before placing your order.</p>
+    </div>
+    @if (step() !== 'confirmation') {
+      <nav class="steps" aria-label="Checkout progress">
+        @for (item of steps; track item.id) { <span [class.active]="step() === item.id" [class.done]="$index < stepIndex()" [attr.aria-current]="step() === item.id ? 'step' : null"><b>{{ $index + 1 }}</b> {{ item.label }}</span> }
+      </nav>
+    }
+    @if (feedback()) {
+      <div class="message" role="alert"><p>{{ feedback() }}</p>
+        @if (step() === 'review') { <button type="button" (click)="refreshCart()" [disabled]="busy() || loading()">Refresh cart and checkout</button> }
+      </div>
+    }
+    @if (loading() && step() !== 'confirmation') { <p role="status">Loading checkout details…</p> }
+    @if (!options() && !loading() && step() !== 'confirmation') {
+      <section class="card"><p>Checkout details are unavailable.</p><ion-button (click)="loadOptions()">Try again</ion-button></section>
+    } @else if (options() && step() !== 'confirmation') {
+      <div class="checkout-grid"><div class="checkout-main">
+        @if (step() === 'delivery') {
+          <section class="card">
+            <h2>Where should we deliver?</h2><p class="muted">Required fields are marked with *. Delivery is available within the Philippines.</p>
+            @if (savedAddresses().length) {
+              <div class="saved-addresses"><p class="section-label">Your saved addresses</p>
+                @for (address of savedAddresses(); track address.id) {
+                  <div class="saved-address" [class.selected]="selectedAddressId() === address.id">
+                    <button type="button" class="address-choice" [attr.aria-pressed]="selectedAddressId() === address.id" (click)="useAddress(address)">
+                      <strong>{{ address.label }} @if (defaultAddressId() === address.id) { <small class="badge">Default</small> }</strong>
+                      <span>{{ address.name }} · {{ address.phone }}</span><span>{{ address.address }}</span>
+                    </button>
+                    <div class="address-actions">
+                      @if (defaultAddressId() !== address.id) { <button type="button" (click)="makeDefault(address)">Make default</button> }
+                      <button type="button" (click)="removeAddress(address)" [attr.aria-label]="'Remove ' + address.label + ' address'">Remove</button>
+                    </div>
+                  </div>
+                }
+                <button type="button" class="text-button" (click)="newAddress()">+ Use a new address</button>
+              </div>
+            }
+            <form #deliveryForm="ngForm" (ngSubmit)="continueToPayment(deliveryForm)">
+              <div class="field-grid">
+                <label>Recipient name *<input name="name" [(ngModel)]="customer.name" autocomplete="shipping name" maxlength="80" required /></label>
+                <label>Contact number *<input name="phone" type="tel" [(ngModel)]="customer.phone" autocomplete="shipping tel" minlength="7" maxlength="30" required placeholder="0912 345 6789" /></label>
+              </div>
+              <label>Email for this order *<input name="email" type="email" [(ngModel)]="customer.email" autocomplete="shipping email" maxlength="254" email required /></label>
+              <label>House / building number and street *<input name="line1" [(ngModel)]="shipping.line1" autocomplete="shipping address-line1" maxlength="150" required /></label>
+              <label>Apartment, floor or unit (optional)<input name="line2" [(ngModel)]="shipping.line2" autocomplete="shipping address-line2" maxlength="100" /></label>
+              <div class="field-grid">
+                <label>Barangay *<input name="barangay" [(ngModel)]="shipping.barangay" maxlength="80" required /></label>
+                <label>City / municipality *<input name="city" [(ngModel)]="shipping.city" autocomplete="shipping address-level2" maxlength="80" required /></label>
+                <label>Province *<input name="province" [(ngModel)]="shipping.province" autocomplete="shipping address-level1" maxlength="80" required /></label>
+                <label>Postal code *<input name="postalCode" [(ngModel)]="shipping.postalCode" autocomplete="shipping postal-code" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required /></label>
+              </div>
+              <label>Delivery instructions (optional)<textarea name="notes" [(ngModel)]="deliveryNotes" maxlength="300" rows="2" placeholder="Landmark, gate or directions for the courier"></textarea></label>
+              <label class="checkbox"><input type="checkbox" name="saveAddress" [(ngModel)]="saveAddress" /> {{ selectedAddressId() ? 'Update this saved address' : 'Save address for next time' }}</label>
+              @if (saveAddress) {
+                <label>Address label<input name="addressLabel" [(ngModel)]="addressLabel" maxlength="30" placeholder="Home or Work" /></label>
+                <small class="muted">Up to five addresses, saved for your account on this device.</small>
+              }
+              @if (addressFeedback()) { <p class="field-error" role="alert">{{ addressFeedback() }}</p> }
+              <ion-button type="submit" expand="block" [disabled]="loading()">Continue to payment</ion-button>
+            </form>
+          </section>
+        } @else if (step() === 'payment') {
+          <section class="card">
+            <h2>How would you like to pay?</h2><p class="muted">Choose cash on delivery or an available transfer method.</p>
+            <fieldset class="payment-options"><legend class="sr-only">Payment method</legend>
+              @for (method of options()!.paymentMethods; track method.id) {
+                <label class="payment-option" [class.selected]="paymentMethod() === method.id" [class.unavailable]="!method.enabled">
+                  <input type="radio" name="paymentMethod" [value]="method.id" [checked]="paymentMethod() === method.id" [disabled]="!method.enabled" (change)="paymentMethod.set(method.id)" />
+                  <span><strong>{{ method.label }}</strong><small>{{ !method.enabled ? 'Currently unavailable' : method.id === 'cash_on_delivery' ? 'Pay the courier when your order arrives.' : 'Manual transfer · payment verified by our team.' }}</small></span>
+                </label>
+              }
+            </fieldset>
+            @if (selectedPayment(); as method) {
+              <div class="payment-instructions"><h3>{{ method.id === 'cash_on_delivery' ? 'Pay on arrival' : 'Payment instructions' }}</h3><p>{{ method.instructions }}</p>
+                @if (method.id !== 'cash_on_delivery') { <small>Place your order first. Include your order reference in the transfer and keep your receipt. Preparation starts after our team verifies payment.</small> }
+              </div>
+            }
+            <div class="actions"><ion-button fill="outline" (click)="step.set('delivery')">Back</ion-button><ion-button (click)="continueToReview()" [disabled]="loading() || !selectedPayment()?.enabled">Review order</ion-button></div>
+          </section>
+        } @else if (step() === 'review') {
+          <section class="card">
+            <h2>One last look</h2><p class="muted">Check your items, delivery details, and payment before submitting.</p>
+            <div class="review-section"><div class="section-heading"><h3>Items</h3><a routerLink="/cart">Edit cart</a></div>
+              @for (item of reviewedItems(); track item.id) {
+                <div class="line product-line"><img [src]="item.image" [alt]="item.name" /><span><strong>{{ item.name }}</strong><small>{{ item.quantity }} × {{ item.price | currency:'PHP':'symbol':'1.2-2' }}</small></span><b>{{ item.price * item.quantity | currency:'PHP':'symbol':'1.2-2' }}</b></div>
+              }
+            </div>
+            <div class="review-section"><div class="section-heading"><h3>Delivery</h3><button type="button" class="text-button" (click)="step.set('delivery'); accepted = false" [disabled]="busy()">Edit</button></div>
+              <p><strong>{{ customer.name }}</strong><br />{{ customer.phone }} · {{ customer.email }}<br />{{ addressSummary() }}</p>
+              @if (deliveryNotes.trim()) { <p class="muted">Instructions: {{ deliveryNotes }}</p> }
+            </div>
+            <div class="review-section"><div class="section-heading"><h3>Payment</h3><button type="button" class="text-button" (click)="step.set('payment'); accepted = false" [disabled]="busy()">Edit</button></div>
+              <p>{{ paymentLabel() }}</p><p class="muted">{{ paymentMethod() === 'cash_on_delivery' ? 'Payment is due to the courier on delivery.' : 'Payment is due after placing your order. Preparation starts after payment verification.' }}</p>
+            </div>
+            <div class="line"><span>Items subtotal</span><strong>{{ subtotal() | currency:'PHP':'symbol':'1.2-2' }}</strong></div>
+            <div class="line"><span>Delivery</span><strong>{{ options()!.deliveryFee === 0 ? 'Free' : (options()!.deliveryFee | currency:'PHP':'symbol':'1.2-2') }}</strong></div>
+            <div class="total"><span>Order total</span><strong>{{ total() | currency:'PHP':'symbol':'1.2-2' }}</strong></div>
+            <label class="checkbox"><input type="checkbox" [(ngModel)]="accepted" [disabled]="busy()" /> I have reviewed the order total, delivery details, and payment instructions.</label>
+            <div class="actions"><ion-button fill="outline" (click)="step.set('payment')" [disabled]="busy()">Back</ion-button><ion-button (click)="placeOrder()" [disabled]="busy() || loading() || !accepted">{{ busy() ? 'Placing order…' : 'Place order' }}</ion-button></div>
+          </section>
+        }
+      </div>
+      <aside class="card summary-card" aria-label="Order summary">
+        <h2>Order summary</h2><p class="muted">{{ cart.itemCount() }} items in your basket</p>
+        @for (item of (step() === 'review' ? reviewedItems() : cart.items()); track item.id) {
+          <div class="summary-item"><span>{{ item.quantity }} × {{ item.name }}</span><strong>{{ item.quantity * item.price | currency:'PHP':'symbol':'1.2-2' }}</strong></div>
+        }
+        <div class="line"><span>Subtotal</span><strong>{{ subtotal() | currency:'PHP':'symbol':'1.2-2' }}</strong></div>
+        <div class="line"><span>Delivery</span><strong>{{ options()!.deliveryFee === 0 ? 'Free' : (options()!.deliveryFee | currency:'PHP':'symbol':'1.2-2') }}</strong></div>
+        <div class="total"><span>Total</span><strong>{{ total() | currency:'PHP':'symbol':'1.2-2' }}</strong></div>
+        <p class="muted">All prices are in Philippine pesos. Your order is submitted only when you select Place order.</p>
+      </aside></div>
+    } @else if (placedOrder(); as order) {
+      <section class="card confirmation-card" role="status">
+        <ion-icon name="checkmark-circle-outline" aria-hidden="true"></ion-icon><span class="section-label">THANK YOU FOR YOUR ORDER</span><h2>Order placed</h2>
+        <p>Your order is awaiting confirmation. Track its progress in My Orders.</p>
+        <div class="reference"><small>Order reference</small><strong>{{ order.id }}</strong></div>
+        <p><strong>{{ order.total | currency:'PHP':'symbol':'1.2-2' }}</strong><br />{{ paymentLabel(order.payment.method) }}</p>
+        <div class="payment-instructions"><h3>{{ order.payment.method === 'cash_on_delivery' ? 'Pay when it arrives' : 'Next: complete your payment' }}</h3><p>{{ order.payment.instructions }}</p>
+          @if (order.payment.method !== 'cash_on_delivery') { <p>Use your order reference in the transfer and keep your receipt. Our team will verify payment before preparing your order.</p> }
+        </div>
+        <p>Delivering to <strong>{{ order.customer.name }}</strong><br />{{ order.customer.address }}</p>
+        <div class="actions"><ion-button routerLink="/orders">View my orders</ion-button><ion-button fill="outline" routerLink="/products">Continue shopping</ion-button></div>
+      </section>
+    }
+  </main>
+</ion-content>

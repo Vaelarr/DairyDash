@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { accountGuard, adminGuard } from './services/auth.guard';
 
 export const routes: Routes = [
   {
@@ -28,6 +29,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'checkout',
+    canActivate: [accountGuard],
+    loadComponent: () =>
+      import('./pages/checkout/checkout.page').then(
+        (m) => m.CheckoutPage
+      ),
+  },
+  {
     path: 'view-product/:id',
     loadComponent: () =>
       import('./pages/product-details/product-details.page').then(
@@ -35,7 +44,20 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'account',
+    loadComponent: () => import('./pages/account/account.page').then((m) => m.AccountPage),
+  },
+  {
+    path: 'orders', canActivate: [accountGuard],
+    loadComponent: () => import('./pages/orders/orders.page').then((m) => m.OrdersPage),
+  },
+  {
+    path: 'manage-orders', canActivate: [adminGuard], data: { admin: true },
+    loadComponent: () => import('./pages/orders/orders.page').then((m) => m.OrdersPage),
+  },
+  {
     path: 'manage-products',
+    canActivate: [adminGuard],
     loadComponent: () =>
       import('./pages/manage-products/manage-products.page').then(
         (m) => m.ManageProductsPage
@@ -43,6 +65,7 @@ export const routes: Routes = [
   },
   {
     path: 'add-product',
+    canActivate: [adminGuard],
     loadComponent: () =>
       import('./pages/product-form/product-form.page').then(
         (m) => m.ProductFormPage
@@ -50,6 +73,7 @@ export const routes: Routes = [
   },
   {
     path: 'edit-product/:id',
+    canActivate: [adminGuard],
     loadComponent: () =>
       import('./pages/product-form/product-form.page').then(
         (m) => m.ProductFormPage

@@ -15,10 +15,16 @@
 }
 
 .splash-logo {
+  display: grid;
+  place-items: center;
   width: 135px;
   height: 135px;
+  margin: 0 auto;
   padding: 12px;
-  object-fit: contain;
+  color: #241915;
+  font-family: 'Fredoka', 'Nunito', sans-serif;
+  font-size: 56px;
+  font-weight: 700;
   border-radius: 30px;
   background: white;
   box-shadow: 0 14px 35px rgba(77, 35, 27, 0.2);

@@ -15,10 +15,10 @@
     <!-- User profile -->
     <section class="menu-profile" aria-label="User information">
       <div class="profile-avatar">
-        @if (user.image && !profileImageFailed()) {
+        @if (user().image && !profileImageFailed()) {
           <img
-            [src]="user.image"
-            [alt]="user.name + ' profile photo'"
+            [src]="user().image"
+            [alt]="user().name + ' profile photo'"
             (error)="profileImageFailed.set(true)"
           />
         } @else {
@@ -32,15 +32,15 @@
       <div class="profile-details">
         <p class="profile-eyebrow">MY PROFILE</p>
 
-        <h2>{{ user.name }}</h2>
+        <h2>{{ user().name }}</h2>
 
         <p class="profile-phone">
           <ion-icon
-            name="call-outline"
+            name="person-outline"
             aria-hidden="true"
           ></ion-icon>
 
-          <span>{{ user.phone }}</span>
+          <span>{{ user().email }}</span>
         </p>
       </div>
     </section>
@@ -49,7 +49,7 @@
     <ion-list id="inbox-list">
       <ion-list-header>Menu</ion-list-header>
 
-      @for (p of appPages; track p.url) {
+      @for (p of visiblePages(); track p.url) {
         <ion-menu-toggle [autoHide]="false">
           <ion-item
             [routerLink]="[p.url]"

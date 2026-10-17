@@ -10,6 +10,10 @@
 
 <ion-content>
   <div class="cart-container">
+    @if (confirmation()) {
+      <p class="checkout-message" role="status">{{ confirmation() }} <a routerLink="/orders">View your orders</a></p>
+    }
+    @if (feedback()) { <p class="checkout-message" role="alert">{{ feedback() }} <button type="button" (click)="refreshCart()" [disabled]="refreshing()">Refresh cart</button></p> }
     @if (cart.items().length === 0) {
       <div class="empty-cart">
         <div class="empty-icon">
@@ -50,6 +54,7 @@
                 <button
                   type="button"
                   (click)="cart.decreaseQuantity(item.id)"
+                  [disabled]="submitting()"
                 >
                   <ion-icon name="remove-outline"></ion-icon>
                 </button>
@@ -60,16 +65,19 @@
                   type="button"
                   class="add-button"
                   (click)="cart.increaseQuantity(item.id)"
+                  [disabled]="submitting() || item.quantity >= maxQuantity(item)"
                 >
                   <ion-icon name="add-outline"></ion-icon>
                 </button>
               </div>
+              @if (itemIssue(item)) { <p class="cart-issue" role="alert">{{ itemIssue(item) }}</p> }
             </div>
 
             <button
               type="button"
               class="remove-button"
               (click)="cart.removeProduct(item.id)"
+              [disabled]="submitting()"
               aria-label="Remove product"
             >
               <ion-icon name="trash-outline"></ion-icon>
@@ -86,10 +94,16 @@
           </strong>
         </div>
 
-        <ion-button expand="block" (click)="checkout()">
-          <ion-icon slot="start" name="bag-check-outline"></ion-icon>
-          Proceed to Checkout
-        </ion-button>
+        @if (auth.user()) {
+          <ion-button expand="block" routerLink="/checkout" [disabled]="refreshing() || !catalogReady() || cartIssues().length > 0">
+            <ion-icon slot="start" name="bag-check-outline"></ion-icon>
+            Continue to checkout
+          </ion-button>
+        } @else {
+          <ion-button expand="block" routerLink="/account" [queryParams]="{ returnUrl: '/checkout' }">Sign In to Checkout</ion-button>
+        }
+        @if (cartIssues().length) { <p class="cart-issue" role="alert">Update the unavailable items or quantities above to continue.</p> }
+        <p class="checkout-note">Choose your delivery address and payment method at checkout. You can review everything before placing your order.</p>
       </div>
     }
   </div>

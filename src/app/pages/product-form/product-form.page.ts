@@ -7,14 +7,13 @@ import { addIcons } from 'ionicons';
 import { image } from 'ionicons/icons';
 import { PageLayoutComponent } from '../../components/page-layout/page-layout.component';
 import { Product } from '../../models/product';
-import { PRODUCT_CATEGORIES, ProductService, priceValue } from '../../services/product.service';
+import { PRODUCT_CATEGORIES, ProductService, apiErrorMessage, priceValue } from '../../services/product.service';
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const MAX_IMAGE_SIDE = 800;
 
 /**
- * Downscales the picked image and re-encodes it as a JPEG data URL. A photo straight from a
- * phone camera would otherwise blow past the browser's storage limit (~5 MB) on its own.
+ * Downscales camera photos before sending them to the API to keep mobile uploads small.
  */
 async function toStorableDataUrl(file: File): Promise<string> {
   const bitmap = await createImageBitmap(file);
@@ -56,8 +55,8 @@ export class ProductFormPage {
   readonly form = this.fb.group({
     name: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(60)]],
     category: ['', Validators.required],
-    price: this.fb.control<number | null>(null, [Validators.required, Validators.min(0.01)]),
-    stock: this.fb.control<number | null>(null, Validators.pattern(/^\d+$/)),
+    price: this.fb.control<number | null>(null, [Validators.required, Validators.min(0.01), Validators.max(999999.99)]),
+    stock: this.fb.control<number | null>(null, [Validators.pattern(/^\d+$/), Validators.max(1000000000)]),
     description: ['', Validators.maxLength(200)],
   });
 
@@ -74,15 +73,18 @@ export class ProductFormPage {
   readonly imageBusy = signal(false);
   readonly dragging = signal(false);
   readonly saveError = signal('');
+  readonly saving = signal(false);
+  readonly loadBusy = signal(false);
+  readonly loadError = signal('');
 
   constructor() {
     addIcons({ image });
-    this.load();
+    void this.load();
   }
 
   /** Ionic keeps visited pages alive, so start from a clean form every time this one is shown. */
   ionViewWillEnter() {
-    this.load();
+    void this.load();
   }
 
   showError(field: keyof typeof this.form.controls): boolean {
@@ -116,7 +118,9 @@ export class ProductFormPage {
 
   async onSubmit() {
     this.form.markAllAsTouched();
-    if (this.form.invalid || this.imageBusy()) return;
+    if (this.form.invalid || this.imageBusy() || this.saving() || this.loadBusy() || this.loadError()) return;
+    this.saveError.set('');
+    this.saving.set(true);
 
     const value = this.form.getRawValue();
     const input = {
@@ -129,17 +133,15 @@ export class ProductFormPage {
       photo: this.imagePreview() ?? undefined,
     };
 
-    const saved = this.isEdit
-      ? this.productService.update(this.productId!, input)
-      : this.productService.add(input);
-
-    if (!saved) {
-      this.saveError.set(
-        "Couldn't save the product because the browser's storage is full. Try a smaller image or none at all."
-      );
+    try {
+      if (this.isEdit) await this.productService.update(this.productId!, input);
+      else await this.productService.add(input);
+    } catch (error) {
+      this.saveError.set(apiErrorMessage(error));
+      this.saving.set(false);
       return;
     }
-
+    this.saving.set(false);
     await this.nav.navigateBack('/manage-products', { replaceUrl: true });
     const toast = await this.toastCtrl.create({
       message: `"${input.name.trim()}" was ${this.isEdit ? 'updated' : 'added to your products'}.`,
@@ -153,8 +155,10 @@ export class ProductFormPage {
     this.nav.navigateBack('/manage-products', { replaceUrl: true });
   }
 
-  private load() {
+  async load() {
+    if (this.loadBusy() || this.saving()) return;
     this.saveError.set('');
+    this.loadError.set('');
     this.imageError.set('');
     this.dragging.set(false);
 
@@ -164,7 +168,16 @@ export class ProductFormPage {
       return;
     }
 
-    const product = this.productService.getById(this.productId!);
+    this.loadBusy.set(true);
+    let product: Product | undefined;
+    try {
+      product = await this.productService.fetchById(this.productId!);
+    } catch (error) {
+      this.loadError.set(apiErrorMessage(error));
+      return;
+    } finally {
+      this.loadBusy.set(false);
+    }
     if (!product) {
       this.router.navigateByUrl('/manage-products', { replaceUrl: true });
       return;

@@ -2,6 +2,10 @@
 
 MilkSwift is a cross-platform mobile and web application built using **Angular 22** standalone components, **Ionic Framework 9**, and **Capacitor 8**. It features a modern dairy product catalog with real-time filtering, interactive hero promotional banners, developer team profiles, and responsive mobile-first navigation with split-pane support for desktop and tablet screens.
 
+The `Frontend` branch includes the frontend updates from `main` through `17131bc`: account registration and recovery, email confirmation, customer and admin orders, product reviews, checkout with delivery and payment preferences, and native Android support.
+
+Run `npm run dev` to start the frontend. Browser requests to `/api` are proxied to a separately running backend at `http://127.0.0.1:3001`; configure `proxy.conf.json` if your backend uses another address. Backend code and database migrations are maintained on `main`. Supabase Auth uses the public configuration in `src/environments/environment.ts`, and native apps use the deployed API configured there.
+
 ---
 
 ## Tech Stack & Architecture
@@ -19,7 +23,7 @@ MilkSwift is a cross-platform mobile and web application built using **Angular 2
 
 Before setting up the project, ensure you have the following installed on your machine:
 
-1. **Node.js**: `v20.x`, `v22.x`, or `v24.x` (LTS or Current)
+1. **Node.js**: `v24.x` or newer
    - Verify: `node -v`
 2. **npm**: `v10.x` or `v11.x`
    - Verify: `npm -v`
@@ -105,7 +109,7 @@ npm run build
 
 ### Build Output
 
-- The production output is generated in the **`dist/`** directory.
+- The production output is generated in the **`www/`** directory.
 - The build includes:
   - Tree-shaken and code-split JavaScript bundles (`main-*.js`, lazy chunk files).
   - Minified CSS styles (`styles-*.css`).
@@ -117,6 +121,8 @@ npm run build
 ## Mobile & Native Deployment (Capacitor)
 
 MilkSwift is pre-configured with Capacitor for native deployment on iOS and Android.
+
+Run `npm run mobile:sync` to build and sync Android assets, `npm run mobile:build` to create `artifacts/DairyDash-debug.apk`, `npm run mobile:run` to launch on a device, or `npm run mobile:open` to open Android Studio. Android builds require SDK Platform 36 and JDK 21–24. Native web assets are built separately in `.angular/mobile/browser`; generated web bundles and APKs are ignored by Git.
 
 ### 1. Add Native Platforms
 
@@ -198,7 +204,7 @@ IPT4.2Menu/
 │           ├── products/     # Full product catalog with real-time search
 │           ├── about/        # Application and product brand details
 │           └── developers/   # Developer credits, roles, and avatar profiles
-└── dist/                     # Production build output
+└── www/                      # Production build output
 ```
 
 ---
@@ -209,7 +215,7 @@ IPT4.2Menu/
 | :--- | :--- | :--- |
 | `npm run dev` | `ng serve --host 0.0.0.0 --port 3000` | Starts development server on port 3000 |
 | `npm start` | `ng serve --host 0.0.0.0 --port 3000` | Alias for `npm run dev` |
-| `npm run build` | `ng build` | Produces production-ready bundles in `dist/` |
+| `npm run build` | `ng build` | Produces production-ready bundles in `www/` |
 | `npm run watch` | `ng build --watch --configuration development` | Builds in watch mode for development |
 | `npm run ionic:serve` | `ng serve` | Invoked automatically by Ionic CLI (`ionic serve`) |
 | `npm run ionic:build` | `ng build` | Invoked automatically by Ionic CLI (`ionic build`) |

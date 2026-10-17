@@ -1,0 +1,21 @@
+:host { display: block; height: 100%; overflow: auto; }
+.confirmation-screen { box-sizing: border-box; min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; padding: calc(32px + var(--ion-safe-area-top, 0px)) 20px calc(24px + var(--ion-safe-area-bottom, 0px)); background: #faf6f2; color: #49382e; font-family: 'Nunito', sans-serif; }
+.brand { display: flex; align-items: center; gap: 10px; font-size: 19px; font-weight: 800; }
+.brand-mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; background: #eddfd3; font-size: 14px; }
+.confirmation-card { box-sizing: border-box; width: 100%; max-width: 520px; padding: 44px 32px; border: 1px solid #e8ddd3; border-radius: 20px; background: #fff; box-shadow: 0 10px 35px #49382e08; text-align: center; }
+.status-icon { display: grid; place-items: center; box-sizing: border-box; width: 64px; height: 64px; margin: 0 auto 26px; border-radius: 50%; }
+.success { color: #355c3a; background: #edf5ee; }
+.success svg { width: 32px; height: 32px; }
+.pending { width: 44px; height: 44px; border: 3px solid #eddfd3; border-top-color: #573f34; animation: spin 1s linear infinite; }
+.failed { color: #9b2828; background: #fff0ed; font-size: 30px; font-weight: 800; }
+.eyebrow { margin: 0 0 14px; color: #786253; font-size: 11px; font-weight: 800; letter-spacing: 1.4px; }
+h1 { margin: 0 0 16px; font-size: clamp(25px, 6vw, 32px); font-weight: 800; line-height: 1.25; }
+p { margin: 0; font-size: 15px; line-height: 1.75; }
+.completion-message { margin-top: 22px; font-size: 17px; font-weight: 800; }
+.return-note { margin-top: 8px; color: #786253; font-size: 13px; }
+footer { color: #786253; font-size: 12px; }
+button { min-height: 44px; margin-top: 24px; padding: 12px 20px; border: 0; border-radius: 10px; background: #573f34; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+button:focus-visible { outline: 3px solid #b8714d; outline-offset: 4px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .pending { animation: none; } }
+@media (max-width: 400px) { .confirmation-card { padding: 32px 22px; } }

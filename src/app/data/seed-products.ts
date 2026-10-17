@@ -1,4 +1,4 @@
-import { Product } from '../models/product';
+import type { Product } from '../models/product';
 
 const CATALOG: Omit<Product, 'id'>[] = [
   {

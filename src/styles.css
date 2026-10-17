@@ -20,3 +20,31 @@
 ion-menu-button {
   --color: #4a3b34;
 }
+
+.api-status {
+  margin: 16px 0;
+  padding: 14px 16px;
+  border: 1px solid var(--ion-border-color);
+  border-radius: 12px;
+  background: var(--ion-card-background);
+  color: var(--ion-text-color);
+}
+
+.api-status-error {
+  border-color: var(--ion-color-danger);
+}
+
+.api-status p {
+  margin: 0 0 10px;
+}
+
+.api-status button {
+  min-height: 44px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast);
+  font: inherit;
+  cursor: pointer;
+}
