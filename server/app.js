@@ -127,6 +127,20 @@ export function createApp(database, {
       isAdmin: user.app_metadata?.role === 'admin',
     } });
   });
+  app.get('/api/wishlist', async (req, res) => {
+    const user = await requireUser(req);
+    res.json({ data: await database.listWishlist(user.id) });
+  });
+  app.put('/api/wishlist/:productId', async (req, res) => {
+    const user = await requireUser(req);
+    await requireProduct(req.params.productId);
+    res.json({ data: await database.saveWishlist(user.id, req.params.productId) });
+  });
+  app.delete('/api/wishlist/:productId', async (req, res) => {
+    const user = await requireUser(req);
+    await database.removeWishlist(user.id, req.params.productId);
+    res.sendStatus(204);
+  });
   app.get('/api/orders', async (req, res) => {
     const user = await requireUser(req);
     res.json({ data: await database.listOrders(user.id) });

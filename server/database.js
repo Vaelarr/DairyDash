@@ -25,7 +25,7 @@ export function openDatabase(path) {
   const db = new DatabaseSync(path);
   db.exec('PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000; PRAGMA journal_mode = WAL;');
   const version = db.prepare('PRAGMA user_version').get().user_version;
-  if (version > 4) {
+  if (version > 5) {
     db.close();
     throw new Error('This database requires a newer version of the API.');
   }
@@ -126,6 +126,20 @@ export function openDatabase(path) {
     } catch (error) { db.exec('ROLLBACK'); db.close(); throw error; }
   }
 
+  if (version < 5) {
+    try {
+      db.exec(`BEGIN IMMEDIATE;
+        CREATE TABLE wishlist (
+          user_id TEXT NOT NULL,
+          product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+          created_at TEXT NOT NULL,
+          PRIMARY KEY(user_id, product_id)
+        ) STRICT;
+        CREATE INDEX wishlist_by_user ON wishlist(user_id, created_at DESC, product_id);
+        PRAGMA user_version = 5; COMMIT;`);
+    } catch (error) { db.exec('ROLLBACK'); db.close(); throw error; }
+  }
+
   const find = db.prepare('SELECT * FROM products WHERE id = ?');
   const reviewColumns = 'id, name, rating, comment, user_id AS userId, created_at AS createdAt, updated_at AS updatedAt';
   const findReview = db.prepare(`SELECT ${reviewColumns} FROM reviews WHERE id = ?`);
@@ -148,6 +162,17 @@ export function openDatabase(path) {
   return {
     close: () => db.close(),
     healthy: () => db.prepare('SELECT 1 AS ok').get().ok === 1,
+    listWishlist: (userId) => db.prepare(`SELECT product_id AS productId, created_at AS createdAt FROM wishlist
+      WHERE user_id = ? ORDER BY created_at DESC, product_id`).all(userId),
+    saveWishlist(userId, productId) {
+      const item = db.prepare(`INSERT INTO wishlist(user_id, product_id, created_at)
+        SELECT ?, id, ? FROM products WHERE id = ?
+        ON CONFLICT(user_id, product_id) DO UPDATE SET product_id = excluded.product_id
+        RETURNING product_id AS productId, created_at AS createdAt`).get(userId, new Date().toISOString(), productId);
+      if (!item) throw new ApiError(404, 'Product not found.');
+      return item;
+    },
+    removeWishlist: (userId, productId) => { db.prepare('DELETE FROM wishlist WHERE user_id = ? AND product_id = ?').run(userId, productId); },
     getProduct: (id) => productFromRow(find.get(id)),
     listProducts({ search = '', category = '', featured = false } = {}) {
       return db.prepare(`SELECT * FROM products

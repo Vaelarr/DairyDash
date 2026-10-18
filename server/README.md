@@ -78,6 +78,9 @@ Successful record/list responses use `{ "data": ... }`. Errors use `{ "error": {
 | PUT | `/api/products/:id/reviews/:reviewId` | Author/admin replaces name, rating and comment using the latest `updatedAt` |
 | DELETE | `/api/products/:id/reviews/:reviewId` | Author/admin deletes a review using `If-Match` (204) |
 | GET | `/api/account` | Persisted account ID, email, display name, email verification, creation date and trusted admin flag (never cached) |
+| GET | `/api/wishlist` | Signed-in customer's saved product IDs and creation dates, newest first |
+| PUT | `/api/wishlist/:productId` | Save an existing product to the signed-in customer's wishlist (idempotent, 200) |
+| DELETE | `/api/wishlist/:productId` | Remove a saved product; repeated removals return 204 |
 | POST | `/api/orders` | Save a signed-in customer's order and decrement stock in one transaction |
 | GET | `/api/orders` | Signed-in customer's order history |
 | GET | `/api/orders/:id` | Customer's own order, or 404 |
@@ -114,7 +117,17 @@ Reviews require a name (up to 60 characters), an integer rating from 1 to 5, and
 
 ## Current scope
 
-The backend covers product/review/order CRUD, Supabase email/password accounts, admin permissions, checkout, order history, review moderation, and order status management. Checkout follows delivery → payment → final review → confirmation. It supports structured Philippine addresses, reusable address labels/defaults, delivery notes, itemized totals, cash on delivery, and configured manual GCash/Maya/bank transfers. The cart and up to five account-specific saved addresses stay on the current device. Purchased quantities clear only after a successful API response. Automatic payment gateways, carrier integrations, wishlist persistence, and live updates remain future work.
+The backend covers product/review/order CRUD, Supabase email/password accounts, admin permissions, checkout, order history, review moderation, order status management, and account-specific wishlists. Checkout follows delivery → payment → final review → confirmation. It supports structured Philippine addresses, reusable address labels/defaults, delivery notes, itemized totals, cash on delivery, and configured manual GCash/Maya/bank transfers. The cart and up to five account-specific saved addresses stay on the current device. Purchased quantities clear only after a successful API response. Automatic payment gateways, carrier integrations, and live updates remain future work.
+
+## Wishlists
+
+Apply [202610180001_wishlist.sql](../supabase/migrations/202610180001_wishlist.sql) after the existing migrations, then run `npm run db:check`. It adds `dairydash_wishlist` and a server-only save function without modifying existing products, orders or accounts. SQLite upgrades to schema version 5 automatically. Wishlist API routes always require a verified account, including in SQLite mode; the standalone SQLite provider does not configure account verification.
+
+The existing product-detail heart and wishlist buttons now load and save through the API. Saved products persist across reloads and devices using the same account. Signed-out visitors are offered a sign-in link. Loading and saving disable duplicate clicks, failed saves leave the last confirmed state intact, and switching accounts clears the previous account's selection. Returning to product details refreshes the current saved state.
+
+`GET /api/wishlist` returns `{ "data": [{ "productId": "seed-fresh-moo", "createdAt": "2026-10-18T00:00:00.000Z" }] }`. `PUT /api/wishlist/:productId` sends `{}` and returns one entry with the same shape. Repeated saves retain the original timestamp and cannot create duplicate entries. Repeated removals succeed even when the product was already removed. Missing products return 404 on save, and deleting a product removes it from every wishlist. Saving a product does not reserve stock or create an order; out-of-stock products can be saved.
+
+Every wishlist operation takes its owner from the verified access token. Request bodies/query parameters cannot select another account, and admin status does not grant access to other customers' wishlists. Responses are never cached. Direct Supabase browser roles cannot access the wishlist table or save function. The list API returns product IDs; a separate wishlist browsing screen is not included.
 
 In Supabase mode, catalog reads remain public. Product create/update/delete require a verified Supabase access token and `app_metadata.role = 'admin'`. New reviews require sign-in. Accounts and orders always require a verified token. Express verifies the token through Supabase Auth and takes the order owner from that verified identity; client-supplied ownership fields are ignored. User-editable `user_metadata` cannot grant admin access. The optional SQLite development provider retains unauthenticated catalog editing and does not configure account verification, so checkout requires Supabase mode. CORS is an origin policy, not an authentication mechanism. Abuse controls are still needed for a public production deployment.
 

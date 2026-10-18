@@ -19,11 +19,14 @@ Then run [202610080001_orders.sql](migrations/202610080001_orders.sql) to add or
 
 Run [202610090001_review_order_crud.sql](migrations/202610090001_review_order_crud.sql) for review ownership, edit/delete, order delivery/status updates, stock restoration, and deletion. Then apply [202610090002_checkout_workflow.sql](migrations/202610090002_checkout_workflow.sql) for saved order delivery details, itemized fees, payment methods/statuses, refunds, and preparation/delivery stages. Apply migrations in filename order. Each migration preserves existing records.
 
-The migration creates:
+Apply [202610180001_wishlist.sql](migrations/202610180001_wishlist.sql) to enable account-specific wishlist persistence for the product-detail buttons. It preserves existing records and can be rerun. The API owns all wishlist reads/writes and derives the customer from the verified access token.
+
+The migrations create:
 
 - `dairydash_products` for products, prices in centavos, stock and cloud image references.
 - `dairydash_reviews` with a foreign key that deletes reviews when their product is deleted.
 - `dairydash_settings` to track the one-time catalog seed.
+- `dairydash_wishlist` for account-owned saved products, automatically removed when their product is deleted.
 - The `dairydash-product-images` public Storage bucket, limited to PNG, JPEG and WebP files up to 5 MB.
 - Search and seed RPC functions, price/stock/review constraints, an update timestamp trigger, and row-level security.
 
@@ -87,6 +90,7 @@ For confirmation and password recovery delivery, follow [the Brevo SMTP setup gu
 | Checkout/order history reports cloud unavailable | Run the new order migration, then `npm run db:check` |
 | Review edit/delete or order management reports cloud unavailable | Apply `202610090001_review_order_crud.sql`, then run `npm run db:check` |
 | Checkout/payment details report cloud unavailable | Apply `202610090002_checkout_workflow.sql`, then run `npm run db:check` |
+| Wishlist loading/saving reports cloud unavailable | Apply `202610180001_wishlist.sql`, then run `npm run db:check` |
 | GCash, Maya or bank transfer is unavailable | Configure the matching `PAYMENT_*_INSTRUCTIONS` server variable and restart/redeploy the API |
 | Product management returns 403 | Assign `app_metadata.role = 'admin'` to the trusted user and sign in again |
 | Browser cannot reach API | Ensure `npm run dev` started both services and the proxy points to the API port |
