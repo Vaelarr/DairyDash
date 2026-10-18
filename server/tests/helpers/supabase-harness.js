@@ -29,6 +29,7 @@ export async function createSupabaseHarness() {
     dairydash_reviews: ['id', 'product_id', 'name', 'rating', 'comment', 'created_at', 'user_id', 'updated_at'],
     dairydash_settings: ['key', 'created_at'],
     dairydash_orders: ['id', 'user_id', 'request_id', 'request_hash', 'customer_name', 'customer_email', 'customer_phone', 'delivery_address', 'status', 'total_cents', 'created_at'],
+    dairydash_wishlist: ['user_id', 'product_id', 'created_at'],
   };
   const json = (value, status = 200) => new Response(JSON.stringify(value), { status, headers: { 'Content-Type': 'application/json' } });
 
@@ -91,6 +92,11 @@ export async function createSupabaseHarness() {
       }
       if (url.pathname.startsWith('/rest/v1/rpc/')) {
         const body = JSON.parse(init.body || '{}');
+        if (url.pathname.endsWith('/dairydash_save_wishlist')) {
+          const result = await postgres.query('select public.dairydash_save_wishlist($1::uuid, $2) as result',
+            [body.customer_id, body.item_id]);
+          return json(result.rows[0].result);
+        }
         if (url.pathname.endsWith('/dairydash_manage_review')) {
           const result = await postgres.query('select public.dairydash_manage_review($1::uuid, $2, $3::uuid, $4::boolean, $5::timestamptz, $6::jsonb, $7::boolean) as result',
             [body.review_id, body.product_id, body.actor_id, body.actor_is_admin, body.expected_updated_at, JSON.stringify(body.change), body.delete_review]);
@@ -179,7 +185,7 @@ export async function createSupabaseHarness() {
   return {
     database, postgres, objects, warnings, calls, state,
     async reset() {
-      await postgres.exec('reset role; truncate public.dairydash_products, public.dairydash_reviews, public.dairydash_settings, public.dairydash_orders, public.dairydash_order_items; set role service_role;');
+      await postgres.exec('reset role; truncate public.dairydash_products, public.dairydash_reviews, public.dairydash_settings, public.dairydash_orders, public.dairydash_order_items, public.dairydash_wishlist; set role service_role;');
       objects.clear(); warnings.length = 0; calls.length = 0;
       Object.assign(state, { failInsert: false, loseInsertResponse: false, loseOrderResponse: false, failRemove: false, failUpload: false, onUpload: null, bucketPublic: true });
     },

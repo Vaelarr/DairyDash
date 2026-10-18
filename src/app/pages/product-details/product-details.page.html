@@ -30,6 +30,8 @@
             class="wishlist-icon"
             type="button"
             (click)="toggleWishlist()"
+            [disabled]="wishlistBusy() || wishlistLoading() || (!!auth.user() && !wishlistLoaded())"
+            [attr.aria-busy]="wishlistBusy() || wishlistLoading()"
             [attr.aria-pressed]="isWishlisted"
             [attr.aria-label]="
               isWishlisted
@@ -139,6 +141,8 @@
             class="secondary-action"
             type="button"
             (click)="toggleWishlist()"
+            [disabled]="wishlistBusy() || wishlistLoading() || (!!auth.user() && !wishlistLoaded())"
+            [attr.aria-busy]="wishlistBusy() || wishlistLoading()"
             [attr.aria-pressed]="isWishlisted"
           >
             <ion-icon
@@ -147,11 +151,22 @@
             ></ion-icon>
 
             {{
-              isWishlisted
+              wishlistBusy() ? 'Updating wishlist…' : isWishlisted
                 ? 'Saved to Wishlist'
                 : 'Add to Wishlist'
             }}
           </button>
+
+          <p class="cart-feedback" role="status" *ngIf="wishlistLoading()">
+            Loading wishlist…
+          </p>
+          <p class="cart-feedback" role="status" *ngIf="wishlistMessage()">
+            {{ wishlistMessage() }}
+            <a *ngIf="!auth.user()" routerLink="/account" [queryParams]="{ returnUrl: '/view-product/' + item.id }">Sign in</a>
+            <button *ngIf="auth.user() && !wishlistLoaded()" type="button" (click)="loadWishlist()" [disabled]="wishlistLoading()">
+              Retry wishlist
+            </button>
+          </p>
 
           <p
             class="cart-feedback"

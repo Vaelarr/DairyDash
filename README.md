@@ -136,7 +136,9 @@ npm run mobile:build
 
 This builds the web assets, creates the Android project on first use, syncs Capacitor, and assembles a debug APK at `artifacts/DairyDash-debug.apk`. The native bundle stays in `.angular/mobile/browser`, separate from the browser build in `www`. Android uses the live API at `https://dairy-dash.vercel.app/api`; browser builds keep their same-origin `/api` requests. Server secrets remain in the backend.
 
-Install Android Studio and Android SDK 36 first. The build script uses a compatible JDK from `JAVA_HOME`, Java on `PATH`, or Android Studio's bundled runtime on Windows. Use JDK 21 (versions 21–24 are supported by the current Gradle wrapper); an Android Studio runtime using Java 25 or newer needs a separate compatible JDK. Set `ANDROID_HOME` to your SDK location if needed.
+Install Android Studio and Android SDK 36 first. The build script uses a compatible JDK from `JAVA_HOME`, Java on `PATH`, or Android Studio's bundled runtime on Windows. JDK 21 is recommended; the script checks the selected JDK against the Gradle wrapper's supported Java versions, including Java 25 with Gradle 9.1 or newer. Set `ANDROID_HOME` to your SDK location if needed.
+
+The wrapper is pinned to Gradle 9.5.1 for compatibility with Android Gradle Plugin 8.13. Gradle 9.6 and newer remove an internal API used by this Android plugin.
 
 Use `npm run mobile:run` to build and run on a connected Android device or emulator, `npm run mobile:open` to open Android Studio, or `npm run mobile:sync` to rebuild and sync the native project without assembling an APK. The debug APK is for testing and is not signed for Play Store release.
 

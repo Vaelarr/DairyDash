@@ -113,6 +113,18 @@ export function openSupabaseDatabase(client, { bucket = 'dairydash-product-image
       return true;
     },
     getProduct: async (id) => productFromRow(await findRow(id)),
+    async listWishlist(userId) {
+      const rows = await allPages(() => client.from('dairydash_wishlist').select('product_id,created_at')
+        .eq('user_id', userId).order('created_at', { ascending: false }).order('product_id', { ascending: true }));
+      return rows.map((row) => ({ productId: row.product_id, createdAt: new Date(row.created_at).toISOString() }));
+    },
+    async saveWishlist(userId, productId) {
+      const item = checked(await client.rpc('dairydash_save_wishlist', { customer_id: userId, item_id: productId }));
+      return { productId: item.productId, createdAt: new Date(item.createdAt).toISOString() };
+    },
+    async removeWishlist(userId, productId) {
+      checked(await client.from('dairydash_wishlist').delete().eq('user_id', userId).eq('product_id', productId));
+    },
     async listProducts({ search = '', category = '', featured = false } = {}) {
       const rows = await allPages(() => client.rpc('dairydash_list_products', {
         search_text: search, category_filter: category || null, featured_only: featured,
