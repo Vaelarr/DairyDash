@@ -11,13 +11,33 @@
 <ion-content>
   <div class="cart-container">
     @if (confirmation()) {
-      <p class="checkout-message" role="status">{{ confirmation() }} <a routerLink="/orders">View your orders</a></p>
+      <p class="checkout-message" role="status">
+        {{ confirmation() }}
+        <a routerLink="/orders">View your orders</a>
+      </p>
     }
-    @if (feedback()) { <p class="checkout-message" role="alert">{{ feedback() }} <button type="button" (click)="refreshCart()" [disabled]="refreshing()">Refresh cart</button></p> }
+
+    @if (feedback()) {
+      <p class="checkout-message" role="alert">
+        {{ feedback() }}
+
+        <button
+          type="button"
+          (click)="refreshCart()"
+          [disabled]="refreshing() || submitting()"
+        >
+          {{ refreshing() ? 'Refreshing…' : 'Refresh cart' }}
+        </button>
+      </p>
+    }
+
     @if (cart.items().length === 0) {
       <div class="empty-cart">
         <div class="empty-icon">
-          <ion-icon name="cart-outline"></ion-icon>
+          <ion-icon
+            name="cart-outline"
+            aria-hidden="true"
+          ></ion-icon>
         </div>
 
         <h2>Your cart is empty</h2>
@@ -34,18 +54,31 @@
           <h1>Shopping Cart</h1>
         </div>
 
-        <p>{{ cart.itemCount() }} item(s)</p>
+        <p>
+          {{ cart.itemCount() }}
+          {{ cart.itemCount() === 1 ? 'item' : 'items' }}
+        </p>
       </div>
+
+      @if (refreshing()) {
+        <p class="checkout-note" role="status">
+          Checking the latest prices and available stock…
+        </p>
+      }
 
       <div class="cart-list">
         @for (item of cart.items(); track item.id) {
           <div class="cart-item">
             <ion-thumbnail>
-              <img [src]="item.image" [alt]="item.name" />
+              <img
+                [src]="item.image"
+                [alt]="item.name"
+              />
             </ion-thumbnail>
 
             <div class="item-information">
               <h3>{{ item.name }}</h3>
+
               <strong>
                 {{ item.price | currency:'PHP':'symbol':'1.2-2' }}
               </strong>
@@ -55,22 +88,52 @@
                   type="button"
                   (click)="cart.decreaseQuantity(item.id)"
                   [disabled]="submitting()"
+                  [attr.aria-label]="
+                    'Decrease quantity of ' + item.name
+                  "
                 >
-                  <ion-icon name="remove-outline"></ion-icon>
+                  <ion-icon
+                    name="remove-outline"
+                    aria-hidden="true"
+                  ></ion-icon>
                 </button>
 
-                <span>{{ item.quantity }}</span>
+                <span aria-live="polite">
+                  {{ item.quantity }}
+                </span>
 
                 <button
                   type="button"
                   class="add-button"
-                  (click)="cart.increaseQuantity(item.id)"
-                  [disabled]="submitting() || item.quantity >= maxQuantity(item)"
+                  (click)="
+                    cart.increaseQuantity(
+                      item.id,
+                      maxQuantity(item)
+                    )
+                  "
+                  [disabled]="
+                    submitting() ||
+                    refreshing() ||
+                    !catalogReady() ||
+                    !!itemIssue(item) ||
+                    item.quantity >= maxQuantity(item)
+                  "
+                  [attr.aria-label]="
+                    'Increase quantity of ' + item.name
+                  "
                 >
-                  <ion-icon name="add-outline"></ion-icon>
+                  <ion-icon
+                    name="add-outline"
+                    aria-hidden="true"
+                  ></ion-icon>
                 </button>
               </div>
-              @if (itemIssue(item)) { <p class="cart-issue" role="alert">{{ itemIssue(item) }}</p> }
+
+              @if (itemIssue(item); as issue) {
+                <p class="cart-issue" role="alert">
+                  {{ issue }}
+                </p>
+              }
             </div>
 
             <button
@@ -78,9 +141,14 @@
               class="remove-button"
               (click)="cart.removeProduct(item.id)"
               [disabled]="submitting()"
-              aria-label="Remove product"
+              [attr.aria-label]="
+                'Remove ' + item.name + ' from cart'
+              "
             >
-              <ion-icon name="trash-outline"></ion-icon>
+              <ion-icon
+                name="trash-outline"
+                aria-hidden="true"
+              ></ion-icon>
             </button>
           </div>
         }
@@ -88,22 +156,59 @@
 
       <div class="summary-card">
         <div>
-          <span>Total</span>
+          <span>Items subtotal</span>
+
           <strong>
             {{ cart.total() | currency:'PHP':'symbol':'1.2-2' }}
           </strong>
         </div>
 
         @if (auth.user()) {
-          <ion-button expand="block" routerLink="/checkout" [disabled]="refreshing() || !catalogReady() || cartIssues().length > 0">
-            <ion-icon slot="start" name="bag-check-outline"></ion-icon>
-            Continue to checkout
+          <ion-button
+            expand="block"
+            routerLink="/checkout"
+            [disabled]="
+              submitting() ||
+              refreshing() ||
+              !catalogReady() ||
+              cartIssues().length > 0
+            "
+          >
+            <ion-icon
+              slot="start"
+              name="bag-check-outline"
+              aria-hidden="true"
+            ></ion-icon>
+
+            {{
+              refreshing()
+                ? 'Checking availability…'
+                : 'Continue to checkout'
+            }}
           </ion-button>
         } @else {
-          <ion-button expand="block" routerLink="/account" [queryParams]="{ returnUrl: '/checkout' }">Sign In to Checkout</ion-button>
+          <ion-button
+            expand="block"
+            routerLink="/account"
+            [queryParams]="{ returnUrl: '/checkout' }"
+            [disabled]="submitting()"
+          >
+            Sign In to Checkout
+          </ion-button>
         }
-        @if (cartIssues().length) { <p class="cart-issue" role="alert">Update the unavailable items or quantities above to continue.</p> }
-        <p class="checkout-note">Choose your delivery address and payment method at checkout. You can review everything before placing your order.</p>
+
+        @if (cartIssues().length > 0) {
+          <p class="cart-issue" role="alert">
+            Update the unavailable items or quantities above
+            to continue.
+          </p>
+        }
+
+        <p class="checkout-note">
+          Choose your delivery address and payment method at
+          checkout. Delivery fees and the final total will be
+          shown before you place your order.
+        </p>
       </div>
     }
   </div>
