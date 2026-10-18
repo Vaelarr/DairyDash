@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, copyFileSync } from 'node:fs';
+import { existsSync, mkdirSync, copyFileSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -15,6 +15,17 @@ function run(command, args, cwd = root) {
 }
 
 if (mode === 'build' || mode === 'run') {
+  const wrapper = readFileSync(join(root, 'android/gradle/wrapper/gradle-wrapper.properties'), 'utf8');
+  const gradleVersion = /gradle-(\d+)\.(\d+)(?:\.\d+)?-(?:bin|all)\.zip/.exec(wrapper);
+  if (!gradleVersion) throw new Error('Cannot determine the Gradle wrapper version.');
+  const [, gradleMajor, gradleMinor] = gradleVersion.map(Number);
+  // Gradle's runtime matrix: https://docs.gradle.org/current/userguide/compatibility.html
+  // Capacitor requires Java 21 or newer for compilation.
+  const supportedJavaVersions = [
+    [21, 8, 5], [22, 8, 8], [23, 8, 10], [24, 8, 14],
+    [25, 9, 1], [26, 9, 4], [27, 9, 8],
+  ].filter(([, major, minor]) => gradleMajor > major || (gradleMajor === major && gradleMinor >= minor))
+    .map(([java]) => java);
   const pathJava = spawnSync('java', ['-XshowSettings:properties', '-version'], { encoding: 'utf8' });
   const pathJavaHome = /java\.home\s*=\s*([^\r\n]+)/.exec(`${pathJava.stderr ?? ''}${pathJava.stdout ?? ''}`)?.[1]?.trim();
   const javaCandidates = [
@@ -26,10 +37,9 @@ if (mode === 'build' || mode === 'run') {
     const java = join(candidate, 'bin', process.platform === 'win32' ? 'java.exe' : 'java');
     const result = spawnSync(java, ['-version'], { encoding: 'utf8' });
     const version = /version "(\d+)/.exec(`${result.stderr ?? ''}${result.stdout ?? ''}`);
-    // The project's Gradle 8.14 wrapper supports Java through version 24.
-    return result.status === 0 && version && Number(version[1]) >= 21 && Number(version[1]) <= 24;
+    return result.status === 0 && version && supportedJavaVersions.includes(Number(version[1]));
   });
-  if (!javaHome) throw new Error('Set JAVA_HOME to a JDK from version 21 through 24 (JDK 21 recommended). This Gradle wrapper does not support Java 25 or newer.');
+  if (!javaHome) throw new Error(`Set JAVA_HOME to a JDK supported by Gradle ${gradleMajor}.${gradleMinor}: ${supportedJavaVersions.join(', ')} (JDK 21 recommended).`);
   nativeEnv.JAVA_HOME = javaHome;
   const sdkCandidates = [
     nativeEnv.ANDROID_HOME, nativeEnv.ANDROID_SDK_ROOT,
