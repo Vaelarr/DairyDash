@@ -1,91 +1,494 @@
-﻿<app-page-layout [title]="admin ? 'Manage Orders' : 'My Orders'" eyebrow="YOUR PURCHASES"
-  [description]="admin ? 'Manage customer delivery details and order status.' : 'View your orders and update pending deliveries.'">
-  <p role="status" aria-live="polite">{{ feedback() }}</p>
+﻿<app-page-layout
+  [title]="admin ? 'Manage Orders' : 'My Orders'"
+  eyebrow="YOUR PURCHASES"
+  [description]="
+    admin
+      ? 'Manage deliveries, payments, and order status.'
+      : 'View your purchases and manage pending orders.'
+  "
+>
+  @if (feedback()) {
+    <p role="status" aria-live="polite">
+      {{ feedback() }}
+    </p>
+  }
+
   @if (!auth.user()) {
-    <p><a routerLink="/account">Sign in to view your orders.</a></p>
+    <p>
+      <a routerLink="/account">
+        Sign in to view your orders.
+      </a>
+    </p>
+  } @else if (admin && !auth.isAdmin()) {
+    <p role="alert">
+      You do not have access to manage orders.
+    </p>
   } @else if (loading()) {
     <p role="status">Loading orders…</p>
   } @else if (error()) {
     <p role="alert">{{ error() }}</p>
-    <button type="button" (click)="load()" [disabled]="busy()">Try Again</button>
+
+    <button
+      type="button"
+      (click)="load()"
+      [disabled]="busy()"
+    >
+      Try Again
+    </button>
   } @else if (orders().length === 0) {
-    <p>{{ admin ? 'No orders to manage.' : 'You haven’t placed an order yet.' }} <a routerLink="/products">Browse products</a></p>
+    <p>
+      {{
+        admin
+          ? 'No orders to manage.'
+          : 'You haven’t placed an order yet.'
+      }}
+      <a routerLink="/products">Browse products</a>
+    </p>
   } @else {
     <div class="orders-list">
       @for (order of orders(); track order.id) {
         <article [attr.data-order-id]="order.id">
-          <header><h2>Order {{ order.id.slice(0, 8) }}</h2><span>{{ statusLabels[order.status] }}</span></header>
+          <header>
+            <h2>Order {{ order.id.slice(0, 8) }}</h2>
+            <span>{{ statusLabels[order.status] }}</span>
+          </header>
+
           <p>{{ order.createdAt | date:'medium' }}</p>
+
           @if (order.status !== 'cancelled') {
-            <ol class="order-progress" aria-label="Order progress">
+            <ol
+              class="order-progress"
+              aria-label="Order progress"
+            >
               @for (status of progress; track status) {
-                <li [class.done]="$index <= progressIndex(order)" [attr.aria-current]="order.status === status ? 'step' : null"><b>{{ $index + 1 }}</b><span>{{ statusLabels[status] }}</span></li>
+                <li
+                  [class.done]="$index <= progressIndex(order)"
+                  [attr.aria-current]="
+                    order.status === status ? 'step' : null
+                  "
+                >
+                  <b>{{ $index + 1 }}</b>
+                  <span>{{ statusLabels[status] }}</span>
+                </li>
               }
             </ol>
           }
+
           <ul>
             @for (item of order.items; track $index) {
-              <li><span>{{ item.quantity }} × {{ item.name }}</span><strong>{{ item.total | currency:'PHP':'symbol':'1.2-2' }}</strong></li>
+              <li>
+                <span>
+                  {{ item.quantity }} × {{ item.name }}
+                </span>
+
+                <strong>
+                  {{
+                    item.total
+                      | currency:'PHP':'symbol':'1.2-2'
+                  }}
+                </strong>
+              </li>
             }
           </ul>
-          <div class="totals"><p>Items subtotal <strong>{{ order.subtotal | currency:'PHP':'symbol':'1.2-2' }}</strong></p>
-            <p>Delivery <strong>{{ order.deliveryFee === 0 ? 'Free' : (order.deliveryFee | currency:'PHP':'symbol':'1.2-2') }}</strong></p>
-            <p class="total">Total <strong>{{ order.total | currency:'PHP':'symbol':'1.2-2' }}</strong></p></div>
-          <p>Delivery to {{ order.customer.name }} · {{ order.customer.address }}</p>
-          <p>{{ order.customer.email }} · {{ order.customer.phone }}</p>
-          @if (order.delivery.notes) { <p>Delivery instructions: {{ order.delivery.notes }}</p> }
-          <div class="payment-details"><p><strong>{{ order.payment.method ? paymentLabels[order.payment.method] : 'Payment method not recorded' }}</strong> · {{ !order.payment.method && order.payment.status === 'unpaid' ? 'Payment not recorded' : paymentStatusLabels[order.payment.status] }}</p>
-            @if (order.payment.status === 'unpaid' && order.status !== 'completed') {
-              <p class="instructions">{{ order.payment.instructions }}</p>
-              @if (order.payment.method && order.payment.method !== 'cash_on_delivery') { <p>Include your order reference in the transfer. Preparation starts after payment is verified.</p> }
-            }
-            @if (order.payment.status === 'refund_pending') { <p>The payment needs to be returned. A refund is recorded after our team verifies it.</p> }
+
+          <div class="totals">
+            <p>
+              Items subtotal
+              <strong>
+                {{
+                  order.subtotal
+                    | currency:'PHP':'symbol':'1.2-2'
+                }}
+              </strong>
+            </p>
+
+            <p>
+              Delivery
+              <strong>
+                {{
+                  order.deliveryFee === 0
+                    ? 'Free'
+                    : (
+                        order.deliveryFee
+                          | currency:'PHP':'symbol':'1.2-2'
+                      )
+                }}
+              </strong>
+            </p>
+
+            <p class="total">
+              Total
+              <strong>
+                {{
+                  order.total
+                    | currency:'PHP':'symbol':'1.2-2'
+                }}
+              </strong>
+            </p>
           </div>
+
+          <p>
+            Delivery to {{ order.customer.name }}
+            · {{ order.customer.address }}
+          </p>
+
+          <p>
+            {{ order.customer.email }}
+            · {{ order.customer.phone }}
+          </p>
+
+          @if (order.delivery.notes) {
+            <p>
+              Delivery instructions: {{ order.delivery.notes }}
+            </p>
+          }
+
+          <div class="payment-details">
+            <p>
+              <strong>
+                {{
+                  order.payment.method
+                    ? paymentLabels[order.payment.method]
+                    : 'Payment method not recorded'
+                }}
+              </strong>
+              ·
+              {{
+                !order.payment.method &&
+                order.payment.status === 'unpaid'
+                  ? 'Payment not recorded'
+                  : paymentStatusLabels[order.payment.status]
+              }}
+            </p>
+
+            @if (
+              order.payment.status === 'unpaid' &&
+              order.status !== 'cancelled' &&
+              order.status !== 'completed'
+            ) {
+              @if (order.payment.instructions) {
+                <p class="instructions">
+                  {{ order.payment.instructions }}
+                </p>
+              }
+
+              @if (
+                order.payment.method &&
+                order.payment.method !== 'cash_on_delivery'
+              ) {
+                <p>
+                  Include your order reference in the transfer.
+                  Preparation starts after payment is verified.
+                </p>
+              }
+            }
+
+            @if (order.payment.status === 'refund_pending') {
+              <p>
+                This order is awaiting a refund. Our team will
+                update the status after the payment is returned.
+              </p>
+            }
+
+            @if (order.payment.status === 'refunded') {
+              <p>
+                The refund has been recorded as completed.
+              </p>
+            }
+
+            @if (
+              order.status === 'cancelled' &&
+              order.payment.status === 'paid'
+            ) {
+              <p>
+                This order is cancelled, but its payment is still
+                marked as paid. Contact our team about the refund.
+              </p>
+            }
+          </div>
+
           <small>Order reference: {{ order.id }}</small>
+
+          @if (
+            !admin &&
+            (
+              order.status === 'completed' ||
+              order.status === 'cancelled'
+            )
+          ) {
+            <p>
+              Need help with a return or refund?
+              <a routerLink="/contact-us">Contact us</a>
+              and include your order reference.
+            </p>
+          }
+
           <div class="order-actions">
-            @if (canEdit(order)) { <button type="button" (click)="edit(order)" [disabled]="busy()">Edit Delivery</button> }
+            @if (canEdit(order)) {
+              <button
+                type="button"
+                (click)="edit(order)"
+                [disabled]="busy() || loading()"
+              >
+                Edit Delivery
+              </button>
+            }
+
             @if (admin && order.status === 'pending') {
-              <button type="button" (click)="update(order, { status: 'confirmed' })" [disabled]="busy()">Confirm Order</button>
+              <button
+                type="button"
+                (click)="update(order, { status: 'confirmed' })"
+                [disabled]="
+                  busy() ||
+                  loading() ||
+                  !canAdvance(order, 'confirmed')
+                "
+              >
+                Confirm Order
+              </button>
             }
+
             @if (admin && order.status === 'confirmed') {
-              <button type="button" (click)="update(order, { status: 'preparing' })" [disabled]="busy() || !canPrepare(order)">Start Preparation</button>
+              <button
+                type="button"
+                (click)="update(order, { status: 'preparing' })"
+                [disabled]="
+                  busy() ||
+                  loading() ||
+                  !canAdvance(order, 'preparing')
+                "
+              >
+                Start Preparation
+              </button>
             }
+
             @if (admin && order.status === 'preparing') {
-              <button type="button" (click)="update(order, { status: 'out_for_delivery' })" [disabled]="busy()">Dispatch Order</button>
+              <button
+                type="button"
+                (click)="update(order, { status: 'out_for_delivery' })"
+                [disabled]="
+                  busy() ||
+                  loading() ||
+                  !canAdvance(order, 'out_for_delivery')
+                "
+              >
+                Dispatch Order
+              </button>
             }
+
             @if (admin && order.status === 'out_for_delivery') {
-              <button type="button" (click)="ask(order, 'deliver')" [disabled]="busy()">{{ order.payment.status === 'unpaid' ? 'Record Delivery & Cash Payment' : 'Mark Delivered' }}</button>
+              <button
+                type="button"
+                (click)="ask(order, 'deliver')"
+                [disabled]="
+                  busy() ||
+                  loading() ||
+                  !canDeliver(order)
+                "
+              >
+                {{
+                  order.payment.method === 'cash_on_delivery' &&
+                  order.payment.status === 'unpaid'
+                    ? 'Record Delivery & Cash Payment'
+                    : 'Mark Delivered'
+                }}
+              </button>
             }
+
             @if (canRecordPayment(order)) {
-              <button type="button" (click)="ask(order, 'paid')" [disabled]="busy()">Verify Payment Received</button>
+              <button
+                type="button"
+                (click)="ask(order, 'paid')"
+                [disabled]="busy() || loading()"
+              >
+                Verify Payment Received
+              </button>
             }
-            @if (admin && order.payment.status === 'refund_pending') {
-              <button type="button" (click)="ask(order, 'refunded')" [disabled]="busy()">Record Completed Refund</button>
+
+            @if (canRecordRefund(order)) {
+              <button
+                type="button"
+                (click)="ask(order, 'refunded')"
+                [disabled]="busy() || loading()"
+              >
+                Record Completed Refund
+              </button>
             }
+
             @if (canCancel(order)) {
-              <button type="button" (click)="ask(order, 'cancel')" [disabled]="busy()">Cancel Order</button>
+              <button
+                type="button"
+                (click)="ask(order, 'cancel')"
+                [disabled]="busy() || loading()"
+              >
+                Cancel Order
+              </button>
             }
+
             @if (canDelete(order)) {
-              <button type="button" (click)="ask(order, 'delete')" [disabled]="busy()">Delete Order</button>
+              <button
+                type="button"
+                (click)="ask(order, 'delete')"
+                [disabled]="busy() || loading()"
+              >
+                Delete from History
+              </button>
             }
           </div>
+
+          @if (
+            admin &&
+            (
+              order.status === 'confirmed' ||
+              order.status === 'preparing' ||
+              order.status === 'out_for_delivery'
+            ) &&
+            !canPrepare(order)
+          ) {
+            <p>
+              Verify receipt of payment before continuing
+              preparation, dispatch, or delivery.
+            </p>
+          }
+
           @if (editing?.id === order.id) {
-            <form #deliveryForm="ngForm" (ngSubmit)="save()" class="delivery-form">
+            <form
+              #deliveryForm="ngForm"
+              (ngSubmit)="save(deliveryForm)"
+              class="delivery-form"
+              novalidate
+            >
               <h3>Edit delivery details</h3>
-              <label>Name<input name="name" [(ngModel)]="customer.name" autocomplete="name" maxlength="80" required /></label>
-              <label>Email<input name="email" type="email" [(ngModel)]="customer.email" autocomplete="email" maxlength="254" email required /></label>
-              <label>Phone<input name="phone" type="tel" [(ngModel)]="customer.phone" autocomplete="tel" maxlength="30" required /></label>
-              <label>Address<textarea name="address" [(ngModel)]="customer.address" autocomplete="street-address" maxlength="500" required></textarea></label>
-              <p>To change products or quantities, cancel this order and place a new one.</p>
-              <button type="submit" [disabled]="busy() || deliveryForm.invalid">{{ busy() ? 'Saving…' : 'Save Delivery' }}</button>
-              <button type="button" (click)="clearDraft()" [disabled]="busy()">Cancel Edit</button>
+
+              <label>
+                Name
+                <input
+                  name="name"
+                  [(ngModel)]="customer.name"
+                  autocomplete="name"
+                  maxlength="80"
+                  [disabled]="busy()"
+                  required
+                />
+              </label>
+
+              <label>
+                Email
+                <input
+                  name="email"
+                  type="email"
+                  [(ngModel)]="customer.email"
+                  autocomplete="email"
+                  maxlength="254"
+                  [disabled]="busy()"
+                  email
+                  required
+                />
+              </label>
+
+              <label>
+                Contact number
+                <input
+                  name="phone"
+                  type="tel"
+                  inputmode="numeric"
+                  [(ngModel)]="customer.phone"
+                  #phoneField="ngModel"
+                  autocomplete="tel"
+                  minlength="7"
+                  maxlength="12"
+                  pattern="[0-9]{7,12}"
+                  placeholder="09123456789"
+                  [disabled]="busy()"
+                  required
+                />
+              </label>
+
+              <small>
+                Enter 7–12 digits without spaces or symbols.
+              </small>
+
+              @if (
+                phoneField.invalid &&
+                (
+                  phoneField.touched ||
+                  deliveryForm.submitted
+                )
+              ) {
+                <p class="field-error" role="alert">
+                  Enter a contact number containing 7–12 digits.
+                </p>
+              }
+
+              <label>
+                Complete delivery address
+                <textarea
+                  name="address"
+                  [(ngModel)]="customer.address"
+                  autocomplete="street-address"
+                  maxlength="500"
+                  rows="3"
+                  [disabled]="busy()"
+                  required
+                ></textarea>
+              </label>
+
+              @if (deliveryError()) {
+                <p class="field-error" role="alert">
+                  {{ deliveryError() }}
+                </p>
+              }
+
+              <p>
+                Products and quantities cannot be changed here.
+                For changes, cancel an eligible order and place
+                a new one, or contact our team.
+              </p>
+
+              <button
+                type="submit"
+                [disabled]="
+                  busy() ||
+                  loading() ||
+                  deliveryForm.invalid
+                "
+              >
+                {{ busy() ? 'Saving…' : 'Save Delivery' }}
+              </button>
+
+              <button
+                type="button"
+                (click)="clearDraft()"
+                [disabled]="busy()"
+              >
+                Cancel Edit
+              </button>
             </form>
           }
+
           @if (confirmation?.order?.id === order.id) {
-            <div class="confirmation" role="group" aria-label="Confirm order action">
+            <div
+              class="confirmation"
+              role="group"
+              aria-label="Confirm order action"
+            >
               <p>{{ confirmationText() }}</p>
-              <button type="button" (click)="confirm()" [disabled]="busy()">Confirm</button>
-              <button type="button" (click)="confirmation = null" [disabled]="busy()">Go Back</button>
+
+              <button
+                type="button"
+                (click)="confirm()"
+                [disabled]="busy() || loading()"
+              >
+                {{ busy() ? 'Processing…' : 'Confirm' }}
+              </button>
+
+              <button
+                type="button"
+                (click)="confirmation = null"
+                [disabled]="busy()"
+              >
+                Go Back
+              </button>
             </div>
           }
         </article>

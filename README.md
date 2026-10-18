@@ -115,7 +115,7 @@ npm run build
 
 ### Build Output
 
-- The production output is generated in the **`dist/`** directory.
+- The production output is generated in the **`www/`** directory.
 - The build includes:
   - Tree-shaken and code-split JavaScript bundles (`main-*.js`, lazy chunk files).
   - Minified CSS styles (`styles-*.css`).
@@ -222,7 +222,7 @@ IPT4.2Menu/
 │           ├── products/     # Full product catalog with real-time search
 │           ├── about/        # Application and product brand details
 │           └── developers/   # Developer credits, roles, and avatar profiles
-└── dist/                     # Production build output
+└── www/                      # Production build output
 ```
 
 ---
@@ -238,7 +238,7 @@ IPT4.2Menu/
 | `npm run api:dev` | `node --watch --env-file-if-exists=.env server/index.js` | Starts the API with reloads |
 | `npm run test:api` | `node --test server/tests/*.test.js` | Tests API routes and persistence |
 | `npm run db:seed` | `node --env-file-if-exists=.env scripts/seed-supabase.js` | Uploads catalog images and seeds Supabase once |
-| `npm run build` | `ng build` | Produces production-ready bundles in `dist/` |
+| `npm run build` | `ng build` | Produces production-ready bundles in `www/` |
 | `npm run watch` | `ng build --watch --configuration development` | Builds in watch mode for development |
 | `npm run ionic:serve` | `ng serve` | Invoked automatically by Ionic CLI (`ionic serve`) |
 | `npm run ionic:build` | `ng build` | Invoked automatically by Ionic CLI (`ionic build`) |
