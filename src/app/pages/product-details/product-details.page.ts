@@ -24,6 +24,7 @@ import {
 } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
 import { SupabaseService } from '../../supabase.service';
+import { WishlistService } from '../../services/wishlist.service';
 
 @Component({
   selector: 'app-product-details',
@@ -42,6 +43,7 @@ export class ProductDetailsPage {
   private readonly route = inject(ActivatedRoute);
   private readonly productService = inject(ProductService);
   private readonly cart = inject(CartService);
+  private readonly wishlist = inject(WishlistService);
 
   readonly auth = inject(SupabaseService);
 
@@ -53,6 +55,10 @@ export class ProductDetailsPage {
   readonly reviewBusy = signal(false);
   readonly reviewsLoading = signal(false);
   readonly reviewsError = signal('');
+  readonly wishlistBusy = signal(false);
+  readonly wishlistLoading = signal(false);
+  readonly wishlistLoaded = signal(false);
+  readonly wishlistMessage = signal('');
 
   quantity = 1;
   isWishlisted = false;
@@ -69,6 +75,7 @@ export class ProductDetailsPage {
 
   private reviewRevision = 0;
   private reviewerId: string | undefined;
+  private wishlistRevision = 0;
 
   get product(): Product | undefined {
     return this.productService.getById(this.productId);
@@ -100,6 +107,9 @@ export class ProductDetailsPage {
         this.cancelReviewEdit();
         this.deletingReview = null;
         this.reviewMessage = '';
+        this.wishlistRevision++;
+        this.wishlistBusy.set(false);
+        void this.loadWishlist();
       }
     });
 
@@ -119,6 +129,7 @@ export class ProductDetailsPage {
 
   ionViewWillEnter(): void {
     void this.load();
+    void this.loadWishlist();
   }
 
   async load(): Promise<void> {
@@ -224,8 +235,57 @@ export class ProductDetailsPage {
       : 'Unable to add this quantity. Check the available stock, product price, or cart limit.';
   }
 
-  toggleWishlist(): void {
-    this.isWishlisted = !this.isWishlisted;
+  async loadWishlist(): Promise<void> {
+    if (this.wishlistBusy()) return;
+    const userId = this.auth.user()?.id;
+    const revision = ++this.wishlistRevision;
+    this.isWishlisted = false;
+    this.wishlistLoaded.set(false);
+    this.wishlistMessage.set('');
+    this.wishlistLoading.set(!!userId);
+    if (!userId) return;
+    try {
+      const items = await this.wishlist.list();
+      if (revision !== this.wishlistRevision || userId !== this.auth.user()?.id) return;
+      this.isWishlisted = items.some((item) => item.productId === this.productId);
+      this.wishlistLoaded.set(true);
+    } catch (error) {
+      if (revision === this.wishlistRevision && userId === this.auth.user()?.id) {
+        this.wishlistMessage.set(apiErrorMessage(error));
+      }
+    } finally {
+      if (revision === this.wishlistRevision) this.wishlistLoading.set(false);
+    }
+  }
+
+  async toggleWishlist(): Promise<void> {
+    if (this.wishlistBusy() || this.wishlistLoading()) return;
+    const userId = this.auth.user()?.id;
+    if (!userId) {
+      this.wishlistMessage.set('Sign in to save products to your wishlist.');
+      return;
+    }
+    if (!this.wishlistLoaded()) {
+      await this.loadWishlist();
+      return;
+    }
+    const saved = !this.isWishlisted;
+    const revision = ++this.wishlistRevision;
+    this.wishlistBusy.set(true);
+    this.wishlistMessage.set('');
+    try {
+      if (saved) await this.wishlist.save(this.productId);
+      else await this.wishlist.remove(this.productId);
+      if (revision !== this.wishlistRevision || userId !== this.auth.user()?.id) return;
+      this.isWishlisted = saved;
+      this.wishlistMessage.set(saved ? 'Product saved to your wishlist.' : 'Product removed from your wishlist.');
+    } catch (error) {
+      if (revision === this.wishlistRevision && userId === this.auth.user()?.id) {
+        this.wishlistMessage.set(apiErrorMessage(error));
+      }
+    } finally {
+      if (revision === this.wishlistRevision) this.wishlistBusy.set(false);
+    }
   }
 
   async submitReview(): Promise<void> {

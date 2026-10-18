@@ -36,7 +36,12 @@ try {
   if (checkoutColumns.error) {
     throw new Error('Checkout workflow schema is not ready. Run supabase/migrations/202610090002_checkout_workflow.sql in the Supabase SQL Editor.');
   }
-  console.log('Checkout delivery and payment schema: ready. No cloud data was changed.');
+  console.log('Checkout delivery and payment schema: ready.');
+  const wishlist = await client.from('dairydash_wishlist').select('user_id,product_id,created_at').limit(0);
+  if (wishlist.error) {
+    throw new Error('Wishlist schema is not ready. Run supabase/migrations/202610180001_wishlist.sql in the Supabase SQL Editor.');
+  }
+  console.log('Wishlist schema: ready. No cloud data was changed.');
 } catch (error) {
   console.error(`Supabase check failed: ${error.message}`);
   process.exitCode = 1;
