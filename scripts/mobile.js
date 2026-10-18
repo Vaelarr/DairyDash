@@ -41,6 +41,7 @@ if (mode === 'build' || mode === 'run') {
   });
   if (!javaHome) throw new Error(`Set JAVA_HOME to a JDK supported by Gradle ${gradleMajor}.${gradleMinor}: ${supportedJavaVersions.join(', ')} (JDK 21 recommended).`);
   nativeEnv.JAVA_HOME = javaHome;
+  nativeEnv.PATH = `${join(javaHome, 'bin')};${nativeEnv.PATH ?? ''}`;
   const sdkCandidates = [
     nativeEnv.ANDROID_HOME, nativeEnv.ANDROID_SDK_ROOT,
     nativeEnv.LOCALAPPDATA ? join(nativeEnv.LOCALAPPDATA, 'Android', 'Sdk') : undefined,
@@ -61,7 +62,7 @@ if (mode === 'open' || mode === 'run') {
   run(process.execPath, [...capacitor, mode, 'android', ...process.argv.slice(3)]);
 } else if (mode === 'build') {
   if (process.platform === 'win32') {
-    run(process.env.ComSpec ?? 'cmd.exe', ['/d', '/c', 'gradlew.bat', 'assembleDebug'], join(root, 'android'));
+    run(process.env.ComSpec ?? 'cmd.exe', ['/d', '/c', '.\\gradlew.bat', 'assembleDebug'], join(root, 'android'));
   } else {
     run('./gradlew', ['assembleDebug'], join(root, 'android'));
   }

@@ -99,10 +99,19 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
+  onSplashDismissed(): void {
+    if (this.splashTimer !== undefined) {
+      clearTimeout(this.splashTimer);
+      this.splashTimer = undefined;
+    }
+    this.showSplash.set(false);
+  }
+
   ngOnInit(): void {
+    // Fallback safety timer in case dismiss event is blocked
     this.splashTimer = setTimeout(() => {
-      this.showSplash.set(false);
-    }, 3000);
+      this.onSplashDismissed();
+    }, 5000);
   }
 
   ngOnDestroy(): void {

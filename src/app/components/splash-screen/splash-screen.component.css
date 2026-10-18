@@ -1,63 +1,371 @@
+:host {
+  display: block;
+}
+
 .splash-screen {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 99999;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(145deg, #ff6f54, #ff947d);
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 28%, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0) 58%),
+    linear-gradient(150deg, #ff6f54 0%, #ff8566 48%, #ffa889 100%);
+  overflow: hidden;
+  user-select: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: opacity 0.42s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.splash-content {
+.splash-screen.is-closing {
+  pointer-events: none;
+  animation: splashFadeOut 0.42s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Ambient floating bubbles */
+.ambient-bubbles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.12));
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.6);
+  animation: bubbleDrift 7s infinite ease-in-out;
+}
+
+.bubble-1 {
+  width: 90px;
+  height: 90px;
+  top: 12%;
+  left: 8%;
+  animation-duration: 8.5s;
+}
+
+.bubble-2 {
+  width: 55px;
+  height: 55px;
+  top: 68%;
+  left: 12%;
+  animation-duration: 6.8s;
+  animation-delay: -2s;
+}
+
+.bubble-3 {
+  width: 110px;
+  height: 110px;
+  top: 18%;
+  right: 10%;
+  animation-duration: 9.2s;
+  animation-delay: -1s;
+}
+
+.bubble-4 {
+  width: 48px;
+  height: 48px;
+  top: 75%;
+  right: 14%;
+  animation-duration: 6.2s;
+  animation-delay: -3.5s;
+}
+
+.bubble-5 {
+  width: 32px;
+  height: 32px;
+  top: 42%;
+  left: 3%;
+  animation-duration: 5.5s;
+  animation-delay: -1.2s;
+}
+
+/* Splash Card & Contents */
+.splash-card {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 380px;
+  width: 100%;
   text-align: center;
-  color: white;
-  animation: splashAnimation 0.7s ease-out;
+  color: #ffffff;
+  cursor: default;
 }
 
-.splash-logo {
+/* Brand Badge with Glow */
+.brand-badge-container {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 135px;
-  height: 135px;
-  margin: 0 auto;
-  padding: 12px;
-  color: #241915;
-  font-family: 'Fredoka', 'Nunito', sans-serif;
-  font-size: 56px;
-  font-weight: 700;
-  border-radius: 30px;
-  background: white;
-  box-shadow: 0 14px 35px rgba(77, 35, 27, 0.2);
+  margin-bottom: 22px;
+  animation: badgeEntrance 0.75s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
 }
 
-h1 {
-  margin: 22px 0 4px;
+.badge-glow-ring {
+  position: absolute;
+  width: 165px;
+  height: 165px;
+  border-radius: 40px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 70%);
+  animation: pulseGlow 2.8s infinite ease-in-out;
+}
+
+.brand-badge {
+  position: relative;
+  width: 128px;
+  height: 128px;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: linear-gradient(135deg, #ffffff 0%, #fff7f2 100%);
+  border-radius: 32px;
+  box-shadow:
+    0 16px 36px rgba(110, 32, 16, 0.26),
+    0 4px 10px rgba(110, 32, 16, 0.12),
+    inset 0 1px 2px rgba(255, 255, 255, 0.95);
+  animation: badgeFloat 3.2s infinite ease-in-out;
+}
+
+.dairy-logo-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(0 4px 8px rgba(255, 111, 84, 0.18));
+}
+
+/* Typography */
+.brand-title {
+  margin: 0 0 6px;
+  color: #ffffff;
   font-family: 'Fredoka', sans-serif;
-  font-size: 34px;
+  font-size: 36px;
   font-weight: 700;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 12px rgba(100, 30, 15, 0.25);
+  animation: elementSlideUp 0.65s ease-out 0.12s both;
 }
 
-p {
-  margin: 0 0 25px;
+.brand-tagline {
+  margin: 0 0 18px;
+  color: rgba(255, 255, 255, 0.95);
   font-family: 'Nunito', sans-serif;
-  font-size: 14px;
-  opacity: 0.9;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  text-shadow: 0 1px 4px rgba(100, 30, 15, 0.15);
+  animation: elementSlideUp 0.65s ease-out 0.2s both;
 }
 
-ion-spinner {
-  --color: white;
-  width: 28px;
-  height: 28px;
+/* Feature highlight pills */
+.brand-highlights {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  animation: elementSlideUp 0.65s ease-out 0.28s both;
 }
 
-@keyframes splashAnimation {
-  from {
+.highlight-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 8px rgba(100, 30, 15, 0.08);
+}
+
+/* Progress Section */
+.progress-section {
+  width: 100%;
+  max-width: 210px;
+  margin: 0 auto 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: elementSlideUp 0.65s ease-out 0.35s both;
+}
+
+.progress-bar-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.32);
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 1px 2px rgba(100, 30, 15, 0.15);
+}
+
+.progress-bar-fill {
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.85);
+  transform-origin: left;
+  animation: progressFill 2.4s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+.loading-label {
+  margin: 10px 0 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+/* Skip Button */
+.skip-hint {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.72);
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  letter-spacing: 0.2px;
+  transition: all 0.2s ease;
+  animation: fadeInHint 1s ease-out 1s both;
+}
+
+.skip-hint:hover,
+.skip-hint:focus-visible {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.18);
+  outline: none;
+}
+
+/* Animations */
+@keyframes badgeEntrance {
+  0% {
     opacity: 0;
-    transform: scale(0.8);
+    transform: scale(0.65) translateY(20px);
   }
+  70% {
+    transform: scale(1.05) translateY(-4px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
 
-  to {
+@keyframes badgeFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes elementSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes progressFill {
+  0% {
+    transform: scaleX(0.05);
+  }
+  50% {
+    transform: scaleX(0.7);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes bubbleDrift {
+  0%, 100% {
+    transform: translateY(0) translateX(0) scale(1);
+  }
+  50% {
+    transform: translateY(-16px) translateX(8px) scale(1.04);
+  }
+}
+
+@keyframes fadeInHint {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes splashFadeOut {
+  0% {
     opacity: 1;
     transform: scale(1);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.05);
+    filter: blur(6px);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .splash-screen,
+  .splash-screen.is-closing,
+  .bubble,
+  .brand-badge-container,
+  .badge-glow-ring,
+  .brand-badge,
+  .brand-title,
+  .brand-tagline,
+  .brand-highlights,
+  .progress-section,
+  .progress-bar-fill,
+  .skip-hint {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .splash-screen.is-closing {
+    opacity: 0;
   }
 }

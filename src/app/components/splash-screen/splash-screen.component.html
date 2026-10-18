@@ -1,10 +1,128 @@
-<div class="splash-screen">
-  <div class="splash-content">
-    <div class="splash-logo" aria-hidden="true">DD</div>
+<div
+  class="splash-screen"
+  [class.is-closing]="isClosing()"
+  (click)="dismiss()"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Dairy Dash Loading Screen"
+>
+  <!-- Ambient floating milk bubbles -->
+  <div class="ambient-bubbles" aria-hidden="true">
+    <span class="bubble bubble-1"></span>
+    <span class="bubble bubble-2"></span>
+    <span class="bubble bubble-3"></span>
+    <span class="bubble bubble-4"></span>
+    <span class="bubble bubble-5"></span>
+  </div>
 
-    <h1>Dairy Dash</h1>
-    <p>Fresh dairy delivered to your door</p>
+  <div class="splash-card" (click)="$event.stopPropagation()">
+    <!-- Animated Brand Badge -->
+    <div class="brand-badge-container">
+      <div class="badge-glow-ring" aria-hidden="true"></div>
+      <div class="brand-badge">
+        <svg
+          class="dairy-logo-svg"
+          viewBox="0 0 100 100"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <defs>
+            <linearGradient id="milkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#FFFFFF" />
+              <stop offset="100%" stop-color="#FFF3ED" />
+            </linearGradient>
+            <linearGradient id="capGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#FF7558" />
+              <stop offset="100%" stop-color="#E55335" />
+            </linearGradient>
+            <linearGradient id="sealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#FFA186" />
+              <stop offset="100%" stop-color="#FF6F54" />
+            </linearGradient>
+          </defs>
 
-    <ion-spinner name="crescent"></ion-spinner>
+          <!-- Bottle cap -->
+          <rect x="38" y="10" width="24" height="8" rx="4" fill="url(#capGrad)" />
+
+          <!-- Bottle silhouette -->
+          <path
+            d="M42 18H58V27L68 37V81C68 85.5 64.5 89 60 89H40C35.5 89 32 85.5 32 81V37L42 18Z"
+            fill="url(#milkGrad)"
+            stroke="#FFE4D6"
+            stroke-width="2"
+          />
+
+          <!-- Milk level waves -->
+          <path
+            d="M33 46C37 44 43 47 50 45C57 43 63 46 67 44V80C67 84 64 87 60 87H40C36 87 33 84 33 80V46Z"
+            fill="#FFF8F5"
+          />
+
+          <!-- Monogram seal -->
+          <circle cx="50" cy="65" r="14" fill="url(#sealGrad)" />
+          <circle
+            cx="50"
+            cy="65"
+            r="12"
+            stroke="#FFFFFF"
+            stroke-width="1.2"
+            stroke-dasharray="2 2"
+            fill="none"
+          />
+          <text
+            x="50"
+            y="70"
+            font-family="'Fredoka', 'Nunito', sans-serif"
+            font-size="13"
+            font-weight="700"
+            fill="#FFFFFF"
+            text-anchor="middle"
+          >DD</text>
+
+          <!-- Splash droplets & sparkles -->
+          <circle cx="23" cy="36" r="3.5" fill="#FFFFFF" opacity="0.9" />
+          <circle cx="76" cy="30" r="2.5" fill="#FFFFFF" opacity="0.85" />
+          <path
+            d="M78 50L80 45L82 50L87 52L82 54L80 59L78 54L73 52L78 50Z"
+            fill="#FFF2EB"
+          />
+          <path
+            d="M21 66L22.5 62L24 66L28 67.5L24 69L22.5 73L21 69L17 67.5L21 66Z"
+            fill="#FFF2EB"
+            opacity="0.95"
+          />
+        </svg>
+      </div>
+    </div>
+
+    <!-- App Title & Tagline -->
+    <h1 class="brand-title">Dairy Dash</h1>
+    <p class="brand-tagline">Fresh dairy delivered to your door</p>
+
+    <!-- Value proposition pills -->
+    <div class="brand-highlights" aria-hidden="true">
+      <span class="highlight-pill">🥛 Farm Fresh</span>
+      <span class="highlight-pill">⚡ Express</span>
+      <span class="highlight-pill">🌿 100% Pure</span>
+    </div>
+
+    <!-- Progress indicator -->
+    <div class="progress-section" aria-live="polite">
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill"></div>
+      </div>
+      <p class="loading-label">Preparing your fresh experience…</p>
+    </div>
+
+    <!-- Tap to skip -->
+    <button
+      type="button"
+      class="skip-hint"
+      (click)="dismiss()"
+      aria-label="Skip splash screen"
+    >
+      Tap anywhere to skip
+    </button>
   </div>
 </div>
