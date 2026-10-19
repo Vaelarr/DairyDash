@@ -6,6 +6,9 @@
         <ng-template #menuButton><ion-menu-button></ion-menu-button></ng-template>
       </ion-buttons>
       <ion-title>{{ title }}</ion-title>
+      <ion-buttons slot="end">
+        <ng-content select="[toolbar-end]"></ng-content>
+      </ion-buttons>
     </ion-toolbar>
   </ion-header>
 

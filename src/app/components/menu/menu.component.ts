@@ -22,6 +22,7 @@ import {
   informationCircleOutline,
   peopleOutline,
   settingsOutline,
+  statsChartOutline,
   timeOutline,
   personOutline,
   callOutline,
@@ -31,6 +32,8 @@ interface AppPage {
   title: string;
   url: string;
   icon: string;
+  /** Only shown to signed-in admins (Manage Products, Manage Orders, Admin Dashboard). */
+  adminOnly?: boolean;
 }
 
 @Component({
@@ -66,7 +69,8 @@ export class MenuComponent {
   readonly appPages: AppPage[] = [
     { title: 'My Account', url: '/account', icon: 'person-outline' },
     { title: 'My Orders', url: '/orders', icon: 'time-outline' },
-    { title: 'Manage Orders', url: '/manage-orders', icon: 'settings-outline' },
+    { title: 'Manage Orders', url: '/manage-orders', icon: 'settings-outline', adminOnly: true },
+    { title: 'Admin Dashboard', url: '/admin-dashboard', icon: 'stats-chart-outline', adminOnly: true },
     {
       title: 'Dashboard',
       url: '/dashboard',
@@ -86,6 +90,7 @@ export class MenuComponent {
       title: 'Manage Products',
       url: '/manage-products',
       icon: 'settings-outline',
+      adminOnly: true,
     },
     {
       title: 'About the App',
@@ -108,7 +113,7 @@ export class MenuComponent {
       icon: 'call-outline',
     },
   ];
-  readonly visiblePages = computed(() => this.appPages.filter((page) => !page.url.startsWith('/manage-') || this.auth.isAdmin()));
+  readonly visiblePages = computed(() => this.appPages.filter((page) => !page.adminOnly || this.auth.isAdmin()));
 
   constructor() {
     addIcons({
@@ -118,6 +123,7 @@ export class MenuComponent {
       'information-circle-outline': informationCircleOutline,
       'people-outline': peopleOutline,
       'settings-outline': settingsOutline,
+      'stats-chart-outline': statsChartOutline,
       'time-outline': timeOutline,
       'person-outline': personOutline,
       'call-outline': callOutline,

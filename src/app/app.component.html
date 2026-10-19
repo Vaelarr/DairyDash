@@ -13,4 +13,8 @@
   @if (showSplash() && !confirmationView()) {
     <app-splash-screen></app-splash-screen>
   }
+
+  @if (adminTabsView()) {
+    <app-admin-tab-bar></app-admin-tab-bar>
+  }
 </ion-app>

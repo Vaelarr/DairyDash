@@ -7,6 +7,9 @@ import { ProductReview, ReviewInput } from '../models/product-review';
 
 export { PRODUCT_CATEGORIES } from '../data/product-categories';
 
+/** Shared with the admin dashboard's low-stock card — keep both in sync with this one value. */
+export const LOW_STOCK_THRESHOLD = 5;
+
 export interface ProductInput {
   name: string;
   category: string;

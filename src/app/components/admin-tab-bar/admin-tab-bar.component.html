@@ -1,0 +1,13 @@
+<nav class="admin-tab-bar" aria-label="Admin sections">
+  @for (tab of tabs; track tab.url) {
+    <a
+      class="admin-tab"
+      [class.active]="isActive(tab.match)"
+      [routerLink]="hrefFor(tab)"
+      [attr.aria-current]="isActive(tab.match) ? 'page' : null"
+    >
+      <ion-icon [name]="tab.icon" aria-hidden="true"></ion-icon>
+      <span>{{ tab.label }}</span>
+    </a>
+  }
+</nav>

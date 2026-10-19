@@ -16,6 +16,8 @@ import {
 
 import { MenuComponent } from './components/menu/menu.component';
 import { SplashScreenComponent } from './components/splash-screen/splash-screen.component';
+import { AdminTabBarComponent } from './components/admin-tab-bar/admin-tab-bar.component';
+import { isAdminTabRoute, isPreviewAdminRoute } from './components/admin-tab-bar/admin-tab-bar.config';
 import { NavigationEnd, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
@@ -46,6 +48,7 @@ import {
     IonRouterOutlet,
     MenuComponent,
     SplashScreenComponent,
+    AdminTabBarComponent,
   ],
 })
 export class AppComponent implements OnInit, OnDestroy {
@@ -53,6 +56,14 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly currentPath = signal(window.location.pathname);
   readonly confirmationView = computed(() => this.currentPath() === '/account' &&
     this.auth.emailConfirmation() !== 'none' && !this.auth.recoveringPassword());
+  // The bottom tab bar is a shortcut between the admin pages; it's shown alongside the sidebar,
+  // not instead of it, so admins never lose access to the rest of the site from "admin mode".
+  // It also shows on the unguarded "-preview" routes, for anyone (no sign-in needed), so the
+  // tab bar itself can be reviewed and used to hop between the preview pages.
+  readonly adminTabsView = computed(() => {
+    const path = this.currentPath();
+    return isAdminTabRoute(path) && (this.auth.isAdmin() || isPreviewAdminRoute(path));
+  });
   readonly showSplash = signal(true);
 
   private splashTimer?: ReturnType<typeof setTimeout>;
@@ -76,6 +87,11 @@ export class AppComponent implements OnInit, OnDestroy {
       if (auth.recoveringPassword()) {
         void router.navigate(['/account'], { queryParams: { action: 'reset' }, replaceUrl: true });
       }
+    });
+    // A global body class lets the global stylesheet keep page content clear of the fixed bar,
+    // without every page needing to know the tab bar exists.
+    effect(() => {
+      document.body.classList.toggle('has-admin-tabs', this.adminTabsView());
     });
     addIcons({
       gridOutline,
