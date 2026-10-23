@@ -16,81 +16,38 @@
   </div>
 
   <div class="splash-card" (click)="$event.stopPropagation()">
-    <!-- Animated Brand Badge -->
+    <!-- Animated Original Brand Badge -->
     <div class="brand-badge-container">
       <div class="badge-glow-ring" aria-hidden="true"></div>
       <div class="brand-badge">
         <svg
           class="dairy-logo-svg"
-          viewBox="0 0 100 100"
-          fill="none"
+          viewBox="0 0 64 64"
           xmlns="http://www.w3.org/2000/svg"
           aria-hidden="true"
         >
-          <defs>
-            <linearGradient id="milkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#FFFFFF" />
-              <stop offset="100%" stop-color="#FFF3ED" />
-            </linearGradient>
-            <linearGradient id="capGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#FF7558" />
-              <stop offset="100%" stop-color="#E55335" />
-            </linearGradient>
-            <linearGradient id="sealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#FFA186" />
-              <stop offset="100%" stop-color="#FF6F54" />
-            </linearGradient>
-          </defs>
-
-          <!-- Bottle cap -->
-          <rect x="38" y="10" width="24" height="8" rx="4" fill="url(#capGrad)" />
-
-          <!-- Bottle silhouette -->
+          <rect width="64" height="64" rx="18" fill="#fff1e6" />
           <path
-            d="M42 18H58V27L68 37V81C68 85.5 64.5 89 60 89H40C35.5 89 32 85.5 32 81V37L42 18Z"
-            fill="url(#milkGrad)"
-            stroke="#FFE4D6"
-            stroke-width="2"
-          />
-
-          <!-- Milk level waves -->
-          <path
-            d="M33 46C37 44 43 47 50 45C57 43 63 46 67 44V80C67 84 64 87 60 87H40C36 87 33 84 33 80V46Z"
-            fill="#FFF8F5"
-          />
-
-          <!-- Monogram seal -->
-          <circle cx="50" cy="65" r="14" fill="url(#sealGrad)" />
-          <circle
-            cx="50"
-            cy="65"
-            r="12"
-            stroke="#FFFFFF"
-            stroke-width="1.2"
-            stroke-dasharray="2 2"
-            fill="none"
-          />
-          <text
-            x="50"
-            y="70"
-            font-family="'Fredoka', 'Nunito', sans-serif"
-            font-size="13"
-            font-weight="700"
-            fill="#FFFFFF"
-            text-anchor="middle"
-          >DD</text>
-
-          <!-- Splash droplets & sparkles -->
-          <circle cx="23" cy="36" r="3.5" fill="#FFFFFF" opacity="0.9" />
-          <circle cx="76" cy="30" r="2.5" fill="#FFFFFF" opacity="0.85" />
-          <path
-            d="M78 50L80 45L82 50L87 52L82 54L80 59L78 54L73 52L78 50Z"
-            fill="#FFF2EB"
+            d="M24 18h16v9l5 8v15a5 5 0 0 1-5 5H24a5 5 0 0 1-5-5V35l5-8z"
+            fill="#ffffff"
+            stroke="#4a3b34"
+            stroke-width="2.5"
+            stroke-linejoin="round"
           />
           <path
-            d="M21 66L22.5 62L24 66L28 67.5L24 69L22.5 73L21 69L17 67.5L21 66Z"
-            fill="#FFF2EB"
-            opacity="0.95"
+            class="milk-wave"
+            d="M20 38c8-6 16 6 24 0v12a4 4 0 0 1-4 4H24a4 4 0 0 1-4-4z"
+            fill="#e8926b"
+          />
+          <rect
+            x="22"
+            y="11"
+            width="20"
+            height="8"
+            rx="3"
+            fill="#e8926b"
+            stroke="#4a3b34"
+            stroke-width="2.5"
           />
         </svg>
       </div>

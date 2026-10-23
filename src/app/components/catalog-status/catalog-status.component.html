@@ -1,0 +1,104 @@
+<!-- Branded Waiting Screen when loading products -->
+<div class="catalog-waiting-state" *ngIf="service.loading()" role="status" aria-label="Loading products">
+  <div class="waiting-card">
+    <div class="logo-badge-container">
+      <div class="logo-pulse-ring" aria-hidden="true"></div>
+      <div class="original-logo-badge">
+        <svg
+          class="dairy-dash-logo"
+          viewBox="0 0 64 64"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <rect width="64" height="64" rx="18" fill="#fff1e6" />
+          <path
+            d="M24 18h16v9l5 8v15a5 5 0 0 1-5 5H24a5 5 0 0 1-5-5V35l5-8z"
+            fill="#ffffff"
+            stroke="#4a3b34"
+            stroke-width="2.5"
+            stroke-linejoin="round"
+          />
+          <path
+            class="milk-wave"
+            d="M20 38c8-6 16 6 24 0v12a4 4 0 0 1-4 4H24a4 4 0 0 1-4-4z"
+            fill="#e8926b"
+          />
+          <rect
+            x="22"
+            y="11"
+            width="20"
+            height="8"
+            rx="3"
+            fill="#e8926b"
+            stroke="#4a3b34"
+            stroke-width="2.5"
+          />
+        </svg>
+      </div>
+    </div>
+
+    <h3 class="waiting-title">Loading fresh favorites…</h3>
+    <p class="waiting-subtitle">Getting today's dairy picks ready for you</p>
+
+    <div class="waiting-progress-track" aria-hidden="true">
+      <div class="waiting-progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- Skeleton preview grid so it's not just an empty space with text -->
+  <div class="skeleton-preview-grid" aria-hidden="true">
+    <div class="skeleton-preview-card" *ngFor="let i of [1, 2, 3, 4]">
+      <div class="skeleton-thumb"></div>
+      <div class="skeleton-line skeleton-title"></div>
+      <div class="skeleton-line skeleton-price"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Branded Error State with retry -->
+<div class="catalog-error-state" *ngIf="service.error() && !service.loading()" role="alert">
+  <div class="error-badge">
+    <svg
+      class="dairy-dash-logo error-logo"
+      viewBox="0 0 64 64"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <rect width="64" height="64" rx="18" fill="#fff1e6" />
+      <path
+        d="M24 18h16v9l5 8v15a5 5 0 0 1-5 5H24a5 5 0 0 1-5-5V35l5-8z"
+        fill="#ffffff"
+        stroke="#4a3b34"
+        stroke-width="2.5"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M20 38c8-6 16 6 24 0v12a4 4 0 0 1-4 4H24a4 4 0 0 1-4-4z"
+        fill="#e8926b"
+      />
+      <rect
+        x="22"
+        y="11"
+        width="20"
+        height="8"
+        rx="3"
+        fill="#e8926b"
+        stroke="#4a3b34"
+        stroke-width="2.5"
+      />
+    </svg>
+  </div>
+  <div class="error-text">
+    <h4>Unable to load products</h4>
+    <p>{{ service.error() }}</p>
+  </div>
+  <button
+    type="button"
+    class="retry-action-btn"
+    (click)="service.refresh()"
+    [disabled]="service.loading()"
+  >
+    Try again
+  </button>
+</div>
+

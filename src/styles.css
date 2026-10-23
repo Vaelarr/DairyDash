@@ -53,29 +53,59 @@ ion-menu-button {
 }
 
 .api-status {
-  margin: 16px 0;
-  padding: 14px 16px;
-  border: 1px solid var(--ion-border-color);
-  border-radius: 12px;
-  background: var(--ion-card-background);
-  color: var(--ion-text-color);
+  margin: 20px auto;
+  padding: 16px 20px;
+  max-width: 480px;
+  border: 1px solid var(--dd-border, #f2e5d8);
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fffaf5 0%, #ffffff 100%);
+  color: var(--ion-text-color, #4a3b34);
+  font-family: 'Fredoka', 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 4px 14px rgba(74, 59, 52, 0.05);
+}
+
+.api-status:not(.api-status-error)::before {
+  content: '';
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background-image: url('/favicon.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  flex-shrink: 0;
+  animation: apiStatusFloat 2s infinite ease-in-out;
 }
 
 .api-status-error {
-  border-color: var(--ion-color-danger);
+  border-color: #f8c8ba;
+  background: #fff8f5;
+  color: #b3382c;
 }
 
 .api-status p {
-  margin: 0 0 10px;
+  margin: 0;
 }
 
 .api-status button {
-  min-height: 44px;
-  padding: 8px 16px;
+  min-height: 40px;
+  padding: 8px 18px;
   border: none;
-  border-radius: 8px;
-  background: var(--ion-color-primary);
-  color: var(--ion-color-primary-contrast);
+  border-radius: 10px;
+  background: var(--ion-color-primary, #e8926b);
+  color: #241915;
   font: inherit;
+  font-weight: 700;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+@keyframes apiStatusFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
 }

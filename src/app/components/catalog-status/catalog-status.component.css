@@ -1,0 +1,273 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+/* Waiting / Loading Container */
+.catalog-waiting-state {
+  margin: 20px 0 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.waiting-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 32px 24px 28px;
+  background: linear-gradient(180deg, #fffaf5 0%, #ffffff 100%);
+  border: 1px solid #f2e5d8;
+  border-radius: 24px;
+  box-shadow: 0 8px 24px rgba(74, 59, 52, 0.06);
+  max-width: 440px;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+/* Logo badge with pulse */
+.logo-badge-container {
+  position: relative;
+  display: grid;
+  place-items: center;
+  margin-bottom: 16px;
+}
+
+.logo-pulse-ring {
+  position: absolute;
+  width: 76px;
+  height: 76px;
+  border-radius: 24px;
+  background: rgba(232, 146, 107, 0.22);
+  animation: pulseRing 2.4s infinite ease-in-out;
+}
+
+.original-logo-badge {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  box-shadow: 0 6px 16px rgba(74, 59, 52, 0.12);
+  animation: gentleFloat 3s infinite ease-in-out;
+}
+
+.dairy-dash-logo {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 18px;
+}
+
+/* Milk wave breathing animation */
+.milk-wave {
+  animation: milkWavePulse 2.8s infinite ease-in-out;
+  transform-origin: center bottom;
+}
+
+/* Typography */
+.waiting-title {
+  margin: 0 0 4px;
+  font-family: 'Fredoka', 'Nunito', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #4a3b34;
+}
+
+.waiting-subtitle {
+  margin: 0 0 18px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  color: #8c7061;
+}
+
+/* Progress bar */
+.waiting-progress-track {
+  width: 160px;
+  height: 5px;
+  background: #f2e5d8;
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.waiting-progress-fill {
+  width: 60px;
+  height: 100%;
+  background: linear-gradient(90deg, #e8926b 0%, #ffaa85 100%);
+  border-radius: 999px;
+  animation: shimmerProgress 1.6s infinite ease-in-out;
+}
+
+/* Skeleton preview cards */
+.skeleton-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 900px;
+}
+
+.skeleton-preview-card {
+  background: #fffaf5;
+  border: 1px solid #f2e5d8;
+  border-radius: 18px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeleton-thumb {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 14px;
+  background: linear-gradient(90deg, #f2e5d8 0%, #fdf6ec 50%, #f2e5d8 100%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.8s infinite;
+}
+
+.skeleton-line {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f2e5d8 0%, #fdf6ec 50%, #f2e5d8 100%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.8s infinite;
+}
+
+.skeleton-line.skeleton-title {
+  width: 75%;
+}
+
+.skeleton-line.skeleton-price {
+  width: 45%;
+  height: 14px;
+}
+
+/* Error State */
+.catalog-error-state {
+  margin: 20px 0;
+  padding: 20px;
+  border-radius: 20px;
+  background: #fff8f5;
+  border: 1.5px solid #f8c8ba;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.error-badge {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.error-logo {
+  filter: saturate(0.85);
+}
+
+.error-text {
+  flex: 1;
+  min-width: 200px;
+}
+
+.error-text h4 {
+  margin: 0 0 2px;
+  font-family: 'Fredoka', 'Nunito', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #b3382c;
+}
+
+.error-text p {
+  margin: 0;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  color: #6d584c;
+}
+
+.retry-action-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 12px;
+  background: #e8926b;
+  color: #241915;
+  font-family: 'Fredoka', 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(232, 146, 107, 0.25);
+}
+
+.retry-action-btn:hover:not(:disabled) {
+  background: #d8825c;
+  transform: translateY(-1px);
+}
+
+.retry-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Animations */
+@keyframes pulseRing {
+  0%, 100% {
+    transform: scale(0.92);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 0.85;
+  }
+}
+
+@keyframes gentleFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes milkWavePulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.88;
+  }
+}
+
+@keyframes shimmerProgress {
+  0% {
+    transform: translateX(-160px);
+  }
+  100% {
+    transform: translateX(160px);
+  }
+}
+
+@keyframes skeletonShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-pulse-ring,
+  .original-logo-badge,
+  .milk-wave,
+  .waiting-progress-fill,
+  .skeleton-thumb,
+  .skeleton-line {
+    animation: none !important;
+  }
+}
+

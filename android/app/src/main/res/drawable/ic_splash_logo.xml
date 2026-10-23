@@ -1,36 +1,30 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-    <!-- Rounded squircle badge background -->
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+    <!-- Authentic DairyDash Rounded Badge Background (#fff1e6) -->
+    <path
+        android:fillColor="#FFF1E6"
+        android:pathData="M 18,0 L 46,0 A 18,18 0 0,1 64,18 L 64,46 A 18,18 0 0,1 46,64 L 18,64 A 18,18 0 0,1 0,46 L 0,18 A 18,18 0 0,1 18,0 Z" />
+
+    <!-- White Milk Bottle Body with Chocolate Stroke (#4a3b34) -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M 30,16 C 18,16 16,18 16,30 L 16,78 C 16,90 18,92 30,92 L 78,92 C 90,92 92,90 92,78 L 92,30 C 92,18 90,16 78,16 Z" />
+        android:strokeColor="#4A3B34"
+        android:strokeWidth="2.5"
+        android:strokeLineJoin="round"
+        android:pathData="M 24,18 L 40,18 L 40,27 L 45,35 L 45,50 A 5,5 0 0,1 40,55 L 24,55 A 5,5 0 0,1 19,50 L 19,35 L 24,27 Z" />
 
-    <!-- Milk bottle cap -->
+    <!-- Terracotta Milk Wave Fill (#e8926b) -->
     <path
-        android:fillColor="#FF6F54"
-        android:pathData="M 46,24 L 62,24 C 64.2,24 66,25.8 66,28 L 66,28 C 66,30.2 64.2,32 62,32 L 46,32 C 43.8,32 42,30.2 42,28 L 42,28 C 42,25.8 43.8,24 46,24 Z" />
+        android:fillColor="#E8926B"
+        android:pathData="M 20,38 C 28,32 36,44 44,38 L 44,50 A 4,4 0 0,1 40,54 L 24,54 A 4,4 0 0,1 20,50 Z" />
 
-    <!-- Milk bottle body -->
+    <!-- Terracotta Bottle Cap (#e8926b) with Chocolate Stroke (#4a3b34) -->
     <path
-        android:fillColor="#FFF4EE"
-        android:pathData="M 48,32 L 60,32 L 60,38 L 68,46 L 68,78 C 68,81.3 65.3,84 62,84 L 46,84 C 42.7,84 40,81.3 40,78 L 40,46 L 48,38 Z" />
-
-    <!-- Milk bottle wave fill -->
-    <path
-        android:fillColor="#FF7A5C"
-        android:pathData="M 41,52 C 44,50 49,53 54,51 C 59,49 64,52 67,50 L 67,77 C 67,80.5 64.5,83 61,83 L 47,83 C 43.5,83 41,80.5 41,77 Z" />
-
-    <!-- Brand Emblem Circle inside bottle -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M 54,67 m -9,0 a 9,9 0 1,0 18,0 a 9,9 0 1,0 -18,0" />
-
-    <!-- Star droplet accent -->
-    <path
-        android:fillColor="#FF8566"
-        android:pathData="M 54,63 L 55,66 L 58,67 L 55,68 L 54,71 L 53,68 L 50,67 L 53,66 Z" />
+        android:fillColor="#E8926B"
+        android:strokeColor="#4A3B34"
+        android:strokeWidth="2.5"
+        android:pathData="M 25,11 L 39,11 A 3,3 0 0,1 42,14 L 42,16 A 3,3 0 0,1 39,19 L 25,19 A 3,3 0 0,1 22,16 L 22,14 A 3,3 0 0,1 25,11 Z" />
 </vector>
-
