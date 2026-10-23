@@ -1,12 +1,27 @@
-<!-- Centered Circle Ring Loader with Original DD Logo (No Text) -->
-<div class="catalog-loading-wrapper" *ngIf="service.loading()" role="status" aria-label="Loading">
-  <div class="circle-ringer">
-    <svg class="ring-spinner" viewBox="0 0 64 64" aria-hidden="true">
-      <circle class="ring-track" cx="32" cy="32" r="28" />
-      <circle class="ring-indicator" cx="32" cy="32" r="28" />
-    </svg>
-    <div class="ringer-logo original-dd-logo" aria-hidden="true">
-      <span>DD</span>
+<!-- Branded Waiting Screen when loading products (Skeleton cards + Original DD badge) -->
+<div class="catalog-waiting-state" *ngIf="service.loading()" role="status" aria-label="Loading products">
+  <div class="waiting-card">
+    <div class="logo-badge-container">
+      <div class="logo-pulse-ring" aria-hidden="true"></div>
+      <div class="original-logo-badge original-dd-badge" aria-hidden="true">
+        <span class="dd-mark-text">DD</span>
+      </div>
+    </div>
+
+    <h3 class="waiting-title">Loading fresh favorites…</h3>
+    <p class="waiting-subtitle">Getting today's dairy picks ready for you</p>
+
+    <div class="waiting-progress-track" aria-hidden="true">
+      <div class="waiting-progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- Skeleton preview grid -->
+  <div class="skeleton-preview-grid" aria-hidden="true">
+    <div class="skeleton-preview-card" *ngFor="let i of [1, 2, 3, 4]">
+      <div class="skeleton-thumb"></div>
+      <div class="skeleton-line skeleton-title"></div>
+      <div class="skeleton-line skeleton-price"></div>
     </div>
   </div>
 </div>
@@ -14,16 +29,17 @@
 <!-- Branded Error State with retry -->
 <div class="catalog-error-state" *ngIf="service.error() && !service.loading()" role="alert">
   <div class="error-badge">
-    <div class="original-dd-logo error-dd-logo" aria-hidden="true">
-      <span>DD</span>
+    <div class="original-logo-badge original-dd-badge error-dd-badge" aria-hidden="true">
+      <span class="dd-mark-text">DD</span>
     </div>
   </div>
   <div class="error-text">
+    <h4>Unable to load products</h4>
     <p>{{ service.error() }}</p>
   </div>
   <button
     type="button"
-    class="retry-button"
+    class="retry-action-btn"
     (click)="service.refresh()"
     [disabled]="service.loading()"
   >

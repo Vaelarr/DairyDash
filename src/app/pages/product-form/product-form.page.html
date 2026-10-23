@@ -6,7 +6,18 @@
   [description]="description()"
   [backHref]="isEdit ? '/manage-products' : ''"
 >
-  <p class="api-status" *ngIf="loadBusy()" role="status">Loading product…</p>
+  <!-- Centered Circle Ring Loader with Original DD Logo (No Text) -->
+  <div class="product-loading-wrapper" *ngIf="loadBusy()" role="status" aria-label="Loading product">
+    <div class="circle-ringer">
+      <svg class="ring-spinner" viewBox="0 0 64 64" aria-hidden="true">
+        <circle class="ring-track" cx="32" cy="32" r="28" />
+        <circle class="ring-indicator" cx="32" cy="32" r="28" />
+      </svg>
+      <div class="ringer-logo original-dd-logo" aria-hidden="true">
+        <span>DD</span>
+      </div>
+    </div>
+  </div>
   <div class="api-status api-status-error" *ngIf="loadError()" role="alert">
     <p>{{ loadError() }}</p>
     <button type="button" (click)="load()">Try again</button>
