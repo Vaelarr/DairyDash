@@ -19,6 +19,7 @@ import {
   cubeOutline,
   gridOutline,
   cartOutline,
+  heartOutline,
   informationCircleOutline,
   peopleOutline,
   settingsOutline,
@@ -87,6 +88,11 @@ export class MenuComponent {
       icon: 'cart-outline',
     },
     {
+      title: 'Wishlist',
+      url: '/wishlist',
+      icon: 'heart-outline',
+    },
+    {
       title: 'Manage Products',
       url: '/manage-products',
       icon: 'settings-outline',
@@ -120,6 +126,7 @@ export class MenuComponent {
       'cube-outline': cubeOutline,
       'grid-outline': gridOutline,
       'cart-outline': cartOutline,
+      'heart-outline': heartOutline,
       'information-circle-outline': informationCircleOutline,
       'people-outline': peopleOutline,
       'settings-outline': settingsOutline,

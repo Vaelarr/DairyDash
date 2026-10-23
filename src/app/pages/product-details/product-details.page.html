@@ -156,6 +156,15 @@
           <p
             class="cart-feedback"
             role="status"
+            *ngIf="wishlistMessage"
+          >
+            {{ wishlistMessage }}
+            <a routerLink="/wishlist">View Wishlist</a>
+          </p>
+
+          <p
+            class="cart-feedback"
+            role="status"
             *ngIf="cartMessage"
           >
             {{ cartMessage }}

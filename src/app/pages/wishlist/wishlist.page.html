@@ -1,0 +1,99 @@
+<ion-header>
+  <ion-toolbar class="wishlist-toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/products"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Wishlist</ion-title>
+    <span class="toolbar-brand" slot="end">Dairy Dash</span>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <main class="wishlist-container">
+    <div class="wishlist-heading">
+      <div>
+        <h1>Your wishlist</h1>
+        <p>Your dairy favorites, saved for later.</p>
+      </div>
+      <span class="saved-count">{{ wishlist.items().length }} saved</span>
+    </div>
+
+    @if (refreshing()) {
+      <p class="wishlist-notice" role="status">Checking for updated product details…</p>
+    }
+
+    @if (catalogError()) {
+      <p class="wishlist-notice wishlist-error" role="alert">
+        {{ catalogError() }}
+        <button type="button" (click)="refreshWishlist()" [disabled]="refreshing()">
+          Try again
+        </button>
+      </p>
+    }
+
+    @if (feedback()) {
+      <p class="wishlist-feedback" role="status">{{ feedback() }}</p>
+    }
+
+    @if (wishlist.items().length === 0) {
+      <section class="empty-wishlist">
+        <div class="empty-icon">
+          <ion-icon name="heart-outline" aria-hidden="true"></ion-icon>
+        </div>
+        <h2>Your wishlist is empty</h2>
+        <p>Save the dairy favorites you want to come back to.</p>
+        <a class="continue-shopping" routerLink="/products">Browse products</a>
+      </section>
+    } @else {
+      <section class="wishlist-list" aria-label="Saved products">
+        @for (product of wishlist.items(); track product.id) {
+          <article class="wishlist-item">
+            <a
+              class="product-image"
+              [routerLink]="['/view-product', product.id]"
+              [attr.aria-label]="'View ' + product.name"
+            >
+              <img
+                [src]="product.photo || 'assets/Products/AlmondBliss.webp'"
+                [alt]="product.name"
+              />
+            </a>
+
+            <div class="product-details">
+              <a class="product-name" [routerLink]="['/view-product', product.id]">
+                {{ product.name }}
+              </a>
+              <p class="product-category">{{ product.category || product.description }}</p>
+              <strong class="product-price">
+                {{ priceValue(product) | currency:'PHP':'symbol':'1.2-2' }}
+              </strong>
+              <button
+                class="add-to-cart"
+                type="button"
+                (click)="addToCart(product)"
+                [disabled]="product.stock === 0"
+              >
+                <ion-icon name="add-outline" aria-hidden="true"></ion-icon>
+                {{ product.stock === 0 ? 'Out of stock' : 'Add to cart' }}
+              </button>
+            </div>
+
+            <button
+              class="remove-button"
+              type="button"
+              (click)="remove(product)"
+              [attr.aria-label]="'Remove ' + product.name + ' from wishlist'"
+            >
+              <ion-icon name="trash-outline" aria-hidden="true"></ion-icon>
+            </button>
+          </article>
+        }
+      </section>
+
+      <a class="continue-shopping" routerLink="/products">
+        <span aria-hidden="true">＋</span>
+        Continue shopping
+      </a>
+    }
+  </main>
+</ion-content>

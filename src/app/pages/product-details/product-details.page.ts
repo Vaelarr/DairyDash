@@ -23,6 +23,7 @@ import {
   priceValue,
 } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
+import { WishlistService } from '../../services/wishlist.service';
 import { SupabaseService } from '../../supabase.service';
 
 @Component({
@@ -42,6 +43,7 @@ export class ProductDetailsPage {
   private readonly route = inject(ActivatedRoute);
   private readonly productService = inject(ProductService);
   private readonly cart = inject(CartService);
+  private readonly wishlist = inject(WishlistService);
 
   readonly auth = inject(SupabaseService);
 
@@ -55,8 +57,8 @@ export class ProductDetailsPage {
   readonly reviewsError = signal('');
 
   quantity = 1;
-  isWishlisted = false;
   cartMessage = '';
+  wishlistMessage = '';
 
   reviews: ProductReview[] = [];
   reviewName = '';
@@ -72,6 +74,10 @@ export class ProductDetailsPage {
 
   get product(): Product | undefined {
     return this.productService.getById(this.productId);
+  }
+
+  get isWishlisted(): boolean {
+    return this.wishlist.hasProduct(this.productId);
   }
 
   get averageRating(): number {
@@ -225,7 +231,22 @@ export class ProductDetailsPage {
   }
 
   toggleWishlist(): void {
-    this.isWishlisted = !this.isWishlisted;
+    const product = this.product;
+
+    if (!product) {
+      this.wishlistMessage = 'This product is unavailable.';
+      return;
+    }
+
+    if (this.isWishlisted) {
+      this.wishlist.removeProduct(product.id);
+      this.wishlistMessage = `${product.name} removed from your wishlist.`;
+      return;
+    }
+
+    this.wishlistMessage = this.wishlist.addProduct(product)
+      ? `${product.name} saved to your wishlist.`
+      : 'Your wishlist is full. Remove an item before saving another.';
   }
 
   async submitReview(): Promise<void> {

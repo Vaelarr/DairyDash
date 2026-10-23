@@ -48,6 +48,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'wishlist',
+    loadComponent: () =>
+      import('./pages/wishlist/wishlist.page').then(
+        (m) => m.WishlistPage
+      ),
+  },
+  {
     path: 'checkout',
     canActivate: [accountGuard],
     loadComponent: () =>
