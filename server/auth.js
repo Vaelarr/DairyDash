@@ -35,3 +35,4 @@ export function createAuthenticator(client) {
     return result.data.user;
   };
 }
+  
