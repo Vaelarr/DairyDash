@@ -14,15 +14,19 @@
     <a routerLink="/products"><span class="shortcut-mark" aria-hidden="true">✦</span><div><strong>Find your favorite</strong><span>Explore the full collection</span></div><span aria-hidden="true">→</span></a>
     <a routerLink="/wishlist"><span class="shortcut-mark" aria-hidden="true">♡</span><div><strong>Saved for later</strong><span>A little list of things you love</span></div><span aria-hidden="true">→</span></a>
   </div>
+
   <app-catalog-status></app-catalog-status>
-  <div class="products-section-header">
-    <div><p class="eyebrow">PICKED FOR YOUR DAY</p><h2>The good stuff.</h2></div>
-    <a routerLink="/products" class="products-see-all">Shop all <span aria-hidden="true">→</span></a>
-  </div>
-  <div class="products-grid">
-    @for (product of featuredProducts(); track product.id) { <app-product-card [product]="product"></app-product-card> }
-  </div>
-  @if (!featuredProducts().length) {
-    <p class="home-empty">Browse the shop for the latest additions. <a routerLink="/products">Explore products →</a></p>
+
+  @if (!loading() && !loadError()) {
+    <div class="products-section-header">
+      <div><p class="eyebrow">PICKED FOR YOUR DAY</p><h2>The good stuff.</h2></div>
+      <a routerLink="/products" class="products-see-all">Shop all <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="products-grid">
+      @for (product of featuredProducts(); track product.id) { <app-product-card [product]="product"></app-product-card> }
+    </div>
+    @if (!featuredProducts().length) {
+      <p class="home-empty">Browse the shop for the latest additions. <a routerLink="/products">Explore products →</a></p>
+    }
   }
 </app-page-layout>

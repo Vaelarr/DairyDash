@@ -42,6 +42,8 @@ export class DashboardPage {
   /** The dashboard's featured products come from the shared catalog, so edits show up here too. */
   private readonly productService = inject(ProductService);
   featuredProducts = this.productService.featured;
+  readonly loading = this.productService.loading;
+  readonly loadError = this.productService.error;
 
   ionViewWillEnter() {
     void this.productService.refresh();
