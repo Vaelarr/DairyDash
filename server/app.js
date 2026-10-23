@@ -3,12 +3,14 @@ import { PRODUCT_CATEGORIES } from '../src/app/data/product-categories.ts';
 import { ApiError } from './errors.js';
 import { validateProduct, validateReview, validateOrder, validateVersion, validateDeleteVersion, validateOrderUpdate } from './validation.js';
 import { checkoutOptions } from './checkout.js';
+import { summarizeDashboard } from './dashboard.js';
 
 export function createApp(database, {
   allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'],
   logError = console.error,
   authenticate,
   checkout = checkoutOptions(process.env),
+  now = () => new Date(),
 } = {}) {
   const app = express();
   app.disable('x-powered-by');
@@ -156,6 +158,12 @@ export function createApp(database, {
     const user = await requireUser(req);
     const order = await database.createOrder(user.id, validateOrder(req.body, checkout));
     res.location(`/api/orders/${order.id}`).status(201).json({ data: order });
+  });
+  app.get('/api/admin/dashboard', async (req, res) => {
+    const user = await requireUser(req);
+    if (user.app_metadata?.role !== 'admin') throw new ApiError(403, 'Dashboard access requires an admin account.');
+    const [orders, products] = await Promise.all([database.adminListOrders(), database.listProducts()]);
+    res.json({ data: summarizeDashboard(orders, products, now()) });
   });
   app.get('/api/admin/orders', async (req, res) => {
     const user = await requireUser(req);

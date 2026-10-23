@@ -1,57 +1,135 @@
-<app-page-layout narrow title="Manage Products">
+<app-page-layout narrow title="Dairy Dash">
+  <app-admin-toolbar-badge toolbar-end></app-admin-toolbar-badge>
+
+  <header class="manage-intro">
+    <div>
+      <h1>Manage Products</h1>
+      <p>Keep your catalog up to date.</p>
+    </div>
+    <a routerLink="/add-product" class="add-new-btn">
+      <ion-icon name="add-outline" aria-hidden="true"></ion-icon>
+      Add new
+    </a>
+  </header>
+
+  <p class="preview-banner" *ngIf="isPreview">
+    Preview — sample data, not signed in. See /manage-products once admin sign-in works.
+  </p>
+  <app-catalog-status *ngIf="!isPreview"></app-catalog-status>
+
   <ion-searchbar
     class="product-search"
     placeholder="Search products..."
     [value]="searchQuery()"
     (ionInput)="handleSearch($event)"
   ></ion-searchbar>
-  <app-catalog-status></app-catalog-status>
 
-  <div class="manage-header">
-    <h2>
-      {{ searchQuery().trim() ? 'Results (' + filtered().length + ' of ' + total() + ')' : 'All Products (' + total() + ')' }}
-    </h2>
-    <a routerLink="/add-product" class="manage-add">Add Product</a>
+  <div class="filter-chips" role="tablist" aria-label="Filter products">
+    <button
+      type="button"
+      class="chip"
+      role="tab"
+      [class.active]="statusFilter() === 'all'"
+      [attr.aria-selected]="statusFilter() === 'all'"
+      (click)="statusFilter.set('all')"
+    >
+      All products <span class="chip-count">{{ allCount() }}</span>
+    </button>
+    <button
+      type="button"
+      class="chip"
+      role="tab"
+      [class.active]="statusFilter() === 'low'"
+      [attr.aria-selected]="statusFilter() === 'low'"
+      (click)="statusFilter.set('low')"
+    >
+      Low stock <span class="chip-count">{{ lowStockCount() }}</span>
+    </button>
   </div>
 
-  <ul class="manage-list" *ngIf="filtered().length > 0; else empty">
-    <li class="manage-row" *ngFor="let product of filtered(); trackBy: trackById">
-      <div class="manage-thumb">
-        <img *ngIf="product.photo; else noPhoto" [src]="product.photo" [alt]="product.name" />
-        <ng-template #noPhoto><ion-icon name="image-outline" aria-hidden="true"></ion-icon></ng-template>
-      </div>
+  <div class="list-header">
+    <h2>{{ listHeading() }}</h2>
+    <div class="sort-wrap">
+      <button
+        type="button"
+        class="sort-pill"
+        [attr.aria-expanded]="sortMenuOpen()"
+        (click)="sortMenuOpen.set(!sortMenuOpen())"
+      >
+        {{ sortLabel() }}
+        <ion-icon name="chevron-down-outline" aria-hidden="true"></ion-icon>
+      </button>
+      @if (sortMenuOpen()) {
+        <div class="sort-menu" role="menu">
+          <button type="button" class="sort-option" [class.active]="sortBy() === 'newest'" role="menuitem" (click)="setSort('newest')">Newest first</button>
+          <button type="button" class="sort-option" [class.active]="sortBy() === 'name'" role="menuitem" (click)="setSort('name')">Name (A–Z)</button>
+          <button type="button" class="sort-option" [class.active]="sortBy() === 'price-asc'" role="menuitem" (click)="setSort('price-asc')">Price: Low to High</button>
+          <button type="button" class="sort-option" [class.active]="sortBy() === 'price-desc'" role="menuitem" (click)="setSort('price-desc')">Price: High to Low</button>
+          <button type="button" class="sort-option" [class.active]="sortBy() === 'stock-asc'" role="menuitem" (click)="setSort('stock-asc')">Stock: Low to High</button>
+        </div>
+      }
+    </div>
+  </div>
 
-      <div class="manage-info">
-        <h3>{{ product.name }}</h3>
-        <p class="manage-price">{{ product.price }}</p>
-        <p class="manage-stock" [class.out]="product.stock === 0">{{ stockLabel(product) }}</p>
-      </div>
+  <ul class="product-list" *ngIf="visibleProducts().length > 0; else empty">
+    <li class="product-row" *ngFor="let product of visibleProducts(); trackBy: trackById">
+      <div class="row-top">
+        <div class="row-thumb">
+          <img *ngIf="product.photo; else noPhoto" [src]="product.photo" [alt]="product.name" />
+          <ng-template #noPhoto><ion-icon name="image-outline" aria-hidden="true"></ion-icon></ng-template>
+        </div>
 
-      <div class="manage-actions">
-        <a
-          class="icon-btn"
-          [routerLink]="['/edit-product', product.id]"
-          [attr.aria-label]="'Edit ' + product.name"
-        >
-          <ion-icon name="create-outline" aria-hidden="true"></ion-icon>
-        </a>
-        <button
-          type="button"
-          class="icon-btn icon-btn-danger"
-          [attr.aria-label]="'Delete ' + product.name"
-          (click)="askToDelete(product)"
-        >
-          <ion-icon name="trash-outline" aria-hidden="true"></ion-icon>
-        </button>
+        <div class="row-main">
+          <div class="row-name-line">
+            <h3>{{ product.name }}</h3>
+            <span class="status-badge" *ngIf="stockBadge(product) as badge" [ngClass]="badge.cssClass">
+              {{ badge.label }}
+            </span>
+          </div>
+
+          <div class="row-price-line">
+            <p class="row-price">{{ product.price }}</p>
+            <p class="row-stock">{{ stockText(product) }}</p>
+          </div>
+
+          <div class="row-actions">
+            <a
+              class="action-btn"
+              [routerLink]="['/edit-product', product.id]"
+              [attr.aria-label]="'Edit ' + product.name"
+            >
+              <ion-icon name="create-outline" aria-hidden="true"></ion-icon>
+              Edit
+            </a>
+            <button
+              type="button"
+              class="action-btn action-btn-danger"
+              [attr.aria-label]="'Delete ' + product.name"
+              (click)="askToDelete(product)"
+            >
+              <ion-icon name="trash-outline" aria-hidden="true"></ion-icon>
+              Delete
+            </button>
+          </div>
+        </div>
       </div>
     </li>
   </ul>
 
   <ng-template #empty>
-    <p class="manage-empty" *ngIf="!loading() && !loadError()">
-      {{ searchQuery().trim() ? 'No products match your search.' : 'There are no products yet. Use Add Product to create one.' }}
+    <p class="manage-empty" *ngIf="isPreview || (!loading() && !loadError())">
+      {{ searchQuery().trim()
+        ? 'No products match your search.'
+        : statusFilter() === 'low'
+          ? 'No products are running low right now.'
+          : 'There are no products yet. Use Add new to create one.' }}
     </p>
   </ng-template>
+
+  <p class="low-stock-note">
+    <ion-icon name="information-circle-outline" aria-hidden="true"></ion-icon>
+    Low-stock alerts appear at {{ lowStockThreshold }} units or fewer.
+  </p>
 
   <ion-modal class="delete-modal" [isOpen]="pendingDelete() !== null" [backdropDismiss]="!deleting()" (didDismiss)="cancelDelete()">
     <ng-template>

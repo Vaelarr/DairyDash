@@ -162,6 +162,7 @@
           </p>
           <p class="cart-feedback" role="status" *ngIf="wishlistMessage()">
             {{ wishlistMessage() }}
+            <a *ngIf="auth.user()" routerLink="/wishlist">View Wishlist</a>
             <a *ngIf="!auth.user()" routerLink="/account" [queryParams]="{ returnUrl: '/view-product/' + item.id }">Sign in</a>
             <button *ngIf="auth.user() && !wishlistLoaded()" type="button" (click)="loadWishlist()" [disabled]="wishlistLoading()">
               Retry wishlist

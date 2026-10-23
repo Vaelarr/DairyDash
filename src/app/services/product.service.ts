@@ -7,6 +7,8 @@ import { ProductReview, ReviewInput } from '../models/product-review';
 
 export { PRODUCT_CATEGORIES } from '../data/product-categories';
 
+export { LOW_STOCK_THRESHOLD } from '../data/admin-dashboard';
+
 export interface ProductInput {
   name: string;
   category: string;
