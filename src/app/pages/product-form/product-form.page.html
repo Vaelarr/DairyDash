@@ -6,12 +6,13 @@
   [description]="description()"
   [backHref]="isEdit ? '/manage-products' : ''"
 >
-  <!-- Centered Simple Loading Circle -->
+  <!-- Centered Simple Loading Circle with Original Logo -->
   <div class="product-loading-wrapper" *ngIf="loadBusy()" role="status" aria-label="Loading product">
     <div class="loading-circle">
-      <svg viewBox="0 0 50 50" class="circle-spinner" aria-hidden="true">
-        <circle class="spinner-track" cx="25" cy="25" r="20"></circle>
-        <circle class="spinner-circle" cx="25" cy="25" r="20"></circle>
+      <img src="assets/logo.png" alt="Dairy Dash" class="loading-logo" />
+      <svg viewBox="0 0 100 100" class="circle-spinner" aria-hidden="true">
+        <circle class="spinner-track" cx="50" cy="50" r="44"></circle>
+        <circle class="spinner-circle" cx="50" cy="50" r="44"></circle>
       </svg>
     </div>
   </div>

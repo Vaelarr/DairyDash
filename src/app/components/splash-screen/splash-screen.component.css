@@ -114,35 +114,32 @@
   position: absolute;
   width: 165px;
   height: 165px;
-  border-radius: 40px;
+  border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 70%);
   animation: pulseGlow 2.8s infinite ease-in-out;
 }
 
 .brand-badge {
   position: relative;
-  width: 124px;
-  height: 124px;
+  width: 136px;
+  height: 136px;
   display: grid;
   place-items: center;
-  padding: 0;
-  border-radius: 34px;
+  padding: 8px;
+  border-radius: 50%;
   background: #ffffff;
   box-shadow:
     0 16px 36px rgba(110, 32, 16, 0.26),
     0 4px 10px rgba(110, 32, 16, 0.12);
   animation: badgeFloat 3.2s infinite ease-in-out;
+  overflow: hidden;
 }
 
-.splash-dd-mark {
-  font-family: 'Fredoka', 'Nunito', sans-serif;
-  font-size: 58px;
-  font-weight: 700;
-  color: #241915;
-  line-height: 1;
-  letter-spacing: -1.5px;
-  user-select: none;
-  filter: drop-shadow(0 2px 4px rgba(74, 59, 52, 0.1));
+.splash-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 /* Typography */
