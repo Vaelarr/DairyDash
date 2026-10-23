@@ -534,6 +534,46 @@
         }
       </form>
     </div>
+
+    <!-- User Preferences (Guest View) -->
+    <section class="menu-section preferences-logged-out">
+      <h2 class="section-title">USER PREFERENCES</h2>
+      <div class="menu-card">
+        <div class="menu-item preference-item">
+          <div class="menu-icon-bubble bubble-indigo">
+            <ion-icon name="navigate-outline" aria-hidden="true"></ion-icon>
+          </div>
+          <div class="menu-text">
+            <span class="menu-label">Bottom Navigation Bar</span>
+            <span class="menu-desc">Show quick navigation tabs at the bottom</span>
+          </div>
+          <ion-toggle
+            [checked]="preferences.bottomNav()"
+            (ionChange)="onToggleBottomNav($event)"
+            aria-label="Toggle bottom navigation bar"
+            color="primary">
+          </ion-toggle>
+        </div>
+
+        <div class="menu-separator"></div>
+
+        <div class="menu-item preference-item">
+          <div class="menu-icon-bubble bubble-slate">
+            <ion-icon name="moon-outline" aria-hidden="true"></ion-icon>
+          </div>
+          <div class="menu-text">
+            <span class="menu-label">Dark Mode</span>
+            <span class="menu-desc">Switch to eye-friendly night theme</span>
+          </div>
+          <ion-toggle
+            [checked]="preferences.darkMode()"
+            (ionChange)="onToggleDarkMode($event)"
+            aria-label="Toggle dark mode"
+            color="primary">
+          </ion-toggle>
+        </div>
+      </div>
+    </section>
   }
 </app-page-layout>
 }
