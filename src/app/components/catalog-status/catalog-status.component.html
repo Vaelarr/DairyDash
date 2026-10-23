@@ -1,19 +1,15 @@
-<!-- Branded Waiting Screen when loading products (Skeleton cards + Original DD badge) -->
+<!-- Branded Waiting Screen when loading products (Skeleton cards + Simple loading circle) -->
 <div class="catalog-waiting-state" *ngIf="service.loading()" role="status" aria-label="Loading products">
   <div class="waiting-card">
-    <div class="logo-badge-container">
-      <div class="logo-pulse-ring" aria-hidden="true"></div>
-      <div class="original-logo-badge original-dd-badge" aria-hidden="true">
-        <span class="dd-mark-text">DD</span>
-      </div>
+    <div class="loading-circle">
+      <svg viewBox="0 0 50 50" class="circle-spinner" aria-hidden="true">
+        <circle class="spinner-track" cx="25" cy="25" r="20"></circle>
+        <circle class="spinner-circle" cx="25" cy="25" r="20"></circle>
+      </svg>
     </div>
 
     <h3 class="waiting-title">Loading fresh favorites…</h3>
     <p class="waiting-subtitle">Getting today's dairy picks ready for you</p>
-
-    <div class="waiting-progress-track" aria-hidden="true">
-      <div class="waiting-progress-fill"></div>
-    </div>
   </div>
 
   <!-- Skeleton preview grid -->
@@ -29,9 +25,11 @@
 <!-- Branded Error State with retry -->
 <div class="catalog-error-state" *ngIf="service.error() && !service.loading()" role="alert">
   <div class="error-badge">
-    <div class="original-logo-badge original-dd-badge error-dd-badge" aria-hidden="true">
-      <span class="dd-mark-text">DD</span>
-    </div>
+    <svg viewBox="0 0 24 24" class="error-icon" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
   </div>
   <div class="error-text">
     <h4>Unable to load products</h4>

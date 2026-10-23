@@ -1,14 +1,11 @@
 <app-page-layout title="Product Details" backHref="/products">
-  <!-- Centered Circle Ring Loader with Original DD Logo (No Text) -->
+  <!-- Centered Simple Loading Circle -->
   <div class="product-loading-wrapper" *ngIf="loading()" role="status" aria-label="Loading product">
-    <div class="circle-ringer">
-      <svg class="ring-spinner" viewBox="0 0 64 64" aria-hidden="true">
-        <circle class="ring-track" cx="32" cy="32" r="28" />
-        <circle class="ring-indicator" cx="32" cy="32" r="28" />
+    <div class="loading-circle">
+      <svg viewBox="0 0 50 50" class="circle-spinner" aria-hidden="true">
+        <circle class="spinner-track" cx="25" cy="25" r="20"></circle>
+        <circle class="spinner-circle" cx="25" cy="25" r="20"></circle>
       </svg>
-      <div class="ringer-logo original-dd-logo" aria-hidden="true">
-        <span>DD</span>
-      </div>
     </div>
   </div>
 

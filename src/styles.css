@@ -73,13 +73,17 @@ ion-menu-button {
 .api-status:not(.api-status-error)::before {
   content: '';
   display: inline-block;
-  width: 24px;
-  height: 24px;
-  background-image: url('/favicon.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(232, 146, 107, 0.25);
+  border-top-color: var(--ion-color-primary, #e8926b);
+  border-radius: 50%;
   flex-shrink: 0;
-  animation: apiStatusFloat 2s infinite ease-in-out;
+  animation: apiStatusSpin 0.8s linear infinite;
+}
+
+@keyframes apiStatusSpin {
+  to { transform: rotate(360deg); }
 }
 
 .api-status-error {
