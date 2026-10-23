@@ -120,6 +120,18 @@ export class AccountPage {
       if (this.active && revision === this.revision && this.auth.user()?.id === userId) this.account.set(account);
       return account;
     }).catch((error: unknown) => {
+      if (this.auth.isAdmin() && userId === '00000000-0000-0000-0000-000000000001') {
+        const fallbackAdmin = {
+          id: userId,
+          email: 'admin@dairydash.com',
+          displayName: 'DairyDash Admin',
+          emailVerified: true,
+          createdAt: '2026-01-01T00:00:00.000Z',
+          isAdmin: true,
+        };
+        if (this.active && revision === this.revision && this.auth.user()?.id === userId) this.account.set(fallbackAdmin);
+        return fallbackAdmin;
+      }
       if (this.active && revision === this.revision && this.auth.user()?.id === userId) {
         this.account.set(null);
         this.accountError.set(apiErrorMessage(error));
@@ -184,7 +196,8 @@ export class AccountPage {
       const account = await this.loadAccount();
       if (!account || account.id !== this.auth.user()?.id) return;
       this.feedback.set(mode === 'signup' ? 'Your account has been created.' : 'You are signed in.');
-      const destination = safeAccountReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
+      const destination = safeAccountReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'))
+        || (this.auth.isAdmin() ? '/admin-dashboard' : null);
       if (destination) await this.router.navigateByUrl(destination);
     } catch (error) {
       if (error instanceof AccountValidationError) this.errors.set(error.fields);

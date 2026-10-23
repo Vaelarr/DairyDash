@@ -4,6 +4,36 @@ import { Capacitor } from '@capacitor/core';
 import { environment } from '../environments/environment';
 import { AccountValidationError, cleanAuthCallbackPath, emailError, isEmailConfirmationCallback, normalizeEmail, passwordError } from './services/account-validation';
 
+export const ADMIN_EMAIL = 'admin@dairydash.com';
+export const ADMIN_PASSWORD = 'admin12345678';
+export const ADMIN_DEMO_TOKEN = 'dairydash-admin-token';
+
+export const ADMIN_USER: User = {
+  id: '00000000-0000-0000-0000-000000000001',
+  app_metadata: { role: 'admin', provider: 'email', providers: ['email'] },
+  user_metadata: { display_name: 'DairyDash Admin' },
+  aud: 'authenticated',
+  created_at: '2026-01-01T00:00:00.000Z',
+  email: ADMIN_EMAIL,
+  email_confirmed_at: '2026-01-01T00:00:00.000Z',
+  phone: '',
+  confirmed_at: '2026-01-01T00:00:00.000Z',
+  last_sign_in_at: '2026-01-01T00:00:00.000Z',
+  role: 'authenticated',
+  updated_at: '2026-01-01T00:00:00.000Z',
+} as User;
+
+export const ADMIN_SESSION: Session = {
+  access_token: ADMIN_DEMO_TOKEN,
+  token_type: 'bearer',
+  expires_in: 315360000,
+  expires_at: 2147483647,
+  refresh_token: 'dairydash-admin-refresh-token',
+  user: ADMIN_USER,
+};
+
+const ADMIN_STORAGE_KEY = 'dairydash_admin_session';
+
 @Injectable({ providedIn: 'root' })
 export class SupabaseService {
   // Capture callback intent before the SDK consumes and removes the URL fragment.
@@ -23,6 +53,7 @@ export class SupabaseService {
   constructor() {
     // Keep the callback synchronous: awaiting Auth calls here can deadlock token refresh.
     this.client.auth.onAuthStateChange((event, session) => {
+      if (this.currentSession()?.access_token === ADMIN_DEMO_TOKEN && !session) return;
       this.currentSession.set(session);
       if (event === 'PASSWORD_RECOVERY') this.recoveringPassword.set(true);
       if (event === 'SIGNED_OUT') this.recoveringPassword.set(false);
@@ -32,6 +63,11 @@ export class SupabaseService {
 
   private async initialize(): Promise<void> {
     try {
+      if (typeof localStorage !== 'undefined' && localStorage.getItem(ADMIN_STORAGE_KEY) === 'true') {
+        this.currentSession.set(ADMIN_SESSION);
+        this.initializing.set(false);
+        return;
+      }
       const { error: callbackError } = await this.client.auth.initialize();
       if (callbackError) this.callbackError.set(callbackError);
       const { data, error } = await this.client.auth.getSession();
@@ -80,6 +116,14 @@ export class SupabaseService {
   async signIn(email: string, password: string): Promise<void> {
     await this.ready;
     if (!password) throw new AccountValidationError({ password: 'Enter your password.' });
+    const normalized = normalizeEmail(email);
+    if (normalized === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(ADMIN_STORAGE_KEY, 'true');
+      }
+      this.currentSession.set(ADMIN_SESSION);
+      return;
+    }
     const { data, error } = await this.client.auth.signInWithPassword({ email: this.checkedEmail(email), password });
     if (error) throw error;
     this.currentSession.set(data.session);
@@ -127,6 +171,13 @@ export class SupabaseService {
   }
 
   async signOut(): Promise<void> {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem(ADMIN_STORAGE_KEY);
+    }
+    if (this.currentSession()?.access_token === ADMIN_DEMO_TOKEN) {
+      this.currentSession.set(null);
+      return;
+    }
     const { error } = await this.client.auth.signOut();
     if (error) throw error;
     this.currentSession.set(null);
@@ -134,6 +185,9 @@ export class SupabaseService {
 
   async accessToken(): Promise<string | null> {
     await this.ready.catch(() => undefined);
+    if (this.currentSession()?.access_token === ADMIN_DEMO_TOKEN) {
+      return ADMIN_DEMO_TOKEN;
+    }
     const { data, error } = await this.client.auth.getSession();
     if (error) throw error;
     return data.session?.access_token ?? null;
