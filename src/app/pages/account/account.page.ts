@@ -1,30 +1,79 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, type NgForm } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { IonIcon } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import {
+  personOutline,
+  mailOutline,
+  lockClosedOutline,
+  eyeOutline,
+  eyeOffOutline,
+  receiptOutline,
+  heartOutline,
+  cartOutline,
+  gridOutline,
+  cubeOutline,
+  clipboardOutline,
+  chatbubbleEllipsesOutline,
+  informationCircleOutline,
+  timeOutline,
+  logOutOutline,
+  chevronForwardOutline,
+  shieldCheckmarkOutline,
+  checkmarkCircle,
+  time,
+  sparkles,
+  arrowBackOutline,
+  calendarOutline,
+} from 'ionicons/icons';
 import { PageLayoutComponent } from '../../components/page-layout/page-layout.component';
 import { EmailConfirmationComponent } from '../../components/email-confirmation/email-confirmation.component';
 import { SupabaseService } from '../../supabase.service';
 import { Account } from '../../models/account';
 import { AccountService } from '../../services/account.service';
+import { CartService } from '../../services/cart.service';
+import { OrderService } from '../../services/order.service';
+import { WishlistService } from '../../services/wishlist.service';
 import { apiErrorMessage } from '../../services/product.service';
 import {
-  AccountValidationError, accountErrorMessage, normalizeEmail, safeAccountReturnUrl, validateAccount,
-  type AccountErrors, type AccountField, type AccountMode,
+  AccountValidationError,
+  accountErrorMessage,
+  normalizeEmail,
+  safeAccountReturnUrl,
+  validateAccount,
+  type AccountErrors,
+  type AccountField,
+  type AccountMode,
 } from '../../services/account-validation';
 
 @Component({
-  selector: 'app-account', standalone: true,
-  imports: [DatePipe, FormsModule, RouterLink, PageLayoutComponent, EmailConfirmationComponent],
-  templateUrl: './account.page.html', styleUrl: './account.page.css',
+  selector: 'app-account',
+  standalone: true,
+  imports: [
+    CommonModule,
+    DatePipe,
+    FormsModule,
+    RouterLink,
+    IonIcon,
+    PageLayoutComponent,
+    EmailConfirmationComponent,
+  ],
+  templateUrl: './account.page.html',
+  styleUrl: './account.page.css',
 })
 export class AccountPage {
   readonly auth = inject(SupabaseService);
+  readonly cart = inject(CartService);
   private readonly accounts = inject(AccountService);
+  private readonly orderService = inject(OrderService);
+  private readonly wishlistService = inject(WishlistService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+
   private readonly selectedMode = signal<AccountMode>('signin');
-  readonly mode = computed(() => this.auth.recoveringPassword() ? 'reset' : this.selectedMode());
+  readonly mode = computed(() => (this.auth.recoveringPassword() ? 'reset' : this.selectedMode()));
   readonly busy = signal(false);
   readonly feedback = signal('');
   readonly error = signal('');
@@ -33,8 +82,27 @@ export class AccountPage {
   readonly accountLoading = signal(false);
   readonly accountError = signal('');
   readonly emailCooldown = signal(0);
-  readonly callbackMessage = computed(() => this.auth.callbackError() ? accountErrorMessage(this.auth.callbackError()) : '');
+  readonly callbackMessage = computed(() =>
+    this.auth.callbackError() ? accountErrorMessage(this.auth.callbackError()) : ''
+  );
   readonly adminRequired = this.route.snapshot.queryParamMap.get('adminRequired') === 'true';
+
+  readonly orderCount = signal<number>(0);
+  readonly wishlistCount = signal<number>(0);
+
+  readonly userInitials = computed(() => {
+    const name = this.account()?.displayName || this.auth.user()?.user_metadata?.['display_name'];
+    if (name?.trim()) {
+      const parts = name.trim().split(/\s+/);
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      }
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    const email = this.account()?.email || this.auth.user()?.email || '';
+    return email ? email.slice(0, 2).toUpperCase() : 'DD';
+  });
+
   name = '';
   email = '';
   password = '';
@@ -48,6 +116,31 @@ export class AccountPage {
   private cooldownTimer?: ReturnType<typeof setInterval>;
 
   constructor() {
+    addIcons({
+      'person-outline': personOutline,
+      'mail-outline': mailOutline,
+      'lock-closed-outline': lockClosedOutline,
+      'eye-outline': eyeOutline,
+      'eye-off-outline': eyeOffOutline,
+      'receipt-outline': receiptOutline,
+      'heart-outline': heartOutline,
+      'cart-outline': cartOutline,
+      'grid-outline': gridOutline,
+      'cube-outline': cubeOutline,
+      'clipboard-outline': clipboardOutline,
+      'chatbubble-ellipses-outline': chatbubbleEllipsesOutline,
+      'information-circle-outline': informationCircleOutline,
+      'time-outline': timeOutline,
+      'log-out-outline': logOutOutline,
+      'chevron-forward-outline': chevronForwardOutline,
+      'shield-checkmark-outline': shieldCheckmarkOutline,
+      'checkmark-circle': checkmarkCircle,
+      'time': time,
+      'sparkles': sparkles,
+      'arrow-back-outline': arrowBackOutline,
+      'calendar-outline': calendarOutline,
+    });
+
     effect(() => {
       const userId = this.auth.user()?.id;
       if (userId !== this.currentUserId) {
@@ -57,13 +150,17 @@ export class AccountPage {
         this.accountError.set('');
         this.accountRequest = null;
       }
-      if (this.active && userId && this.auth.emailConfirmation() === 'none') void this.loadAccount();
+      if (this.active && userId && this.auth.emailConfirmation() === 'none') {
+        void this.loadAccount();
+        void this.loadStats();
+      }
     });
   }
 
   ionViewWillEnter(): void {
     this.active = true;
     void this.loadAccount();
+    void this.loadStats();
   }
 
   ionViewDidLeave(): void {
@@ -115,34 +212,54 @@ export class AccountPage {
     const revision = this.revision;
     this.accountLoading.set(true);
     this.accountError.set('');
-    const promise = this.accounts.get().then((account) => {
-      if (account.id !== userId) throw new Error('Account identity changed.');
-      if (this.active && revision === this.revision && this.auth.user()?.id === userId) this.account.set(account);
-      return account;
-    }).catch((error: unknown) => {
-      if (this.auth.isAdmin() && userId === '00000000-0000-0000-0000-000000000001') {
-        const fallbackAdmin = {
-          id: userId,
-          email: 'admin@dairydash.com',
-          displayName: 'DairyDash Admin',
-          emailVerified: true,
-          createdAt: '2026-01-01T00:00:00.000Z',
-          isAdmin: true,
-        };
-        if (this.active && revision === this.revision && this.auth.user()?.id === userId) this.account.set(fallbackAdmin);
-        return fallbackAdmin;
-      }
-      if (this.active && revision === this.revision && this.auth.user()?.id === userId) {
-        this.account.set(null);
-        this.accountError.set(apiErrorMessage(error));
-      }
-      return null;
-    }).finally(() => {
-      if (this.accountRequest?.promise === promise) this.accountRequest = null;
-      if (revision === this.revision) this.accountLoading.set(false);
-    });
+    const promise = this.accounts
+      .get()
+      .then((account) => {
+        if (account.id !== userId) throw new Error('Account identity changed.');
+        if (this.active && revision === this.revision && this.auth.user()?.id === userId) {
+          this.account.set(account);
+        }
+        return account;
+      })
+      .catch((error: unknown) => {
+        if (this.auth.isAdmin() && userId === '00000000-0000-0000-0000-000000000001') {
+          const fallbackAdmin = {
+            id: userId,
+            email: 'admin@dairydash.com',
+            displayName: 'DairyDash Admin',
+            emailVerified: true,
+            createdAt: '2026-01-01T00:00:00.000Z',
+            isAdmin: true,
+          };
+          if (this.active && revision === this.revision && this.auth.user()?.id === userId) {
+            this.account.set(fallbackAdmin);
+          }
+          return fallbackAdmin;
+        }
+        if (this.active && revision === this.revision && this.auth.user()?.id === userId) {
+          this.account.set(null);
+          this.accountError.set(apiErrorMessage(error));
+        }
+        return null;
+      })
+      .finally(() => {
+        if (this.accountRequest?.promise === promise) this.accountRequest = null;
+        if (revision === this.revision) this.accountLoading.set(false);
+      });
     this.accountRequest = { userId, promise };
     return promise;
+  }
+
+  async loadStats(): Promise<void> {
+    if (!this.auth.user() || !this.active) return;
+    try {
+      const orders = await this.orderService.list().catch(() => []);
+      if (this.active) this.orderCount.set(orders.length);
+    } catch {}
+    try {
+      const wishlist = await this.wishlistService.list().catch(() => []);
+      if (this.active) this.wishlistCount.set(wishlist.length);
+    } catch {}
   }
 
   private startEmailCooldown(): void {
@@ -170,40 +287,56 @@ export class AccountPage {
       if (mode === 'forgot') {
         await this.auth.requestPasswordReset(this.email);
         this.startEmailCooldown();
-        this.feedback.set('If an account exists for this email, a password reset link will arrive shortly. Check your inbox and spam folder.');
+        this.feedback.set(
+          'If an account exists for this email, a password reset link will arrive shortly. Check your inbox and spam folder.'
+        );
         return;
       }
       if (mode === 'reset') {
         await this.auth.updatePassword(this.password);
         this.clearPasswords();
         this.selectedMode.set('signin');
-        await this.router.navigate(['/account'], { queryParams: { action: null }, queryParamsHandling: 'merge', replaceUrl: true });
-        this.feedback.set('Your password has been updated. Use the new password the next time you sign in.');
+        await this.router.navigate(['/account'], {
+          queryParams: { action: null },
+          queryParamsHandling: 'merge',
+          replaceUrl: true,
+        });
+        this.feedback.set(
+          'Your password has been updated. Use the new password the next time you sign in.'
+        );
         await this.loadAccount();
         return;
       }
       let signedIn = true;
-      if (mode === 'signup') signedIn = await this.auth.signUp(this.email, this.password, this.name);
-      else await this.auth.signIn(this.email, this.password);
+      if (mode === 'signup') {
+        signedIn = await this.auth.signUp(this.email, this.password, this.name);
+      } else {
+        await this.auth.signIn(this.email, this.password);
+      }
       this.clearPasswords();
       if (!signedIn) {
         this.selectedMode.set('signin');
         this.errors.set({});
         this.startEmailCooldown();
-        this.feedback.set('Check your inbox and spam folder for a confirmation email. Confirm your address, then sign in. If you already have an account, sign in or reset your password.');
+        this.feedback.set(
+          'Check your inbox and spam folder for a confirmation email. Confirm your address, then sign in. If you already have an account, sign in or reset your password.'
+        );
         return;
       }
       const account = await this.loadAccount();
+      void this.loadStats();
       if (!account || account.id !== this.auth.user()?.id) return;
-      this.feedback.set(mode === 'signup' ? 'Your account has been created.' : 'You are signed in.');
-      const destination = safeAccountReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'))
-        || (this.auth.isAdmin() ? '/admin-dashboard' : null);
+      this.feedback.set(
+        mode === 'signup' ? 'Your account has been created.' : 'You are signed in.'
+      );
+      const destination =
+        safeAccountReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl')) ||
+        (this.auth.isAdmin() ? '/admin-dashboard' : null);
       if (destination) await this.router.navigateByUrl(destination);
     } catch (error) {
       if (error instanceof AccountValidationError) this.errors.set(error.fields);
       this.error.set(accountErrorMessage(error));
     } finally {
-      // Credentials are kept only for the in-progress request, never in app storage.
       if (mode !== 'forgot') this.clearPasswords();
       this.busy.set(false);
     }
@@ -221,10 +354,14 @@ export class AccountPage {
     try {
       await this.auth.resendConfirmation(this.email);
       this.startEmailCooldown();
-      this.feedback.set('If this email has an account awaiting confirmation, a new confirmation link will arrive shortly. Check your inbox and spam folder.');
+      this.feedback.set(
+        'If this email has an account awaiting confirmation, a new confirmation link will arrive shortly. Check your inbox and spam folder.'
+      );
     } catch (error) {
       this.error.set(accountErrorMessage(error));
-    } finally { this.busy.set(false); }
+    } finally {
+      this.busy.set(false);
+    }
   }
 
   async signOut(): Promise<void> {
@@ -235,12 +372,21 @@ export class AccountPage {
     try {
       await this.auth.signOut();
       this.account.set(null);
+      this.orderCount.set(0);
+      this.wishlistCount.set(0);
       this.clearPasswords();
       this.errors.set({});
       this.selectedMode.set('signin');
-      await this.router.navigate(['/account'], { queryParams: { action: null }, queryParamsHandling: 'merge', replaceUrl: true });
+      await this.router.navigate(['/account'], {
+        queryParams: { action: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
       this.feedback.set('You have been signed out.');
-    } catch (error) { this.error.set(accountErrorMessage(error)); }
-    finally { this.busy.set(false); }
+    } catch (error) {
+      this.error.set(accountErrorMessage(error));
+    } finally {
+      this.busy.set(false);
+    }
   }
 }
