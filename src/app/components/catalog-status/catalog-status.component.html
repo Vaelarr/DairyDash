@@ -1,40 +1,12 @@
-<!-- Centered Circle Ring Loader with Original Logo (No Text) -->
+<!-- Centered Circle Ring Loader with Original DD Logo (No Text) -->
 <div class="catalog-loading-wrapper" *ngIf="service.loading()" role="status" aria-label="Loading">
   <div class="circle-ringer">
     <svg class="ring-spinner" viewBox="0 0 64 64" aria-hidden="true">
       <circle class="ring-track" cx="32" cy="32" r="28" />
       <circle class="ring-indicator" cx="32" cy="32" r="28" />
     </svg>
-    <div class="ringer-logo">
-      <svg
-        class="dairy-dash-logo"
-        viewBox="0 0 64 64"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-      >
-        <rect width="64" height="64" rx="18" fill="#fff1e6" />
-        <path
-          d="M24 18h16v9l5 8v15a5 5 0 0 1-5 5H24a5 5 0 0 1-5-5V35l5-8z"
-          fill="#ffffff"
-          stroke="#4a3b34"
-          stroke-width="2.5"
-          stroke-linejoin="round"
-        />
-        <path
-          d="M20 38c8-6 16 6 24 0v12a4 4 0 0 1-4 4H24a4 4 0 0 1-4-4z"
-          fill="#e8926b"
-        />
-        <rect
-          x="22"
-          y="11"
-          width="20"
-          height="8"
-          rx="3"
-          fill="#e8926b"
-          stroke="#4a3b34"
-          stroke-width="2.5"
-        />
-      </svg>
+    <div class="ringer-logo original-dd-logo" aria-hidden="true">
+      <span>DD</span>
     </div>
   </div>
 </div>
@@ -42,42 +14,16 @@
 <!-- Branded Error State with retry -->
 <div class="catalog-error-state" *ngIf="service.error() && !service.loading()" role="alert">
   <div class="error-badge">
-    <svg
-      class="dairy-dash-logo error-logo"
-      viewBox="0 0 64 64"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <rect width="64" height="64" rx="18" fill="#fff1e6" />
-      <path
-        d="M24 18h16v9l5 8v15a5 5 0 0 1-5 5H24a5 5 0 0 1-5-5V35l5-8z"
-        fill="#ffffff"
-        stroke="#4a3b34"
-        stroke-width="2.5"
-        stroke-linejoin="round"
-      />
-      <path
-        d="M20 38c8-6 16 6 24 0v12a4 4 0 0 1-4 4H24a4 4 0 0 1-4-4z"
-        fill="#e8926b"
-      />
-      <rect
-        x="22"
-        y="11"
-        width="20"
-        height="8"
-        rx="3"
-        fill="#e8926b"
-        stroke="#4a3b34"
-        stroke-width="2.5"
-      />
-    </svg>
+    <div class="original-dd-logo error-dd-logo" aria-hidden="true">
+      <span>DD</span>
+    </div>
   </div>
   <div class="error-text">
     <p>{{ service.error() }}</p>
   </div>
   <button
     type="button"
-    class="retry-action-btn"
+    class="retry-button"
     (click)="service.refresh()"
     [disabled]="service.loading()"
   >

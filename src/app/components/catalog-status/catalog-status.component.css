@@ -47,80 +47,97 @@
   stroke-dashoffset: 0;
 }
 
-/* Logo centered inside ring */
-.ringer-logo {
+/* Original DD Logo centered inside ring */
+.ringer-logo.original-dd-logo {
   position: relative;
   width: 52px;
   height: 52px;
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0 4px 14px rgba(74, 59, 52, 0.1);
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1.5px solid #f2e5d8;
   display: grid;
   place-items: center;
+  box-shadow: 0 4px 14px rgba(74, 59, 52, 0.09);
   animation: gentlePulse 2.4s ease-in-out infinite;
 }
 
-.dairy-dash-logo {
-  width: 100%;
-  height: 100%;
-  display: block;
+.ringer-logo.original-dd-logo span {
+  font-family: 'Fredoka', 'Nunito', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #241915;
+  line-height: 1;
+  letter-spacing: -0.5px;
+  user-select: none;
 }
 
 /* Error State */
 .catalog-error-state {
-  margin: 24px auto;
-  padding: 18px 22px;
-  max-width: 480px;
-  border-radius: 20px;
-  background: #fff8f5;
-  border: 1.5px solid #f8c8ba;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 16px;
-  box-shadow: 0 4px 14px rgba(74, 59, 52, 0.05);
+  text-align: center;
+  padding: 24px 20px;
+  margin: 16px auto 24px;
+  max-width: 420px;
+  background: #fff8f5;
+  border: 1px solid #f9ded2;
+  border-radius: 20px;
+  box-shadow: 0 6px 18px rgba(232, 146, 107, 0.08);
 }
 
 .error-badge {
+  margin-bottom: 12px;
+}
+
+.error-dd-logo {
   width: 44px;
   height: 44px;
-  flex-shrink: 0;
+  border-radius: 13px;
+  background: #ffebe3;
+  border: 1.5px solid #f8c8b6;
+  display: grid;
+  place-items: center;
 }
 
-.error-logo {
-  border-radius: 12px;
-}
-
-.error-text {
-  flex: 1;
+.error-dd-logo span {
+  font-family: 'Fredoka', 'Nunito', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #a64b2b;
+  line-height: 1;
 }
 
 .error-text p {
-  margin: 0;
+  margin: 0 0 16px;
   font-family: 'Nunito', sans-serif;
   font-size: 14px;
-  font-weight: 600;
-  color: #b3382c;
+  color: #75645a;
+  line-height: 1.45;
 }
 
-.retry-action-btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 10px;
-  background: #e8926b;
-  color: #241915;
+.retry-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 22px;
   font-family: 'Fredoka', 'Nunito', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  background: var(--ion-color-primary, #e8926b);
+  border: none;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(232, 146, 107, 0.28);
   cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.retry-action-btn:hover:not(:disabled) {
-  background: #d8825c;
+.retry-button:active {
+  transform: scale(0.96);
 }
 
-.retry-action-btn:disabled {
+.retry-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -140,13 +157,28 @@
     transform: scale(1);
   }
   50% {
-    transform: scale(0.96);
+    transform: scale(1.05);
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .ring-spinner,
-  .ringer-logo {
-    animation: none !important;
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .catalog-loading-wrapper {
+    min-height: 42vh;
+    padding: 32px 12px;
+  }
+
+  .circle-ringer {
+    width: 86px;
+    height: 86px;
+  }
+
+  .ringer-logo.original-dd-logo {
+    width: 48px;
+    height: 48px;
+  }
+
+  .ringer-logo.original-dd-logo span {
+    font-size: 22px;
   }
 }
