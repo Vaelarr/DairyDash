@@ -1,15 +1,5 @@
-<ion-header>
-  <ion-toolbar class="wishlist-toolbar">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/products"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Wishlist</ion-title>
-    <span class="toolbar-brand" slot="end">Dairy Dash</span>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content>
-  <main class="wishlist-container">
+<app-page-layout title="Wishlist" backHref="/products">
+  <div class="wishlist-container">
     <div class="wishlist-heading">
       <div>
         <h1>Your wishlist</h1>
@@ -103,5 +93,5 @@
         Continue shopping
       </a>
     }
-  </main>
-</ion-content>
+  </div>
+</app-page-layout>

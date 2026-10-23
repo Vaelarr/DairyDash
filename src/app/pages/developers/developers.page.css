@@ -10,6 +10,7 @@
   gap: 16px;
   padding: 18px 20px;
   background: #ffffff;
+  border: 1px solid var(--dd-border);
   border-radius: 18px;
   box-shadow: 0 8px 22px rgba(74, 59, 52, 0.06);
 }
@@ -22,7 +23,7 @@
   place-items: center;
   border-radius: 50%;
   background: var(--ion-color-secondary, #c4b6e8);
-  color: #ffffff;
+  color: var(--dd-ink);
   font-weight: 700;
   font-size: 18px;
   overflow: hidden;
@@ -45,7 +46,7 @@
   margin: 0 0 4px;
   font-size: 13px;
   font-weight: 700;
-  color: var(--ion-color-primary);
+  color: var(--dd-accent);
 }
 
 .developer-desc {

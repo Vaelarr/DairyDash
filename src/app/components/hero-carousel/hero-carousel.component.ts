@@ -21,20 +21,35 @@ export class HeroCarouselComponent implements OnInit, OnDestroy {
 
   // A signal so the view updates when the timer changes it (the app is zoneless).
   activeIndex = signal(0);
+  readonly paused = signal(false);
+  private motionQuery?: MediaQueryList;
+  private readonly motionChanged = (event: MediaQueryListEvent) => {
+    if (event.matches) { this.paused.set(true); this.stopTimer(); }
+  };
   private timer: ReturnType<typeof setInterval> | null = null;
   private touchStartX: number | null = null;
 
   ngOnInit() {
+    this.motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    this.paused.set(this.motionQuery.matches);
+    this.motionQuery.addEventListener('change', this.motionChanged);
     this.startTimer();
   }
 
   ngOnDestroy() {
     this.stopTimer();
+    this.motionQuery?.removeEventListener('change', this.motionChanged);
   }
 
   goTo(index: number) {
+    if (!this.slides.length) return;
     this.activeIndex.set((index + this.slides.length) % this.slides.length);
-    // Restart the timer so a manual change isn't followed by an immediate auto-advance.
+    this.paused.set(true);
+    this.stopTimer();
+  }
+
+  togglePlayback(): void {
+    this.paused.update((paused) => !paused);
     this.startTimer();
   }
 
@@ -55,7 +70,7 @@ export class HeroCarouselComponent implements OnInit, OnDestroy {
 
   private startTimer() {
     this.stopTimer();
-    if (this.slides.length > 1) {
+    if (this.slides.length > 1 && !this.paused()) {
       this.timer = setInterval(() => {
         this.activeIndex.update((i) => (i + 1) % this.slides.length);
       }, this.intervalMs);

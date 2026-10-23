@@ -1,0 +1,22 @@
+:host { display: block; min-width: 0; height: 100%; }
+.product-tile { display: flex; flex-direction: column; height: 100%; overflow: hidden; border: 1px solid var(--dd-border); border-radius: var(--dd-radius); background: var(--dd-surface); box-shadow: var(--dd-shadow); transition: transform 180ms, box-shadow 180ms; }
+.product-link { flex: 1; color: inherit; text-decoration: none; border-radius: var(--dd-radius); }
+.product-link:focus-visible { outline-offset: -4px; }
+.product-tile-photo { position: relative; display: grid; place-items: center; aspect-ratio: 1.12; margin: 8px 8px 0; overflow: hidden; border-radius: 14px; background: #f7eee7; }
+.product-tile-photo img { width: 100%; height: 100%; object-fit: contain; transition: transform 240ms; }
+.product-tile-photo > ion-icon { font-size: 48px; color: var(--dd-muted); }
+.stock-tag { position: absolute; top: 10px; left: 10px; padding: 5px 8px; border-radius: 8px; background: #fff8e7; color: #785115; font-size: 11px; font-weight: 800; }
+.sold-out { background: #f5e8e5; color: #87382f; }
+.product-tile-info { padding: 16px 16px 8px; }
+.product-category { margin: 0 0 6px; color: var(--dd-muted); font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+h3 { margin: 0 0 7px; color: var(--dd-ink); font-size: 20px; line-height: 1.2; font-weight: 500; overflow-wrap: anywhere; }
+.product-tile-desc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 42px; margin: 0; color: var(--dd-muted); font-size: 13px; line-height: 1.6; }
+.product-tile-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 16px 0; }
+.product-tile-price { color: var(--dd-accent); font-size: 18px; font-weight: 900; font-variant-numeric: tabular-nums; }
+button { display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-width: 68px; min-height: 44px; padding: 8px 12px; border: none; border-radius: 12px; background: var(--ion-color-primary); color: var(--dd-ink); font-size: 13px; font-weight: 900; cursor: pointer; }
+button ion-icon { font-size: 18px; }
+button:hover:not(:disabled) { background: #e6a180; }
+button:disabled { background: #f0eae5; color: #75645a; cursor: default; }
+.card-feedback { min-height: 18px; margin: 2px 16px 10px; color: var(--dd-success); font-size: 11px; line-height: 1.4; }
+@media (hover: hover) { .product-tile:hover { transform: translateY(-3px); box-shadow: 0 12px 28px #4a3b3412; } .product-link:hover img { transform: scale(1.035); } }
+@media (max-width: 520px) { .product-tile-info { padding: 12px 12px 6px; } h3 { font-size: 17px; } .product-tile-desc { font-size: 12px; min-height: 38px; } .product-tile-footer { padding-inline: 12px; gap: 6px; } .product-tile-price { font-size: 16px; } button { min-width: 58px; padding-inline: 9px; } .card-feedback { margin-inline: 12px; } .stock-tag { top: 6px; left: 6px; font-size: 10px; } }

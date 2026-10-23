@@ -8,17 +8,16 @@
       <ion-title>{{ title }}</ion-title>
       <ion-buttons slot="end">
         <ng-content select="[toolbar-end]"></ng-content>
+        <a class="toolbar-cart" routerLink="/cart" [attr.aria-label]="'View cart, ' + cart.itemCount() + ' items'">
+          <ion-icon name="cart-outline" aria-hidden="true"></ion-icon>
+          @if (cart.itemCount()) { <span aria-hidden="true">{{ cart.itemCount() > 99 ? '99+' : cart.itemCount() }}</span> }
+        </a>
       </ion-buttons>
     </ion-toolbar>
   </ion-header>
 
-  <ion-content [fullscreen]="true">
-    <ion-header collapse="condense">
-      <ion-toolbar>
-        <ion-title size="large">{{ title }}</ion-title>
-      </ion-toolbar>
-    </ion-header>
-    <main class="page-content" [class.page-content-narrow]="narrow">
+  <ion-content>
+    <main class="page-content" [class.page-content-narrow]="narrow" tabindex="0" [attr.aria-label]="title">
       <section class="page-intro" *ngIf="eyebrow || description">
         <p class="page-eyebrow" *ngIf="eyebrow">{{ eyebrow }}</p>
         <h1>{{ heading || title }}</h1>

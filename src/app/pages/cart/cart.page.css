@@ -12,7 +12,7 @@
 /* Toolbar: matches the dashboard */
 
 .brand-toolbar {
-  --background: var(--cart-primary);
+  --background: var(--dd-surface);
   --color: var(--cart-text);
   --border-color: rgba(74, 59, 52, 0.12);
 }
@@ -30,7 +30,7 @@
 /* Page background and spacing */
 
 ion-content {
-  --background: #ffffff;
+  --background: var(--dd-canvas);
   --color: var(--cart-text);
 }
 
@@ -40,7 +40,7 @@ ion-content {
   max-width: 1200px;
   margin: 0 auto;
   padding: 32px;
-  background: #ffffff;
+  background: var(--dd-canvas);
 }
 
 .cart-heading {
@@ -52,7 +52,7 @@ ion-content {
 }
 
 .cart-heading span {
-  color: #a56b57;
+  color: var(--dd-accent);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 1.4px;
@@ -103,6 +103,8 @@ ion-thumbnail img {
   object-fit: contain;
   background: #ffffff;
 }
+ion-thumbnail { display: grid; place-items: center; background: var(--dd-soft); }
+ion-thumbnail > ion-icon { color: var(--dd-muted); font-size: 30px; }
 
 .item-information {
   flex: 1;
@@ -136,8 +138,8 @@ ion-thumbnail img {
 .quantity-control button {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border: 1px solid var(--cart-border);
   border-radius: 10px;
@@ -169,8 +171,8 @@ ion-thumbnail img {
   right: 12px;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border: 0;
   border-radius: 10px;
@@ -193,7 +195,7 @@ ion-thumbnail img {
   padding: 22px;
   border: 1px solid var(--cart-border);
   border-radius: 18px;
-  background: #fff8f3;
+  background: var(--dd-surface);
 }
 
 .summary-card > div {
@@ -329,3 +331,10 @@ ion-thumbnail img {
 .checkout-message { padding: 16px; border: 1px solid var(--cart-border); border-radius: 12px; background: var(--cart-soft); }
 .cart-issue { color: #a3372f; font-size: 13px; line-height: 1.5; }
 .checkout-note { color: var(--cart-muted); font-size: 13px; line-height: 1.5; }
+.cart-layout { display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 24px; align-items: start; }
+.cart-layout .summary-card { position: sticky; top: 20px; margin-top: 0; box-shadow: var(--dd-shadow); }
+.cart-heading p, .checkout-note { color: var(--dd-muted); }
+.cart-item { box-shadow: var(--dd-shadow); }
+.empty-cart { min-height: 52vh; }
+.cart-heading h1 { font-size: clamp(30px, 5vw, 40px); }
+@media (max-width: 960px) { .cart-layout { grid-template-columns: minmax(0, 1fr); gap: 20px; } .cart-layout .summary-card { position: static; } }

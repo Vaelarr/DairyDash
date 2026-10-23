@@ -1,5 +1,8 @@
 <div
   class="hero-carousel"
+  role="region"
+  aria-roledescription="carousel"
+  aria-label="DairyDash highlights"
   (touchstart)="handleTouchStart($event)"
   (touchend)="handleTouchEnd($event)"
 >
@@ -7,11 +10,11 @@
     class="hero-carousel-track"
     [style.transform]="'translateX(-' + (activeIndex() * 100) + '%)'"
   >
-    <div class="hero-slide" *ngFor="let slide of slides; let i = index">
+    <div class="hero-slide" *ngFor="let slide of slides; let i = index" [attr.aria-hidden]="i !== activeIndex()">
       <img
         *ngIf="slide.photo"
         [src]="slide.photo"
-        [alt]="slide.title"
+        alt=""
         class="hero-slide-photo"
       />
       <div *ngIf="!slide.photo" class="hero-slide-photo hero-slide-placeholder"></div>
@@ -30,6 +33,13 @@
       [class.active]="i === activeIndex()"
       (click)="goTo(i)"
       [attr.aria-label]="'Go to slide ' + (i + 1)"
-    ></button>
+      [attr.aria-pressed]="i === activeIndex()"
+      type="button"
+    ><span></span></button>
+    @if (slides.length > 1) {
+      <button type="button" class="playback-toggle" (click)="togglePlayback()" [attr.aria-label]="paused() ? 'Play slideshow' : 'Pause slideshow'">
+        <span aria-hidden="true">{{ paused() ? '▷' : 'Ⅱ' }}</span> {{ paused() ? 'Play' : 'Pause' }}
+      </button>
+    }
   </div>
 </div>

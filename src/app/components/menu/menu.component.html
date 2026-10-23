@@ -47,9 +47,9 @@
 
     <!-- Existing menu links -->
     <ion-list id="inbox-list">
-      <ion-list-header>Menu</ion-list-header>
-
-      @for (p of visiblePages(); track p.url) {
+      @for (group of groups(); track group.label) {
+      <ion-list-header>{{ group.label }}</ion-list-header>
+      @for (p of group.pages; track p.url) {
         <ion-menu-toggle [autoHide]="false">
           <ion-item
             [routerLink]="[p.url]"
@@ -70,10 +70,11 @@
           </ion-item>
         </ion-menu-toggle>
       }
+      }
     </ion-list>
 
     <ion-note class="menu-footer">
-      Fresh ideas, thoughtfully made.
+      A little everyday goodness.
     </ion-note>
   </ion-content>
 </ion-menu>

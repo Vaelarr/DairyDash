@@ -1,34 +1,40 @@
-<app-page-layout
-  title="List of Products"
-  eyebrow="CATALOG"
-  description="Browse and manage your product line."
->
-  <ion-searchbar
-    class="product-search"
-    placeholder="Search products..."
-    [value]="searchQuery"
-    (ionInput)="handleSearch($event)"
-  ></ion-searchbar>
+<app-page-layout title="Shop" eyebrow="THE DAIRY AISLE" heading="Find your next favorite." description="A little something for your morning, your coffee, and everything in between.">
+  <section class="catalog-tools" aria-label="Find products">
+    <ion-searchbar class="product-search" placeholder="Search milk, flavors, and favorites" aria-label="Search products" [value]="searchQuery" (ionInput)="handleSearch($event)"></ion-searchbar>
+    <div class="catalog-filters">
+      @if (categories().length) {
+        <label class="select-field">Category
+          <select [(ngModel)]="category" aria-label="Product category">
+            <option value="">All categories</option>
+            @for (item of categories(); track item) { <option [value]="item">{{ item }}</option> }
+          </select>
+        </label>
+      }
+      <label class="availability-filter"><input type="checkbox" [(ngModel)]="availableOnly" /> Available to order</label>
+      <label class="select-field sort-field">Sort by
+        <select [(ngModel)]="sortBy" aria-label="Sort products">
+          <option value="recommended">Recommended</option>
+          <option value="price-asc">Price: low to high</option>
+          <option value="price-desc">Price: high to low</option>
+          <option value="name">Name: A–Z</option>
+        </select>
+      </label>
+    </div>
+  </section>
   <app-catalog-status></app-catalog-status>
-
   <div class="products-section-header">
-    <h2>Featured Products</h2>
+    <p role="status">{{ filteredProducts.length }} {{ filteredProducts.length === 1 ? 'favorite' : 'favorites' }}{{ hasFilters ? ' found' : ' to explore' }}</p>
+    @if (hasFilters) { <button type="button" class="reset-filters" (click)="resetFilters()">Clear filters</button> }
   </div>
-
   <div class="products-grid">
-    <a class="product-tile" *ngFor="let product of filteredProducts; trackBy: trackById" [routerLink]="['/view-product', product.id]" [attr.aria-label]="'View ' + product.name + ' details'">
-      <div class="product-tile-photo">
-        <img *ngIf="product.photo" [src]="product.photo" [alt]="product.name" />
-      </div>
-      <div class="product-tile-info">
-        <h3>{{ product.name }}</h3>
-        <p class="product-tile-price">{{ product.price }}</p>
-        <p class="product-tile-desc">{{ product.description }}</p>
-      </div>
-    </a>
+    @for (product of filteredProducts; track product.id) { <app-product-card [product]="product"></app-product-card> }
   </div>
-
-  <p class="products-empty" *ngIf="!loading() && !loadError() && filteredProducts.length === 0">
-    {{ searchQuery.trim() ? 'No products match your search.' : 'There are no products to show.' }}
-  </p>
+  @if (!loading() && !loadError() && filteredProducts.length === 0) {
+    <section class="products-empty">
+      <span aria-hidden="true">✦</span>
+      <h2>{{ hasFilters ? 'No matches just yet.' : 'Our shelves are being refreshed.' }}</h2>
+      <p>{{ hasFilters ? 'Try another search or clear your filters to see all our favorites.' : 'Check back soon for your next dairy favorite.' }}</p>
+      @if (hasFilters) { <button type="button" (click)="resetFilters()">Show all products</button> }
+    </section>
+  }
 </app-page-layout>

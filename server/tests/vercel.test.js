@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
+import { globSync } from 'node:fs';
+import { readFile, readdir } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { test } from 'node:test';
 import { createVercelHandler } from '../vercel.js';
@@ -58,7 +60,7 @@ test('Vercel serves nested catalog routes and query filters as cloud JSON', asyn
 
 test('Vercel accepts trusted deployment origins and rejects unrelated origins', async (t) => {
   const request = await fixture(t);
-  for (const origin of ['https://dairy-dash.vercel.app', 'https://dairy-dash-preview.vercel.app', 'https://localhost']) {
+  for (const origin of ['https://dairy-dash.vercel.app', 'https://dairy-dash-preview.vercel.app', 'https://localhost', 'capacitor://localhost', 'http://localhost']) {
     const response = await request('/api/categories', { headers: { Origin: origin } });
     assert.equal(response.status, 200);
     assert.equal(response.headers.get('access-control-allow-origin'), origin);
@@ -88,4 +90,34 @@ test('Vercel reports missing server configuration as JSON without exposing secre
   const body = await response.text();
   assert.match(JSON.parse(body).error.message, /SUPABASE_URL and SUPABASE_SECRET_KEY/);
   assert.ok(!body.includes('sb_secret_do_not_expose'));
+});
+
+test('Vercel configuration includes all shared TypeScript dependencies for the serverless function', async () => {
+  const vercelConfig = JSON.parse(await readFile(new URL('../../vercel.json', import.meta.url), 'utf8'));
+  const includePattern = vercelConfig.functions?.['api/index.js']?.includeFiles;
+  assert.ok(includePattern, 'api/index.js must specify includeFiles in vercel.json');
+
+  const serverDir = new URL('../', import.meta.url);
+  const serverFiles = (await readdir(serverDir)).filter((file) => file.endsWith('.js'));
+  const importedTsFiles = new Set();
+  for (const file of serverFiles) {
+    const content = await readFile(new URL(file, serverDir), 'utf8');
+    const matches = content.matchAll(/(?:import|from)\s+['"](\.\.\/src\/app\/[^'"]+\.ts)['"]/g);
+    for (const match of matches) {
+      importedTsFiles.add(match[1].replace('../', ''));
+    }
+  }
+
+  assert.ok(importedTsFiles.size > 0, 'Expected server files to import shared TypeScript files');
+  assert.ok(importedTsFiles.has('src/app/data/admin-dashboard.ts'));
+  assert.ok(importedTsFiles.has('src/app/data/product-categories.ts'));
+  assert.ok(importedTsFiles.has('src/app/models/checkout.ts'));
+
+  const matchedFiles = globSync(includePattern).map((f) => f.replaceAll('\\', '/'));
+  for (const tsFile of importedTsFiles) {
+    assert.ok(
+      matchedFiles.includes(tsFile),
+      `Expected includeFiles pattern "${includePattern}" to match required dependency "${tsFile}"`
+    );
+  }
 });

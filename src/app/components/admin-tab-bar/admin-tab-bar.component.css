@@ -10,7 +10,7 @@
   z-index: 1000;
   display: flex;
   justify-content: space-around;
-  padding: 6px 4px calc(6px + var(--ion-safe-area-bottom, 0px));
+  padding: 6px 8px calc(6px + var(--ion-safe-area-bottom, 0px));
   background: #ffffff;
   border-top: 1px solid var(--ion-border-color);
   box-shadow: 0 -4px 16px rgba(74, 59, 52, 0.08);
@@ -23,9 +23,11 @@
   align-items: center;
   gap: 2px;
   flex: 1;
+  min-height: 58px;
+  justify-content: center;
   padding: 6px 4px;
   border-radius: 10px;
-  color: var(--ion-color-medium);
+  color: var(--dd-muted);
   text-decoration: none;
   font-size: 11px;
   font-weight: 700;
@@ -36,7 +38,8 @@
 }
 
 .admin-tab.active {
-  color: var(--ion-color-primary);
+  color: var(--dd-accent);
+  background: var(--dd-soft);
 }
 
 .admin-tab:focus-visible {

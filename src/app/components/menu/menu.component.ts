@@ -73,12 +73,12 @@ export class MenuComponent {
     { title: 'Manage Orders', url: '/manage-orders', icon: 'settings-outline', adminOnly: true },
     { title: 'Admin Dashboard', url: '/admin-dashboard', icon: 'stats-chart-outline', adminOnly: true },
     {
-      title: 'Dashboard',
+      title: 'Home',
       url: '/dashboard',
       icon: 'grid-outline',
     },
     {
-      title: 'List of Products',
+      title: 'Shop',
       url: '/products',
       icon: 'cube-outline',
     },
@@ -120,6 +120,15 @@ export class MenuComponent {
     },
   ];
   readonly visiblePages = computed(() => this.appPages.filter((page) => !page.adminOnly || this.auth.isAdmin()));
+  readonly groups = computed(() => [
+    { label: 'Shopping', urls: ['/dashboard', '/products', '/wishlist', '/cart'] },
+    { label: 'Your account', urls: ['/account', '/orders'] },
+    { label: 'Management', urls: ['/admin-dashboard', '/manage-products', '/manage-orders'] },
+    { label: 'Discover DairyDash', urls: ['/about', '/company-history', '/developers', '/contact-us'] },
+  ].map((group) => ({ label: group.label, pages: group.urls.flatMap((url) => {
+    const page = this.visiblePages().find((item) => item.url === url);
+    return page ? [page] : [];
+  }) })).filter((group) => group.pages.length));
 
   constructor() {
     addIcons({

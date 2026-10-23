@@ -1,5 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, booleanAttribute } from '@angular/core';
+import { Component, Input, booleanAttribute, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { addIcons } from 'ionicons';
+import { cartOutline } from 'ionicons/icons';
+import { CartService } from '../../services/cart.service';
 import {
   IonBackButton,
   IonHeader,
@@ -8,6 +12,7 @@ import {
   IonMenuButton,
   IonTitle,
   IonContent,
+  IonIcon,
 } from '@ionic/angular';
 
 @Component({
@@ -17,6 +22,8 @@ import {
   standalone: true,
   imports: [
     CommonModule,
+    RouterLink,
+    IonIcon,
     IonBackButton,
     IonHeader,
     IonToolbar,
@@ -27,6 +34,8 @@ import {
   ],
 })
 export class PageLayoutComponent {
+  readonly cart = inject(CartService);
+  constructor() { addIcons({ 'cart-outline': cartOutline }); }
   @Input() title: string = '';
   /** Big heading in the page body; defaults to `title` (which is also the toolbar text). */
   @Input() heading: string = '';

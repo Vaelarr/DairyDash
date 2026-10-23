@@ -1,10 +1,10 @@
-.account-card { padding: 24px; border: 1px solid #e8d5c7; border-radius: 18px; background: #fff8f3; }
+.account-card { padding: 28px; border: 1px solid var(--dd-border); border-radius: 24px; background: var(--dd-surface); box-shadow: var(--dd-shadow); }
 h2 { margin-top: 0; color: #573f34; }
 form, .account-actions { display: grid; gap: 16px; }
 .field { display: grid; gap: 8px; }
 label { color: #573f34; font-weight: 700; }
-input { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #d8bfae; border-radius: 8px; background: white; color: #35271f; }
-button, a { padding: 12px 16px; border: 0; border-radius: 10px; background: #ed9e77; color: #573f34; text-align: center; font-weight: 800; text-decoration: none; cursor: pointer; }
+input { width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 14px; border: 1px solid #c7b5a7; border-radius: 12px; background: white; color: var(--dd-ink); font-size: 16px; }
+button, a { min-height: 44px; padding: 12px 16px; border: 0; border-radius: 12px; background: var(--ion-color-primary); color: var(--dd-ink); text-align: center; font-weight: 800; text-decoration: none; cursor: pointer; }
 button.secondary { background: transparent; text-decoration: underline; }
 button:disabled { opacity: .6; cursor: default; }
 p { line-height: 1.6; overflow-wrap: anywhere; }
@@ -25,4 +25,10 @@ button.text-button { padding: 4px 0; color: #80411f; background: transparent; te
 .connection-status { color: #355c3a; font-weight: 700; }
 .account-email { color: #6c5548; }
 .account-actions { margin-top: 24px; }
+.account-actions a { background: var(--dd-soft); }
+.account-actions button { color: #943a30; text-underline-offset: 4px; }
+.account-card > h2 { font-size: 28px; font-weight: 500; }
+.intro { font-size: 15px; }
+form > button[type=submit] { min-height: 48px; }
+@media (min-width: 520px) { .account-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); } .account-actions button { grid-column: 1 / -1; } }
 @media (max-width: 400px) { .account-card { padding: 18px; } }

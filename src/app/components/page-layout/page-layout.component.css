@@ -1,18 +1,18 @@
 .page-content,
 ion-content {
-	--background: #ffffff;
+	--background: var(--dd-canvas);
 }
 
 .page-content {
-	max-width: 920px;
+	max-width: 1160px;
 	margin: 0 auto;
-	padding: 20px 16px 32px;
+	padding: 24px 18px 40px;
 }
 
 .page-content-narrow { max-width: var(--page-narrow-width, 624px); }
 
 .page-intro { margin-bottom: 22px; }
-.page-eyebrow { margin: 0 0 7px; color: #e8926b; font: 800 11px/1.2 'Nunito', sans-serif; letter-spacing: 1.5px; }
+.page-eyebrow { margin: 0 0 9px; color: var(--dd-accent); font: 800 11px/1.2 'Nunito', sans-serif; letter-spacing: 1.5px; }
 .page-intro h1 { margin: 0; color: #4a3b34; font-size: clamp(30px, 7vw, 46px); line-height: 1.05; font-weight: 600; }
 .page-intro > p:last-child { max-width: 520px; margin: 9px 0 0; color: #755d50; font-size: 16px; font-weight: 600; }
 
@@ -25,9 +25,14 @@ ion-content {
 .page-layout-about .layout-placeholder-large, .page-layout-developers .layout-placeholder-large { min-height: 220px; }
 
 @media (min-width: 700px) {
-	.page-content { padding: 36px 32px; }
+	.page-content { padding: 36px 32px 48px; }
 	.page-layout { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 	.page-layout .layout-placeholder-large { grid-column: 1 / 3; grid-row: 1 / 3; min-height: 220px; }
 	.page-layout .layout-placeholder-highlight { grid-column: 3; grid-row: 1; min-height: 104px; }
 	.page-layout .layout-placeholder-anchor { grid-column: 3; grid-row: 2; min-height: 104px; }
 }
+
+.toolbar-cart { position: relative; display: grid; place-items: center; width: 48px; height: 44px; margin-inline: 8px; color: var(--dd-ink); text-decoration: none; border-radius: 12px; }
+.toolbar-cart:hover { background: var(--dd-soft); }
+.toolbar-cart ion-icon { font-size: 24px; }
+.toolbar-cart span { position: absolute; top: 0; right: 0; min-width: 19px; padding: 2px 4px; border: 2px solid white; border-radius: 12px; color: white; background: var(--dd-accent); font-size: 10px; font-weight: 900; text-align: center; }

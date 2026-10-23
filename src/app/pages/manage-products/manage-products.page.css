@@ -64,8 +64,8 @@
 .product-search {
   --background: #fdf6ec;
   --border-radius: 14px;
-  --placeholder-color: var(--ion-color-primary);
-  --icon-color: var(--ion-color-primary);
+  --placeholder-color: var(--dd-muted);
+  --icon-color: var(--dd-muted);
   --box-shadow: none;
   padding: 0 0 14px;
 }
@@ -285,7 +285,7 @@
   margin: 0;
   font-size: 15px;
   font-weight: 800;
-  color: var(--ion-color-primary-shade);
+  color: var(--dd-accent);
 }
 
 .row-stock {
@@ -323,7 +323,7 @@
 
 .action-btn-danger {
   border-color: rgba(var(--ion-color-primary-rgb), 0.5);
-  color: var(--ion-color-primary-shade);
+  color: #943a30;
 }
 
 .action-btn:hover {

@@ -17,6 +17,7 @@ import {
 import { MenuComponent } from './components/menu/menu.component';
 import { SplashScreenComponent } from './components/splash-screen/splash-screen.component';
 import { AdminTabBarComponent } from './components/admin-tab-bar/admin-tab-bar.component';
+import { ShoppingTabBarComponent } from './components/shopping-tab-bar/shopping-tab-bar.component';
 import { isAdminTabRoute, isPreviewAdminRoute } from './components/admin-tab-bar/admin-tab-bar.config';
 import { NavigationEnd, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -49,11 +50,12 @@ import {
     MenuComponent,
     SplashScreenComponent,
     AdminTabBarComponent,
+    ShoppingTabBarComponent,
   ],
 })
 export class AppComponent implements OnInit, OnDestroy {
   readonly auth = inject(SupabaseService);
-  private readonly currentPath = signal(window.location.pathname);
+  readonly currentPath = signal(window.location.pathname);
   readonly confirmationView = computed(() => this.currentPath() === '/account' &&
     this.auth.emailConfirmation() !== 'none' && !this.auth.recoveringPassword());
   // The bottom tab bar is a shortcut between the admin pages; it's shown alongside the sidebar,
@@ -64,7 +66,14 @@ export class AppComponent implements OnInit, OnDestroy {
     const path = this.currentPath();
     return isAdminTabRoute(path) && (this.auth.isAdmin() || isPreviewAdminRoute(path));
   });
-  readonly showSplash = signal(true);
+  readonly shoppingTabsView = computed(() => !this.confirmationView() && !this.adminTabsView() &&
+    !/^\/(checkout|manage-|add-product|edit-product|admin-)/.test(this.currentPath()));
+  readonly showSplash = signal(this.needsSplash());
+
+  private needsSplash(): boolean {
+    try { return sessionStorage.getItem('dairyDashSplashSeen') !== '1'; }
+    catch { return true; }
+  }
 
   private splashTimer?: ReturnType<typeof setTimeout>;
 
@@ -92,6 +101,7 @@ export class AppComponent implements OnInit, OnDestroy {
     // without every page needing to know the tab bar exists.
     effect(() => {
       document.body.classList.toggle('has-admin-tabs', this.adminTabsView());
+      document.body.classList.toggle('has-shopping-tabs', this.shoppingTabsView());
     });
     addIcons({
       gridOutline,
@@ -116,6 +126,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   onSplashDismissed(): void {
+    try { sessionStorage.setItem('dairyDashSplashSeen', '1'); } catch { /* The app stays usable without session storage. */ }
     if (this.splashTimer !== undefined) {
       clearTimeout(this.splashTimer);
       this.splashTimer = undefined;
@@ -123,7 +134,18 @@ export class AppComponent implements OnInit, OnDestroy {
     this.showSplash.set(false);
   }
 
+  focusContent(event: Event): void {
+    event.preventDefault();
+    const content = [...document.querySelectorAll<HTMLElement>('ion-router-outlet main, ion-router-outlet .cart-container')]
+      .find((element) => !element.closest('.ion-page-hidden') && element.getBoundingClientRect().width > 0);
+    if (content) {
+      if (!content.hasAttribute('tabindex')) content.setAttribute('tabindex', '-1');
+      content.focus();
+    }
+  }
+
   ngOnInit(): void {
+    if (!this.showSplash()) return;
     // Fallback safety timer in case dismiss event is blocked
     this.splashTimer = setTimeout(() => {
       this.onSplashDismissed();

@@ -170,7 +170,7 @@
   gap: 3px;
   font-size: 13px;
   font-weight: 800;
-  color: var(--ion-color-success, #2dd36f);
+  color: var(--dd-success);
 }
 
 .sales-trend.down {
@@ -234,7 +234,7 @@
 
 .stat-card-top ion-icon {
   font-size: 18px;
-  color: var(--ion-color-primary);
+  color: var(--dd-accent);
 }
 
 .stat-card strong {
@@ -307,7 +307,8 @@
   gap: 2px;
   font-size: 13px;
   font-weight: 700;
-  color: var(--ion-color-primary-shade);
+  color: var(--dd-accent);
+  min-height: 44px;
   text-decoration: none;
 }
 

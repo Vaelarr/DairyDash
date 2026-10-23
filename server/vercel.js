@@ -17,6 +17,8 @@ export function createVercelHandler(env = process.env) {
         );
         // Capacitor serves bundled Android assets from this HTTPS origin.
         allowedOrigins.add('https://localhost');
+        allowedOrigins.add('capacitor://localhost');
+        allowedOrigins.add('http://localhost');
         // Vercel supplies these trusted hosts for production and preview deployments.
         for (const host of [env.VERCEL_PROJECT_PRODUCTION_URL, env.VERCEL_URL]) {
           if (host) allowedOrigins.add(`https://${host}`);
@@ -25,8 +27,8 @@ export function createVercelHandler(env = process.env) {
         app = createApp(openSupabaseDatabase(client, { bucket: config.bucket }), {
           allowedOrigins: [...allowedOrigins], authenticate: createAuthenticator(client), checkout: checkoutOptions(env),
         });
-      } catch {
-        console.error('Vercel API setup failed. Check the server Supabase environment variables.');
+      } catch (error) {
+        console.error('Vercel API setup failed. Check the server Supabase environment variables.', error);
         res.writeHead(503, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
         res.end(JSON.stringify({ error: {
           message: 'The API is not configured. Set SUPABASE_URL and SUPABASE_SECRET_KEY in Vercel and redeploy.',

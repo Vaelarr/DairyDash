@@ -1,15 +1,8 @@
 import { CurrencyPipe } from '@angular/common';
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import {
-  IonBackButton,
-  IonButtons,
-  IonContent,
-  IonHeader,
-  IonIcon,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/angular';
+import { IonIcon } from '@ionic/angular';
+import { PageLayoutComponent } from '../../components/page-layout/page-layout.component';
 import { addIcons } from 'ionicons';
 import {
   addOutline,
@@ -30,12 +23,7 @@ import { WishlistService } from '../../services/wishlist.service';
   imports: [
     CurrencyPipe,
     RouterLink,
-    IonHeader,
-    IonToolbar,
-    IonButtons,
-    IonBackButton,
-    IonTitle,
-    IonContent,
+    PageLayoutComponent,
     IonIcon,
   ],
   templateUrl: './wishlist.page.html',

@@ -1,0 +1,26 @@
+<article class="product-tile">
+  <a class="product-link" [routerLink]="['/view-product', product.id]">
+    <div class="product-tile-photo">
+      @if (product.photo) {
+        <img [src]="product.photo" alt="" loading="lazy" decoding="async" />
+      } @else {
+        <ion-icon name="image-outline" aria-hidden="true"></ion-icon>
+      }
+      @if (product.stock === 0) { <span class="stock-tag sold-out">Out of stock</span> }
+      @else if (product.stock !== undefined && product.stock <= lowStockThreshold) { <span class="stock-tag">Only {{ product.stock }} left</span> }
+    </div>
+    <div class="product-tile-info">
+      <p class="product-category">{{ product.category || 'Dairy favorite' }}</p>
+      <h3>{{ product.name }}</h3>
+      <p class="product-tile-desc">{{ product.description }}</p>
+    </div>
+  </a>
+  <div class="product-tile-footer">
+    <strong class="product-tile-price">{{ product.price }}</strong>
+    <button type="button" (click)="addToCart()" [disabled]="product.stock === 0" [attr.aria-label]="product.stock === 0 ? product.name + ' is sold out' : 'Add ' + product.name + ' to cart'">
+      @if (product.stock !== 0) { <ion-icon name="add-outline" aria-hidden="true"></ion-icon> }
+      {{ product.stock === 0 ? 'Sold out' : 'Add' }}
+    </button>
+  </div>
+  <p class="card-feedback" role="status">{{ feedback() }}</p>
+</article>

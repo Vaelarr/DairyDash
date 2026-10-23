@@ -23,6 +23,7 @@ import {
   removeOutline,
   trashOutline,
   bagCheckOutline,
+  imageOutline,
 } from 'ionicons/icons';
 
 import { CartItem, CartService } from '../../services/cart.service';
@@ -78,6 +79,7 @@ export class CartPage {
       removeOutline,
       trashOutline,
       bagCheckOutline,
+      imageOutline,
     });
   }
 

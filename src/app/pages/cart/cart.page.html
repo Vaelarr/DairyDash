@@ -66,14 +66,19 @@
         </p>
       }
 
+      <div class="cart-layout">
       <div class="cart-list">
         @for (item of cart.items(); track item.id) {
           <div class="cart-item">
             <ion-thumbnail>
+              @if (item.image) {
               <img
                 [src]="item.image"
                 [alt]="item.name"
               />
+              } @else {
+                <ion-icon name="image-outline" aria-hidden="true"></ion-icon>
+              }
             </ion-thumbnail>
 
             <div class="item-information">
@@ -209,6 +214,7 @@
           checkout. Delivery fees and the final total will be
           shown before you place your order.
         </p>
+      </div>
       </div>
     }
   </div>

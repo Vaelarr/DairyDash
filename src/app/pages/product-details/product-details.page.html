@@ -80,10 +80,10 @@
           <div class="detail-price-row">
             <strong>{{ item.price }}</strong>
 
-            <div class="detail-stock">
+            <div class="detail-stock" [class.out-of-stock]="stockCount === 0">
               <span>
                 <i aria-hidden="true"></i>
-                {{ stockCount === 0 ? 'Out of stock' : 'In Stock' }}
+                {{ stockCount === 0 ? 'Out of stock' : stockCount === undefined ? 'Available to order' : 'In stock' }}
               </span>
 
               <small *ngIf="stockCount !== undefined">
@@ -185,9 +185,9 @@
             ></ion-icon>
 
             <div>
-              <strong>Fresh delivery within 24 hours</strong>
+              <strong>A little goodness, on its way</strong>
               <small>
-                Chilled, sealed, and handled with care.
+                Review your delivery details and total at checkout.
               </small>
             </div>
           </div>

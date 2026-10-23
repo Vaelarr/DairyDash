@@ -2,7 +2,7 @@
   --contact-primary: #e8926b;
   --contact-heading: #241915;
   --contact-text: #4a3b34;
-  --contact-muted: #8c7061;
+  --contact-muted: var(--dd-muted);
   --contact-border: #e5d6ca;
   --contact-soft: #fff4ec;
 
@@ -11,7 +11,7 @@
 }
 
 ion-toolbar {
-  --background: var(--contact-primary);
+  --background: var(--dd-surface);
   --color: var(--contact-text);
   --border-color: transparent;
 }
@@ -26,7 +26,7 @@ ion-menu-button {
 }
 
 ion-content {
-  --background: #ffffff;
+  --background: var(--dd-canvas);
   --color: var(--contact-text);
 }
 

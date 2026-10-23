@@ -8,13 +8,14 @@ import {
 } from '../../components/hero-carousel/hero-carousel.component';
 import { ProductService } from '../../services/product.service';
 import { CatalogStatusComponent } from '../../components/catalog-status/catalog-status.component';
+import { ProductCardComponent } from '../../components/product-card/product-card.component';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.css'],
   standalone: true,
-  imports: [CommonModule, RouterModule, PageLayoutComponent, HeroCarouselComponent, CatalogStatusComponent],
+  imports: [CommonModule, RouterModule, PageLayoutComponent, HeroCarouselComponent, CatalogStatusComponent, ProductCardComponent],
 })
 export class DashboardPage {
   heroSlides: HeroSlide[] = [

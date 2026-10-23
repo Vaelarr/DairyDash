@@ -3,6 +3,7 @@
 	src: url('../assets/Fredoka/Fredoka-VariableFont_wdth,wght.ttf') format('truetype');
 	font-style: normal;
 	font-weight: 300 700;
+	font-display: swap;
 }
 
 @font-face {
@@ -10,6 +11,7 @@
 	src: url('../assets/Nunito/Nunito-VariableFont_wght.ttf') format('truetype');
 	font-style: normal;
 	font-weight: 200 1000;
+	font-display: swap;
 }
 
 @font-face {
@@ -17,9 +19,21 @@
 	src: url('../assets/Nunito/Nunito-Italic-VariableFont_wght.ttf') format('truetype');
 	font-style: italic;
 	font-weight: 200 1000;
+	font-display: swap;
 }
 
 :root {
+	--dd-canvas: #fbf8f5;
+	--dd-surface: #ffffff;
+	--dd-soft: #fff1e6;
+	--dd-ink: #352b25;
+	--dd-muted: #75645a;
+	--dd-accent: #a64b2b;
+	--dd-border: #e8ddd4;
+	--dd-success: #286347;
+	--dd-shadow: 0 6px 24px rgba(74, 59, 52, 0.045);
+	--dd-radius: 20px;
+	--dd-nav-height: 76px;
 	--ion-color-primary: #e8926b;
 	--ion-color-primary-rgb: 232, 146, 107;
 	--ion-color-primary-contrast: #241915;
@@ -44,9 +58,10 @@
 	--ion-background-color-step-100: #fdf6ec;
 	--ion-background-color-step-150: #f2e5d8;
 	--ion-border-color: #e5d6ca;
-	--ion-color-medium: #8c7061;
-	--ion-color-medium-shade: #755d50;
-	--ion-toolbar-background: #e8926b;
+	--ion-color-medium: #75645a;
+	--ion-color-medium-rgb: 117, 100, 90;
+	--ion-color-medium-shade: #625147;
+	--ion-toolbar-background: #ffffff;
 	--ion-toolbar-color: #241915;
 	--ion-font-family: 'Nunito', sans-serif;
 }

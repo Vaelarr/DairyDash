@@ -1,0 +1,14 @@
+<nav class="shopping-tabs" aria-label="Shopping navigation">
+  @for (tab of tabs; track tab.url) {
+    <a [routerLink]="tab.url" [class.active]="isActive(tab.url)" [attr.aria-current]="isActive(tab.url) ? 'page' : null">
+      <span class="tab-icon">
+        <ion-icon [name]="tab.icon" aria-hidden="true"></ion-icon>
+        @if (tab.label === 'Cart' && cart.itemCount()) {
+          <b aria-hidden="true">{{ cart.itemCount() > 99 ? '99+' : cart.itemCount() }}</b>
+        }
+      </span>
+      <span>{{ tab.label }}</span>
+      @if (tab.label === 'Cart' && cart.itemCount()) { <span class="sr-only">{{ cart.itemCount() }} items</span> }
+    </a>
+  }
+</nav>
