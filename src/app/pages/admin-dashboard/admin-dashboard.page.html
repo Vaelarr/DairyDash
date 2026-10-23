@@ -1,0 +1,162 @@
+<app-page-layout title="Dairy Dash">
+  <app-admin-toolbar-badge toolbar-end></app-admin-toolbar-badge>
+
+  <header class="admin-intro">
+    <h1>Dashboard</h1>
+    <div class="admin-intro-row">
+      <p>Here's how your shop is doing.</p>
+      @if (summary()) {
+        <p class="admin-date">{{ today() | date: 'MMM d, y': '+0800' }}</p>
+      }
+    </div>
+  </header>
+
+  @if (isPreview) {
+    <p class="preview-banner">
+      Preview — sample data, not signed in. See /admin-dashboard once admin sign-in works.
+    </p>
+  }
+
+  @if (error()) {
+    <p class="admin-error" role="alert">
+      {{ error() }}
+      <button type="button" (click)="load()">Retry</button>
+    </p>
+  }
+
+  @if (loading()) {
+    <p role="status">Loading dashboard…</p>
+  }
+
+  @if (summary()) {
+  <section class="sales-card" aria-label="Total sales">
+    <div class="sales-card-top">
+      <span class="sales-label">Total sales</span>
+      <div class="range-wrap">
+        <button
+          type="button"
+          class="range-pill"
+          [attr.aria-expanded]="rangeMenuOpen()"
+          (click)="rangeMenuOpen.set(!rangeMenuOpen())"
+        >
+          Today
+          <ion-icon name="chevron-down-outline" class="range-chevron" aria-hidden="true"></ion-icon>
+        </button>
+        @if (rangeMenuOpen()) {
+          <div class="range-menu" role="menu">
+            <button type="button" class="range-option active" role="menuitem" (click)="rangeMenuOpen.set(false)">
+              Today
+            </button>
+            <button type="button" class="range-option" role="menuitem" disabled>This week (soon)</button>
+            <button type="button" class="range-option" role="menuitem" disabled>This month (soon)</button>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="sales-main">
+      <strong>{{ salesToday() | currency: 'PHP' : 'symbol' : '1.2-2' }}</strong>
+      <span class="sales-trend" [class.down]="salesChangePct() < 0">
+        <ion-icon
+          [name]="salesChangePct() >= 0 ? 'trending-up-outline' : 'trending-down-outline'"
+          aria-hidden="true"
+        ></ion-icon>
+        {{ salesChangePct() | number: '1.0-0' }}%
+      </span>
+    </div>
+    <p class="sales-compare">vs {{ salesYesterday() | currency: 'PHP' : 'symbol' : '1.2-2' }} yesterday</p>
+
+    <div class="goal-row">
+      <span>Daily goal · {{ dailySalesGoal | currency: 'PHP' : 'symbol' : '1.0-0' }}</span>
+      <span>{{ dailyGoalPct() }}%</span>
+    </div>
+    <div class="goal-track">
+      <div class="goal-fill" [style.width.%]="dailyGoalPct()"></div>
+    </div>
+  </section>
+
+  <section class="stat-grid" aria-label="Today's activity">
+    <div class="stat-card">
+      <div class="stat-card-top">
+        <span>Orders today</span>
+        <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
+      </div>
+      <strong>{{ orderCountToday() }}</strong>
+      <p>{{ completedToday() }} completed · {{ openToday() }} open</p>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-top">
+        <span>Units in stock</span>
+        <ion-icon name="cube-outline" aria-hidden="true"></ion-icon>
+      </div>
+      <strong>{{ unitsInStock() }}</strong>
+      <p>Across {{ trackedProductCount() }} product{{ trackedProductCount() === 1 ? '' : 's' }}</p>
+    </div>
+  </section>
+
+  @if (lowStockProducts().length > 0) {
+    <a routerLink="/manage-products" class="low-stock-banner">
+      <ion-icon name="warning-outline" aria-hidden="true"></ion-icon>
+      <span class="low-stock-text">
+        <strong>
+          {{ lowStockProducts().length }} product{{ lowStockProducts().length === 1 ? '' : 's' }} running low
+        </strong>
+        <br />
+        {{ lowStockSummary() }}: {{ lowStockThreshold }} or fewer
+      </span>
+      <ion-icon name="chevron-forward-outline" class="chev" aria-hidden="true"></ion-icon>
+    </a>
+  }
+
+  <div class="section-header">
+    <h2>Orders to handle</h2>
+    <a routerLink="/manage-orders" class="section-link">
+      View all
+      <ion-icon name="chevron-forward-outline" aria-hidden="true"></ion-icon>
+    </a>
+  </div>
+
+  <a routerLink="/manage-orders" class="handle-row">
+    <span class="handle-icon pending">
+      <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
+    </span>
+    <span class="handle-text">
+      <strong>Pending confirmation</strong>
+      <br />
+      New orders waiting for review
+    </span>
+    <span class="handle-count">{{ pendingCount() }}</span>
+    <ion-icon name="chevron-forward-outline" class="chev" aria-hidden="true"></ion-icon>
+  </a>
+
+  <a routerLink="/manage-orders" class="handle-row">
+    <span class="handle-icon preparing">
+      <ion-icon name="cube-outline" aria-hidden="true"></ion-icon>
+    </span>
+    <span class="handle-text">
+      <strong>Preparing orders</strong>
+      <br />
+      Pack and mark ready for delivery
+    </span>
+    <span class="handle-count">{{ preparingCount() }}</span>
+    <ion-icon name="chevron-forward-outline" class="chev" aria-hidden="true"></ion-icon>
+  </a>
+
+  }
+
+  <h2 class="quick-header">Quick access</h2>
+  <div class="quick-grid">
+    <a routerLink="/manage-products" class="quick-btn">
+      <ion-icon name="cube-outline" aria-hidden="true"></ion-icon>
+      Products
+    </a>
+    <button type="button" class="quick-btn" disabled title="Coming soon">
+      <ion-icon name="stats-chart-outline" aria-hidden="true"></ion-icon>
+      Reports
+    </button>
+    <a routerLink="/account" class="quick-btn">
+      <ion-icon name="settings-outline" aria-hidden="true"></ion-icon>
+      Settings
+    </a>
+  </div>
+</app-page-layout>

@@ -21,6 +21,14 @@ ion-menu-button {
   --color: #4a3b34;
 }
 
+/* Keeps page content clear of the fixed admin tab bar (see AppComponent / AdminTabBarComponent).
+   Only below the split-pane's "lg" breakpoint, where the bar actually shows. */
+@media (max-width: 991.98px) {
+  body.has-admin-tabs .page-content {
+    padding-bottom: 84px;
+  }
+}
+
 .api-status {
   margin: 16px 0;
   padding: 14px 16px;

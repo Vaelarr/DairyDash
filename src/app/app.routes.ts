@@ -8,6 +8,25 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
+    path: 'admin-dashboard',
+    canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./pages/admin-dashboard/admin-dashboard.page').then(
+        (m) => m.AdminDashboardPage
+      ),
+  },
+  {
+    // TEMPORARY: unguarded, sample-data view of the admin dashboard so the design can be
+    // reviewed without working admin sign-in. Remove this route (and the preview branches in
+    // AdminDashboardPage) once that's no longer needed.
+    path: 'admin-dashboard-preview',
+    data: { preview: true },
+    loadComponent: () =>
+      import('./pages/admin-dashboard/admin-dashboard.page').then(
+        (m) => m.AdminDashboardPage
+      ),
+  },
+  {
     path: 'dashboard',
     loadComponent: () =>
       import('./pages/dashboard/dashboard.page').then(
@@ -26,6 +45,13 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/cart/cart.page').then(
         (m) => m.CartPage
+      ),
+  },
+  {
+    path: 'wishlist',
+    loadComponent: () =>
+      import('./pages/wishlist/wishlist.page').then(
+        (m) => m.WishlistPage
       ),
   },
   {
@@ -58,6 +84,15 @@ export const routes: Routes = [
   {
     path: 'manage-products',
     canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./pages/manage-products/manage-products.page').then(
+        (m) => m.ManageProductsPage
+      ),
+  },
+  {
+    // TEMPORARY: see the matching comment on admin-dashboard-preview above.
+    path: 'manage-products-preview',
+    data: { preview: true },
     loadComponent: () =>
       import('./pages/manage-products/manage-products.page').then(
         (m) => m.ManageProductsPage
