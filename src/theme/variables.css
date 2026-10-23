@@ -79,3 +79,42 @@ h3,
 .menu-brand h1 {
 	font-family: 'Fredoka', sans-serif;
 }
+
+
+/* DairyDash Dark Palette */
+html.ion-palette-dark,
+body.ion-palette-dark,
+.ion-palette-dark {
+	--dd-canvas: #121212;
+	--dd-surface: #1e1e1e;
+	--dd-soft: #29211c;
+	--dd-ink: #f7efe9;
+	--dd-muted: #a6988f;
+	--dd-accent: #f09a75;
+	--dd-border: #332b26;
+	--dd-success: #34d399;
+	--dd-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+
+	--ion-background-color: #121212;
+	--ion-background-color-rgb: 18, 18, 18;
+	--ion-text-color: #f7efe9;
+	--ion-text-color-rgb: 247, 239, 233;
+	--ion-card-background: #1e1e1e;
+	--ion-item-background: #1e1e1e;
+	--ion-toolbar-background: #191919;
+	--ion-toolbar-color: #f7efe9;
+	--ion-border-color: #332b26;
+	--ion-color-medium: #a6988f;
+	--ion-color-medium-rgb: 166, 152, 143;
+	--ion-color-medium-shade: #8f827a;
+	--ion-background-color-step-50: #181818;
+	--ion-background-color-step-100: #1e1e1e;
+	--ion-background-color-step-150: #262626;
+
+	--ion-color-primary: #f09a75;
+	--ion-color-primary-rgb: 240, 154, 117;
+	--ion-color-primary-contrast: #1c1411;
+	--ion-color-primary-contrast-rgb: 28, 20, 17;
+	--ion-color-primary-shade: #d38564;
+	--ion-color-primary-tint: #f3a886;
+}

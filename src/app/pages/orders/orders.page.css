@@ -8,11 +8,11 @@ li { padding: 10px 0; border-bottom: 1px solid #e8d5c7; }
 p, small { overflow-wrap: anywhere; line-height: 1.6; }
 .total { font-size: 18px; }
 .order-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
-button { min-height: 44px; border: 1px solid #ab7960; border-radius: 12px; padding: 10px 14px; background: #fff; color: #573f34; font-weight: 800; cursor: pointer; }
+button { min-height: 44px; border: 1px solid #ab7960; border-radius: 12px; padding: 10px 14px; background: var(--dd-surface); color: var(--dd-ink); font-weight: 800; cursor: pointer; }
 button:disabled { opacity: .5; cursor: wait; }
 .delivery-form, .confirmation { border-top: 1px solid #e8d5c7; margin-top: 20px; padding-top: 16px; }
 .delivery-form label { display: grid; gap: 6px; margin-bottom: 12px; }
-input, textarea { width: 100%; padding: 10px; border: 1px solid #ab7960; border-radius: 8px; background: #fff; color: #573f34; }
+input, textarea { width: 100%; padding: 10px; border: 1px solid #ab7960; border-radius: 8px; background: var(--dd-surface); color: var(--dd-ink); }
 .delivery-form button, .confirmation button { margin: 0 8px 8px 0; }
 .order-progress { display: flex; padding: 0; margin: 24px 0; list-style: none; gap: 8px; }
 .order-progress li { display: flex; flex: 1; flex-direction: column; gap: 8px; padding: 10px 0; border-bottom: 3px solid #e8d5c7; color: #806455; font-size: 11px; text-align: center; }

@@ -1,10 +1,10 @@
 :host {
   --cart-primary: #e8926b;
-  --cart-heading: #241915;
-  --cart-text: #4a3b34;
-  --cart-muted: #8c7061;
-  --cart-border: #e5d6ca;
-  --cart-soft: #fff4ec;
+  --cart-heading: var(--dd-ink);
+  --cart-text: var(--dd-ink);
+  --cart-muted: var(--dd-muted);
+  --cart-border: var(--dd-border);
+  --cart-soft: var(--dd-soft);
 
   font-family: 'Nunito', sans-serif;
 }

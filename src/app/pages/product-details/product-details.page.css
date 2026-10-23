@@ -7,7 +7,7 @@
   margin: 0 auto;
   overflow: hidden;
   border-radius: 20px;
-  background: #fff;
+  background: var(--dd-surface);
   border: 1px solid var(--dd-border);
   box-shadow: 0 10px 30px rgba(74, 59, 52, 0.08);
 }

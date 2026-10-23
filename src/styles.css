@@ -14,6 +14,9 @@
 @import "@ionic/angular/css/flex-utils.css";
 @import "@ionic/angular/css/display.css";
 
+/* Dark mode palette from Ionic */
+@import "@ionic/angular/css/palettes/dark.class.css";
+
 /* Theme variables */
 @import "./theme/variables.css";
 
@@ -38,7 +41,7 @@ ion-searchbar { --placeholder-color: var(--dd-muted); --icon-color: var(--dd-mut
 }
 
 ion-menu-button {
-  --color: #4a3b34;
+  --color: var(--dd-ink, #4a3b34);
 }
 
 /* Keeps page content clear of the fixed admin tab bar (see AppComponent / AdminTabBarComponent).

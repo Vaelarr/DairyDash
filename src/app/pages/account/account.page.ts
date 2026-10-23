@@ -2,7 +2,7 @@ import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, type NgForm } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { IonIcon } from '@ionic/angular';
+import { IonIcon, IonToggle } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
   personOutline,
@@ -27,6 +27,8 @@ import {
   sparkles,
   arrowBackOutline,
   calendarOutline,
+  navigateOutline,
+  moonOutline,
 } from 'ionicons/icons';
 import { PageLayoutComponent } from '../../components/page-layout/page-layout.component';
 import { EmailConfirmationComponent } from '../../components/email-confirmation/email-confirmation.component';
@@ -37,6 +39,7 @@ import { CartService } from '../../services/cart.service';
 import { OrderService } from '../../services/order.service';
 import { WishlistService } from '../../services/wishlist.service';
 import { apiErrorMessage } from '../../services/product.service';
+import { PreferencesService } from '../../services/preferences.service';
 import {
   AccountValidationError,
   accountErrorMessage,
@@ -57,6 +60,7 @@ import {
     FormsModule,
     RouterLink,
     IonIcon,
+    IonToggle,
     PageLayoutComponent,
     EmailConfirmationComponent,
   ],
@@ -66,6 +70,7 @@ import {
 export class AccountPage {
   readonly auth = inject(SupabaseService);
   readonly cart = inject(CartService);
+  readonly preferences = inject(PreferencesService);
   private readonly accounts = inject(AccountService);
   private readonly orderService = inject(OrderService);
   private readonly wishlistService = inject(WishlistService);
@@ -139,6 +144,8 @@ export class AccountPage {
       'sparkles': sparkles,
       'arrow-back-outline': arrowBackOutline,
       'calendar-outline': calendarOutline,
+      'navigate-outline': navigateOutline,
+      'moon-outline': moonOutline,
     });
 
     effect(() => {
@@ -260,6 +267,16 @@ export class AccountPage {
       const wishlist = await this.wishlistService.list().catch(() => []);
       if (this.active) this.wishlistCount.set(wishlist.length);
     } catch {}
+  }
+
+  onToggleBottomNav(event: CustomEvent): void {
+    const checked = (event as CustomEvent<{ checked: boolean }>).detail.checked;
+    this.preferences.setBottomNav(checked);
+  }
+
+  onToggleDarkMode(event: CustomEvent): void {
+    const checked = (event as CustomEvent<{ checked: boolean }>).detail.checked;
+    this.preferences.setDarkMode(checked);
   }
 
   private startEmailCooldown(): void {

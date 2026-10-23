@@ -8,8 +8,8 @@ ion-menu {
 }
 
 .menu-content {
-  --background: #ffffff;
-  --color: #4a3b34;
+  --background: var(--dd-surface);
+  --color: var(--dd-ink);
   --padding-top: 0;
   --padding-start: 0;
   --padding-end: 0;
@@ -25,7 +25,7 @@ ion-menu {
   padding: calc(24px + var(--ion-safe-area-top, 0px)) 20px 22px;
   background: var(--dd-surface);
   border-bottom: 1px solid var(--dd-border);
-  color: #241915;
+  color: var(--dd-ink);
 }
 
 .menu-brand-mark {
@@ -164,10 +164,10 @@ ion-menu {
 }
 
 #inbox-list ion-item {
-  --background: #ffffff;
-  --background-hover: #fff4ec;
+  --background: var(--dd-surface);
+  --background-hover: var(--dd-soft);
   --background-focused: #fff4ec;
-  --color: #4a3b34;
+  --color: var(--dd-ink);
   --padding-start: 12px;
   --inner-padding-end: 12px;
   --min-height: 46px;

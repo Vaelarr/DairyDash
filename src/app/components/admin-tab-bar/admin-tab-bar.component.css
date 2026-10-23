@@ -11,7 +11,7 @@
   display: flex;
   justify-content: space-around;
   padding: 6px 8px calc(6px + var(--ion-safe-area-bottom, 0px));
-  background: #ffffff;
+  background: var(--dd-surface);
   border-top: 1px solid var(--ion-border-color);
   box-shadow: 0 -4px 16px rgba(74, 59, 52, 0.08);
   font-family: 'Nunito', sans-serif;

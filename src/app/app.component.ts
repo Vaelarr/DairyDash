@@ -24,6 +24,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { SupabaseService } from './supabase.service';
 import { cleanAuthCallbackPath } from './services/account-validation';
+import { PreferencesService } from './services/preferences.service';
 
 import { addIcons } from 'ionicons';
 import {
@@ -55,6 +56,7 @@ import {
 })
 export class AppComponent implements OnInit, OnDestroy {
   readonly auth = inject(SupabaseService);
+  readonly preferences = inject(PreferencesService);
   readonly currentPath = signal(window.location.pathname);
   readonly confirmationView = computed(() => this.currentPath() === '/account' &&
     this.auth.emailConfirmation() !== 'none' && !this.auth.recoveringPassword());
@@ -63,11 +65,15 @@ export class AppComponent implements OnInit, OnDestroy {
   // It also shows on the unguarded "-preview" routes, for anyone (no sign-in needed), so the
   // tab bar itself can be reviewed and used to hop between the preview pages.
   readonly adminTabsView = computed(() => {
+    if (!this.preferences.bottomNav()) return false;
     const path = this.currentPath();
     return isAdminTabRoute(path) && (this.auth.isAdmin() || isPreviewAdminRoute(path));
   });
-  readonly shoppingTabsView = computed(() => !this.confirmationView() && !this.adminTabsView() &&
-    !/^\/(checkout|manage-|add-product|edit-product|admin-)/.test(this.currentPath()));
+  readonly shoppingTabsView = computed(() => {
+    if (!this.preferences.bottomNav()) return false;
+    return !this.confirmationView() && !this.adminTabsView() &&
+      !/^\/(checkout|manage-|add-product|edit-product|admin-)/.test(this.currentPath());
+  });
   readonly showSplash = signal(this.needsSplash());
 
   private needsSplash(): boolean {
