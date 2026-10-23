@@ -131,18 +131,6 @@ export class MenuComponent {
   }) })).filter((group) => group.pages.length));
 
   constructor() {
-    addIcons({
-      'cube-outline': cubeOutline,
-      'grid-outline': gridOutline,
-      'cart-outline': cartOutline,
-      'heart-outline': heartOutline,
-      'information-circle-outline': informationCircleOutline,
-      'people-outline': peopleOutline,
-      'settings-outline': settingsOutline,
-      'stats-chart-outline': statsChartOutline,
-      'time-outline': timeOutline,
-      'person-outline': personOutline,
-      'call-outline': callOutline,
-    });
+    addIcons({ cubeOutline, gridOutline, cartOutline, heartOutline, informationCircleOutline, peopleOutline, settingsOutline, statsChartOutline, timeOutline, personOutline, callOutline });
   }
 }
