@@ -112,8 +112,8 @@
 
 .badge-glow-ring {
   position: absolute;
-  width: 165px;
-  height: 165px;
+  width: clamp(210px, 58vw, 260px);
+  height: clamp(210px, 58vw, 260px);
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 70%);
   animation: pulseGlow 2.8s infinite ease-in-out;
@@ -121,18 +121,18 @@
 
 .brand-badge {
   position: relative;
-  width: 136px;
-  height: 136px;
+  width: clamp(170px, 48vw, 210px);
+  height: clamp(170px, 48vw, 210px);
   display: grid;
   place-items: center;
-  padding: 8px;
+  padding: 14px;
   border-radius: 50%;
   background: #ffffff;
   box-shadow:
     0 16px 36px rgba(110, 32, 16, 0.26),
     0 4px 10px rgba(110, 32, 16, 0.12);
   animation: badgeFloat 3.2s infinite ease-in-out;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .splash-logo-img {

@@ -4,8 +4,16 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { IonIcon } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
-  chevronDownOutline, chevronForwardOutline, cubeOutline, settingsOutline,
-  statsChartOutline, timeOutline, trendingDownOutline, trendingUpOutline, warningOutline,
+  chevronDownOutline,
+  chevronForwardOutline,
+  clipboardOutline,
+  cubeOutline,
+  settingsOutline,
+  statsChartOutline,
+  timeOutline,
+  trendingDownOutline,
+  trendingUpOutline,
+  warningOutline,
 } from 'ionicons/icons';
 import { AdminToolbarBadgeComponent } from '../../components/admin-toolbar-badge/admin-toolbar-badge.component';
 import { PageLayoutComponent } from '../../components/page-layout/page-layout.component';
@@ -68,6 +76,7 @@ export class AdminDashboardPage {
     addIcons({
       'chevron-down-outline': chevronDownOutline,
       'chevron-forward-outline': chevronForwardOutline,
+      'clipboard-outline': clipboardOutline,
       'cube-outline': cubeOutline,
       'settings-outline': settingsOutline,
       'stats-chart-outline': statsChartOutline,

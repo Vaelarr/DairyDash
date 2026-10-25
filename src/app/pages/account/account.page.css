@@ -100,7 +100,37 @@
 .inline-text-btn{background:none;border:none;color:var(--dd-muted,#75645a);font-size:13px;font-weight:600;text-decoration:underline;cursor:pointer}
 .inline-back-btn{background:none;border:none;color:var(--ion-color-primary,#e8926b);font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
 .cooldown-timer{text-align:center;margin:0;font-size:12px;color:var(--dd-muted,#75645a)}
-@media (max-width:440px){.profile-hero-card{padding:16px 14px;gap:12px}.profile-avatar{width:58px;height:58px;font-size:20px}.profile-name{font-size:18px}.auth-card{padding:20px 16px}.menu-separator{margin-left:60px}}
+@media (max-width:440px){
+  .profile-hero-card{padding:16px 14px;gap:12px}
+  .profile-avatar{width:58px;height:58px;font-size:20px}
+  .profile-name{font-size:18px}
+  .auth-card{padding:20px 16px}
+  .menu-separator{margin-left:60px}
+}
+
+@media (max-width:360px){
+  .profile-hero-card{padding:14px 10px;gap:10px;border-radius:18px}
+  .profile-avatar{width:48px;height:48px;font-size:17px;border-width:2px}
+  .profile-name{font-size:16.5px}
+  .profile-email{font-size:12.5px}
+  .stats-grid{gap:6px}
+  .stat-card{padding:10px 4px;border-radius:14px}
+  .stat-icon-wrap{width:32px;height:32px;font-size:16px;margin-bottom:4px}
+  .stat-number{font-size:16px}
+  .stat-label{font-size:10px}
+  .auth-card{padding:16px 12px;border-radius:20px}
+  .auth-logo-frame{width:60px;height:60px}
+  .auth-logo-img{width:42px;height:42px}
+  .auth-title{font-size:21px}
+  .auth-tabs{gap:2px;padding:3px}
+  .auth-tab{padding:8px 6px;font-size:12.5px}
+  .input-wrap input{height:42px;font-size:14px}
+  .menu-item{padding:11px 12px;gap:10px}
+  .menu-icon-bubble{width:34px;height:34px;font-size:17px}
+  .menu-label{font-size:14px}
+  .menu-desc{font-size:11px}
+  .menu-separator{margin-left:54px}
+}
 
 .preference-item{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 16px;background:var(--dd-surface)}
 .preference-item ion-toggle{--track-background:#e2d7ce;--track-background-checked:var(--ion-color-primary,#e8926b);--handle-background:#fff;--handle-background-checked:#fff;flex-shrink:0}

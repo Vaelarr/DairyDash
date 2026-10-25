@@ -95,7 +95,7 @@
   </section>
 
   @if (lowStockProducts().length > 0) {
-    <a routerLink="/manage-products" class="low-stock-banner">
+    <a [routerLink]="isPreview ? '/manage-products-preview' : '/manage-products'" [queryParams]="{ filter: 'low' }" class="low-stock-banner">
       <ion-icon name="warning-outline" aria-hidden="true"></ion-icon>
       <span class="low-stock-text">
         <strong>
@@ -116,7 +116,7 @@
     </a>
   </div>
 
-  <a routerLink="/manage-orders" class="handle-row">
+  <a routerLink="/manage-orders" [queryParams]="{ status: 'pending' }" class="handle-row">
     <span class="handle-icon pending">
       <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
     </span>
@@ -129,7 +129,7 @@
     <ion-icon name="chevron-forward-outline" class="chev" aria-hidden="true"></ion-icon>
   </a>
 
-  <a routerLink="/manage-orders" class="handle-row">
+  <a routerLink="/manage-orders" [queryParams]="{ status: 'preparing' }" class="handle-row">
     <span class="handle-icon preparing">
       <ion-icon name="cube-outline" aria-hidden="true"></ion-icon>
     </span>
@@ -146,9 +146,13 @@
 
   <h2 class="quick-header">Quick access</h2>
   <div class="quick-grid">
-    <a routerLink="/manage-products" class="quick-btn">
+    <a [routerLink]="isPreview ? '/manage-products-preview' : '/manage-products'" class="quick-btn">
       <ion-icon name="cube-outline" aria-hidden="true"></ion-icon>
       Products
+    </a>
+    <a routerLink="/manage-orders" class="quick-btn">
+      <ion-icon name="clipboard-outline" aria-hidden="true"></ion-icon>
+      Orders
     </a>
     <button type="button" class="quick-btn" disabled title="Coming soon">
       <ion-icon name="stats-chart-outline" aria-hidden="true"></ion-icon>

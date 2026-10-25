@@ -5,4 +5,23 @@ a.active { color: var(--dd-accent); background: var(--dd-soft); }
 .tab-icon { position: relative; height: 25px; }
 ion-icon { font-size: 24px; }
 b { position: absolute; top: -5px; left: 18px; padding: 2px 5px; border: 2px solid white; border-radius: 12px; background: var(--dd-accent); color: white; font-size: 10px; line-height: 1.2; }
+@media (max-width: 360px) {
+  .shopping-tabs {
+    padding: 4px 4px calc(4px + var(--ion-safe-area-bottom, 0px));
+  }
+  a {
+    min-height: 52px;
+    font-size: 10px;
+    gap: 2px;
+  }
+  ion-icon {
+    font-size: 21px;
+  }
+  b {
+    left: 15px;
+    font-size: 9px;
+    padding: 1px 4px;
+  }
+}
+
 @media (min-width: 992px) { .shopping-tabs { display: none; } }

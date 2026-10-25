@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="18" fill="#fff1e6"/>
-  <text x="32" y="44" font-family="'Fredoka', 'Nunito', sans-serif" font-size="32" font-weight="700" fill="#241915" text-anchor="middle" letter-spacing="-1">DD</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <path fill="#FFF1E6" d="M 18,0 L 46,0 A 18,18 0 0,1 64,18 L 64,46 A 18,18 0 0,1 46,64 L 18,64 A 18,18 0 0,1 0,46 L 0,18 A 18,18 0 0,1 18,0 Z" />
+  <path fill="#FFFFFF" stroke="#4A3B34" stroke-width="2.5" stroke-linejoin="round" d="M 24,18 L 40,18 L 40,27 L 45,35 L 45,50 A 5,5 0 0,1 40,55 L 24,55 A 5,5 0 0,1 19,50 L 19,35 L 24,27 Z" />
+  <path fill="#E8926B" d="M 20,38 C 28,32 36,44 44,38 L 44,50 A 4,4 0 0,1 40,54 L 24,54 A 4,4 0 0,1 20,50 Z" />
+  <path fill="#E8926B" stroke="#4A3B34" stroke-width="2.5" stroke-linejoin="round" d="M 25,11 L 39,11 A 3,3 0 0,1 42,14 L 42,16 A 3,3 0 0,1 39,19 L 25,19 A 3,3 0 0,1 22,16 L 22,14 A 3,3 0 0,1 25,11 Z" />
 </svg>

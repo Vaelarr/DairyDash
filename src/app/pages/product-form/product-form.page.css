@@ -86,6 +86,18 @@
   min-width: 0;
 }
 
+.field-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.char-count {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ion-color-medium, #8c7061);
+}
+
 .field-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -110,6 +122,7 @@
   font-family: inherit;
   font-size: 16px; /* 16px stops iOS from zooming in on focus */
   color: var(--ion-text-color);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .field input,
@@ -186,6 +199,7 @@
   font-size: 16px;
   font-weight: 800;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .btn-primary {
@@ -229,7 +243,7 @@
   padding: 14px 12px 8px;
   border: 1px solid var(--ion-border-color);
   border-radius: 18px;
-  background: #ffffff;
+  background: var(--dd-surface, #ffffff);
   box-shadow: 0 8px 22px rgba(74, 59, 52, 0.06);
 }
 
@@ -351,6 +365,32 @@
   .loading-logo {
     width: 56px;
     height: 56px;
+  }
+}
+
+@media (max-width: 380px) {
+  .field-row {
+    gap: 8px;
+  }
+
+  .field input,
+  .field select {
+    padding: 0 10px;
+    font-size: 15px;
+  }
+
+  .photo-card-img {
+    height: 150px;
+  }
+
+  .upload-preview {
+    width: 130px;
+    height: 130px;
+  }
+
+  .btn {
+    height: 48px;
+    font-size: 15px;
   }
 }
 

@@ -150,7 +150,10 @@
     </div>
 
     <div class="field">
-      <label for="product-description">Description</label>
+      <div class="field-label-row">
+        <label for="product-description">Description</label>
+        <span class="char-count">{{ form.controls.description.value?.length || 0 }}/200</span>
+      </div>
       <textarea
         id="product-description"
         rows="4"

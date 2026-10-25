@@ -6,6 +6,7 @@ import { addIcons } from 'ionicons';
 import {
   addOutline,
   chevronDownOutline,
+  closeCircleOutline,
   createOutline,
   imageOutline,
   informationCircleOutline,
@@ -19,7 +20,7 @@ import { CatalogStatusComponent } from '../../components/catalog-status/catalog-
 import { Product } from '../../models/product';
 import { LOW_STOCK_THRESHOLD, ProductService, apiErrorMessage, priceValue } from '../../services/product.service';
 
-type StatusFilter = 'all' | 'low';
+type StatusFilter = 'all' | 'low' | 'out';
 type SortBy = 'newest' | 'name' | 'price-asc' | 'price-desc' | 'stock-asc';
 
 const SORT_LABELS: Record<SortBy, string> = {
@@ -71,11 +72,12 @@ export class ManageProductsPage {
   private readonly productService = inject(ProductService);
   private readonly toastCtrl = inject(ToastController);
   private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly route = inject(ActivatedRoute);
 
   readonly lowStockThreshold = LOW_STOCK_THRESHOLD;
 
   /** True on the unguarded `/manage-products-preview` route; see previewProducts() above. */
-  readonly isPreview = inject(ActivatedRoute).snapshot.data['preview'] === true;
+  readonly isPreview = this.route.snapshot.data['preview'] === true;
   private readonly previewList = signal<Product[]>(previewProducts());
 
   readonly loading = this.productService.loading;
@@ -94,15 +96,22 @@ export class ManageProductsPage {
   );
   readonly allCount = computed(() => this.allProducts().length);
   readonly lowStockCount = computed(
-    () => this.allProducts().filter((p) => p.stock !== undefined && p.stock <= LOW_STOCK_THRESHOLD).length
+    () => this.allProducts().filter((p) => p.stock !== undefined && p.stock > 0 && p.stock <= LOW_STOCK_THRESHOLD).length
+  );
+  readonly outOfStockCount = computed(
+    () => this.allProducts().filter((p) => p.stock === 0).length
   );
 
   /** Products matching the active status chip, before search or sort. */
   private readonly statusFiltered = computed(() => {
     const products = this.allProducts();
-    return this.statusFilter() === 'low'
-      ? products.filter((p) => p.stock !== undefined && p.stock <= LOW_STOCK_THRESHOLD)
-      : products;
+    if (this.statusFilter() === 'low') {
+      return products.filter((p) => p.stock !== undefined && p.stock > 0 && p.stock <= LOW_STOCK_THRESHOLD);
+    }
+    if (this.statusFilter() === 'out') {
+      return products.filter((p) => p.stock === 0);
+    }
+    return products;
   });
 
   private readonly searched = computed(() => {
@@ -134,13 +143,19 @@ export class ManageProductsPage {
 
   readonly sortLabel = computed(() => SORT_LABELS[this.sortBy()]);
 
-  /** "All Products (4)" / "Low Stock (2)" / "Results (1 of 4)" while searching. */
+  /** "All Products (4)" / "Low Stock (2)" / "Out of Stock (1)" / "Results (1 of 4)" while searching. */
   readonly listHeading = computed(() => {
     const base = this.statusFiltered();
     if (this.searchQuery().trim()) {
       return `Results (${this.searched().length} of ${base.length})`;
     }
-    return `${this.statusFilter() === 'low' ? 'Low Stock' : 'All Products'} (${base.length})`;
+    const label =
+      this.statusFilter() === 'low'
+        ? 'Low Stock'
+        : this.statusFilter() === 'out'
+          ? 'Out of Stock'
+          : 'All Products';
+    return `${label} (${base.length})`;
   });
 
   /** The product the user is being asked to confirm deleting. */
@@ -150,6 +165,7 @@ export class ManageProductsPage {
     addIcons({
       'add-outline': addOutline,
       'chevron-down-outline': chevronDownOutline,
+      'close-circle-outline': closeCircleOutline,
       'create-outline': createOutline,
       'image-outline': imageOutline,
       'information-circle-outline': informationCircleOutline,
@@ -160,6 +176,10 @@ export class ManageProductsPage {
 
   ionViewWillEnter() {
     this.sortMenuOpen.set(false);
+    const filterParam = this.route.snapshot.queryParamMap.get('filter');
+    if (filterParam === 'low' || filterParam === 'out' || filterParam === 'all') {
+      this.statusFilter.set(filterParam as StatusFilter);
+    }
     if (!this.isPreview) void this.productService.refresh();
   }
 
@@ -183,6 +203,10 @@ export class ManageProductsPage {
   setSort(value: SortBy) {
     this.sortBy.set(value);
     this.sortMenuOpen.set(false);
+  }
+
+  clearSearch() {
+    this.searchQuery.set('');
   }
 
   /** Right-aligned count text on each row, e.g. "24 in stock" / "Out of stock" / "Stock not set". */

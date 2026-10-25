@@ -1,13 +1,33 @@
-﻿import {
+import {
   Component,
+  computed,
   effect,
   inject,
   signal,
 } from '@angular/core';
 
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, CommonModule } from '@angular/common';
 import { FormsModule, type NgForm } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { IonIcon, IonSearchbar } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import {
+  callOutline,
+  checkmarkCircleOutline,
+  chevronForwardOutline,
+  closeCircleOutline,
+  createOutline,
+  cubeOutline,
+  locationOutline,
+  mailOutline,
+  personOutline,
+  timeOutline,
+  trashOutline,
+} from 'ionicons/icons';
+
+import {
+  AdminToolbarBadgeComponent,
+} from '../../components/admin-toolbar-badge/admin-toolbar-badge.component';
 
 import {
   PageLayoutComponent,
@@ -37,6 +57,14 @@ type OrderAction =
   | 'refunded'
   | 'deliver';
 
+export type OrderFilter =
+  | 'all'
+  | 'pending'
+  | 'preparing'
+  | 'out_for_delivery'
+  | 'completed'
+  | 'cancelled';
+
 interface OrderChange {
   customer?: OrderCustomer;
   status?: Order['status'];
@@ -47,22 +75,27 @@ interface OrderChange {
   selector: 'app-orders',
   standalone: true,
   imports: [
+    CommonModule,
     CurrencyPipe,
     DatePipe,
     FormsModule,
     RouterLink,
+    IonIcon,
+    IonSearchbar,
     PageLayoutComponent,
+    AdminToolbarBadgeComponent,
   ],
   templateUrl: './orders.page.html',
   styleUrl: './orders.page.css',
 })
 export class OrdersPage {
   private readonly service = inject(OrderService);
+  private readonly route = inject(ActivatedRoute);
 
   readonly auth = inject(SupabaseService);
 
   readonly admin =
-    inject(ActivatedRoute).snapshot.data['admin'] === true;
+    this.route.snapshot.data['admin'] === true;
 
   readonly orders = signal<Order[]>([]);
   readonly loading = signal(false);
@@ -71,10 +104,65 @@ export class OrdersPage {
   readonly feedback = signal('');
   readonly deliveryError = signal('');
 
+  readonly statusFilter = signal<OrderFilter>('all');
+  readonly searchQuery = signal('');
+
   readonly progress = ORDER_PROGRESS;
   readonly statusLabels = ORDER_STATUS_LABELS;
   readonly paymentLabels = PAYMENT_LABELS;
   readonly paymentStatusLabels = PAYMENT_STATUS_LABELS;
+
+  readonly pendingCount = computed(
+    () => this.orders().filter((o) => o.status === 'pending').length
+  );
+  readonly preparingCount = computed(
+    () =>
+      this.orders().filter(
+        (o) => o.status === 'confirmed' || o.status === 'preparing'
+      ).length
+  );
+  readonly deliveryCount = computed(
+    () =>
+      this.orders().filter((o) => o.status === 'out_for_delivery').length
+  );
+  readonly completedCount = computed(
+    () => this.orders().filter((o) => o.status === 'completed').length
+  );
+  readonly cancelledCount = computed(
+    () => this.orders().filter((o) => o.status === 'cancelled').length
+  );
+
+  readonly visibleOrders = computed(() => {
+    let list = this.orders();
+    if (!this.admin) return list;
+
+    const filter = this.statusFilter();
+    if (filter === 'pending') {
+      list = list.filter((o) => o.status === 'pending');
+    } else if (filter === 'preparing') {
+      list = list.filter(
+        (o) => o.status === 'confirmed' || o.status === 'preparing'
+      );
+    } else if (filter === 'out_for_delivery') {
+      list = list.filter((o) => o.status === 'out_for_delivery');
+    } else if (filter === 'completed') {
+      list = list.filter((o) => o.status === 'completed');
+    } else if (filter === 'cancelled') {
+      list = list.filter((o) => o.status === 'cancelled');
+    }
+
+    const q = this.searchQuery().trim().toLowerCase();
+    if (q) {
+      list = list.filter(
+        (o) =>
+          o.id.toLowerCase().includes(q) ||
+          o.customer.name.toLowerCase().includes(q) ||
+          o.customer.phone.toLowerCase().includes(q) ||
+          o.customer.address.toLowerCase().includes(q)
+      );
+    }
+    return list;
+  });
 
   editing: Order | null = null;
 
@@ -95,6 +183,20 @@ export class OrdersPage {
   private currentUserId: string | undefined;
 
   constructor() {
+    addIcons({
+      'call-outline': callOutline,
+      'checkmark-circle-outline': checkmarkCircleOutline,
+      'chevron-forward-outline': chevronForwardOutline,
+      'close-circle-outline': closeCircleOutline,
+      'create-outline': createOutline,
+      'cube-outline': cubeOutline,
+      'location-outline': locationOutline,
+      'mail-outline': mailOutline,
+      'person-outline': personOutline,
+      'time-outline': timeOutline,
+      'trash-outline': trashOutline,
+    });
+
     effect(() => {
       const userId = this.auth.user()?.id;
 
@@ -119,6 +221,21 @@ export class OrdersPage {
 
   ionViewWillEnter(): void {
     this.active = true;
+    const statusParam = this.route.snapshot.queryParamMap.get(
+      'status'
+    ) as OrderFilter | null;
+    if (
+      statusParam &&
+      [
+        'pending',
+        'preparing',
+        'out_for_delivery',
+        'completed',
+        'cancelled',
+      ].includes(statusParam)
+    ) {
+      this.statusFilter.set(statusParam);
+    }
     void this.load();
   }
 
@@ -131,6 +248,14 @@ export class OrdersPage {
     this.error.set('');
     this.feedback.set('');
     this.clearDraft();
+  }
+
+  handleSearch(event: any): void {
+    this.searchQuery.set(event?.detail?.value ?? '');
+  }
+
+  clearSearch(): void {
+    this.searchQuery.set('');
   }
 
   async load(): Promise<void> {
@@ -298,61 +423,111 @@ export class OrdersPage {
       case 'paid':
         return (
           'Have you verified receipt of the full order total? ' +
-          'Confirming records the payment as received.'
+          'Marking this order as paid records payment verification and unlocks preparation.'
         );
 
       case 'refunded':
         return (
-          'Have you already returned the full payment to the customer? ' +
-          'Confirming records the refund as completed. ' +
-          'It does not transfer money.'
+          'Has the refund for this order been completed? ' +
+          'Marking this order as refunded closes the pending refund status.'
         );
-
-      case 'deliver':
-        return selected.order.payment.status === 'unpaid'
-          ? (
-              'Confirm that this cash-on-delivery order was delivered ' +
-              'and the courier collected the full order total.'
-            )
-          : 'Confirm that this order was delivered to the customer.';
 
       case 'cancel':
-        return selected.order.payment.status === 'paid'
-          ? (
-              'Cancel this order? Its payment will still need a refund. ' +
-              'Cancelling does not send money back automatically.'
-            )
-          : 'Cancel this order? It will no longer continue to delivery.';
+        return this.admin
+          ? 'Are you sure you want to cancel this customer order? Restoring inventory will be recorded automatically.'
+          : 'Are you sure you want to cancel this order? Any eligible refund or inventory adjustment will be processed.';
 
       case 'delete':
-        return (
-          'Permanently delete this cancelled order from history? ' +
-          'This action cannot be undone.'
+        return 'Delete this cancelled order from history? This cannot be undone.';
+
+      case 'deliver':
+        return selected.order.payment.method === 'cash_on_delivery' &&
+          selected.order.payment.status === 'unpaid'
+          ? 'Confirm delivery and that cash payment was received in full?'
+          : 'Confirm that this order has been successfully delivered to the customer?';
+
+      default:
+        return 'Are you sure you want to continue?';
+    }
+  }
+
+  async confirm(): Promise<void> {
+    const selected = this.confirmation;
+
+    if (!selected || this.busy() || this.loading()) {
+      return;
+    }
+
+    if (!this.actionAllowed(selected.order, selected.action)) {
+      this.confirmation = null;
+      this.feedback.set(
+        'This action is no longer available. Review the order status.'
+      );
+      return;
+    }
+
+    switch (selected.action) {
+      case 'cancel':
+        await this.update(selected.order, {
+          status: 'cancelled',
+        });
+        break;
+
+      case 'delete':
+        await this.mutate(
+          selected.order,
+          () => this.service.remove(selected.order, this.admin),
+          true
         );
+        break;
+
+      case 'deliver':
+        await this.update(selected.order, {
+          status: 'completed',
+          ...(
+            selected.order.payment.method === 'cash_on_delivery' &&
+            selected.order.payment.status === 'unpaid'
+              ? { paymentStatus: 'paid' as const }
+              : {}
+          ),
+        });
+        break;
+
+      case 'paid':
+        await this.update(selected.order, {
+          paymentStatus: 'paid',
+        });
+        break;
+
+      case 'refunded':
+        await this.update(selected.order, {
+          paymentStatus: 'refunded',
+        });
+        break;
     }
   }
 
   edit(order: Order): void {
-    if (
-      this.busy() ||
-      this.loading() ||
-      !this.canEdit(order)
-    ) {
+    if (this.busy() || this.loading() || !this.canEdit(order)) {
       return;
     }
 
-    this.editing = order;
-    this.customer = { ...order.customer };
     this.confirmation = null;
     this.feedback.set('');
     this.deliveryError.set('');
+    this.editing = order;
+    this.customer = {
+      name: order.customer.name,
+      email: order.customer.email,
+      phone: order.customer.phone,
+      address: order.customer.address,
+    };
   }
 
   clearDraft(): void {
     this.editing = null;
     this.confirmation = null;
     this.deliveryError.set('');
-
     this.customer = {
       name: '',
       email: '',
@@ -364,41 +539,27 @@ export class OrdersPage {
   async save(form: NgForm): Promise<void> {
     const order = this.editing;
 
-    if (
-      !order ||
-      this.busy() ||
-      this.loading() ||
-      !this.canEdit(order)
-    ) {
+    if (!order) {
       return;
     }
 
-    form.form.markAllAsTouched();
-    this.deliveryError.set('');
-
-    const customer: OrderCustomer = {
+    const customer = {
       name: this.customer.name.trim(),
       email: this.customer.email.trim(),
       phone: this.customer.phone.trim(),
       address: this.customer.address.trim(),
     };
 
-    this.customer = customer;
-
-    const valid = Boolean(
-      customer.name &&
-      customer.name.length <= 80 &&
-      customer.email.length <= 254 &&
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email) &&
-      /^[0-9]{7,12}$/.test(customer.phone) &&
-      customer.address &&
-      customer.address.length <= 500
-    );
-
-    if (form.invalid || !valid) {
+    if (
+      !form.valid ||
+      !customer.name ||
+      !customer.email ||
+      !customer.address ||
+      !/^[0-9]{7,12}$/.test(customer.phone)
+    ) {
       this.deliveryError.set(
-        'Enter your name, a valid email, a contact number containing ' +
-        '7–12 digits, and a complete delivery address.'
+        'Enter a recipient name, valid email, phone number with ' +
+          '7–12 digits, and a complete delivery address.'
       );
       return;
     }
@@ -466,62 +627,6 @@ export class OrdersPage {
     );
   }
 
-  async confirm(): Promise<void> {
-    const selected = this.confirmation;
-
-    if (!selected || this.busy() || this.loading()) {
-      return;
-    }
-
-    if (!this.actionAllowed(selected.order, selected.action)) {
-      this.confirmation = null;
-      this.feedback.set(
-        'This action is no longer available. Review the order status.'
-      );
-      return;
-    }
-
-    switch (selected.action) {
-      case 'cancel':
-        await this.update(selected.order, {
-          status: 'cancelled',
-        });
-        break;
-
-      case 'delete':
-        await this.mutate(
-          selected.order,
-          () => this.service.remove(selected.order, this.admin),
-          true
-        );
-        break;
-
-      case 'deliver':
-        await this.update(selected.order, {
-          status: 'completed',
-          ...(
-            selected.order.payment.method === 'cash_on_delivery' &&
-            selected.order.payment.status === 'unpaid'
-              ? { paymentStatus: 'paid' as const }
-              : {}
-          ),
-        });
-        break;
-
-      case 'paid':
-        await this.update(selected.order, {
-          paymentStatus: 'paid',
-        });
-        break;
-
-      case 'refunded':
-        await this.update(selected.order, {
-          paymentStatus: 'refunded',
-        });
-        break;
-    }
-  }
-
   private hasAccess(): boolean {
     return (
       !!this.auth.user() &&
@@ -534,6 +639,17 @@ export class OrdersPage {
       this.hasAccess() &&
       this.admin &&
       this.auth.isAdmin()
+    );
+  }
+
+  private isCurrentRequest(
+    revision: number,
+    userId: string | undefined
+  ): boolean {
+    return (
+      this.active &&
+      revision === this.revision &&
+      userId === this.auth.user()?.id
     );
   }
 
@@ -557,17 +673,6 @@ export class OrdersPage {
       case 'deliver':
         return this.canDeliver(order);
     }
-  }
-
-  private isCurrentRequest(
-    revision: number,
-    userId: string | undefined
-  ): boolean {
-    return (
-      this.active &&
-      revision === this.revision &&
-      userId === this.auth.user()?.id
-    );
   }
 
   private async mutate(

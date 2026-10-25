@@ -6,14 +6,14 @@ ion-content {
 .page-content {
 	max-width: 1160px;
 	margin: 0 auto;
-	padding: 24px 18px 40px;
+	padding: 24px 18px calc(var(--dd-nav-height, 76px) + var(--ion-safe-area-bottom, 0px) + 20px);
 }
 
 .page-content-narrow { max-width: var(--page-narrow-width, 624px); }
 
 .page-intro { margin-bottom: 22px; }
 .page-eyebrow { margin: 0 0 9px; color: var(--dd-accent); font: 800 11px/1.2 'Nunito', sans-serif; letter-spacing: 1.5px; }
-.page-intro h1 { margin: 0; color: var(--dd-ink); font-size: clamp(30px, 7vw, 46px); line-height: 1.05; font-weight: 600; }
+.page-intro h1 { margin: 0; color: var(--dd-ink); font-size: clamp(28px, 7vw, 46px); line-height: 1.05; font-weight: 600; }
 .page-intro > p:last-child { max-width: 520px; margin: 9px 0 0; color: var(--dd-muted); font-size: 16px; font-weight: 600; }
 
 .page-layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
@@ -24,12 +24,26 @@ ion-content {
 .page-layout-products .layout-placeholder { min-height: 170px; }
 .page-layout-about .layout-placeholder-large, .page-layout-developers .layout-placeholder-large { min-height: 220px; }
 
+@media (max-width: 380px) {
+	.page-content {
+		padding-inline: 12px;
+		padding-top: 18px;
+	}
+}
+
 @media (min-width: 700px) {
-	.page-content { padding: 36px 32px 48px; }
+	.page-content { padding: 36px 32px calc(var(--dd-nav-height, 76px) + var(--ion-safe-area-bottom, 0px) + 24px); }
 	.page-layout { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 	.page-layout .layout-placeholder-large { grid-column: 1 / 3; grid-row: 1 / 3; min-height: 220px; }
 	.page-layout .layout-placeholder-highlight { grid-column: 3; grid-row: 1; min-height: 104px; }
 	.page-layout .layout-placeholder-anchor { grid-column: 3; grid-row: 2; min-height: 104px; }
+}
+
+@media (min-width: 992px) {
+	/* Tab bar is hidden on wide screens because split pane is visible */
+	.page-content {
+		padding-bottom: 48px;
+	}
 }
 
 .toolbar-cart { position: relative; display: grid; place-items: center; width: 48px; height: 44px; margin-inline: 8px; color: var(--dd-ink); text-decoration: none; border-radius: 12px; }

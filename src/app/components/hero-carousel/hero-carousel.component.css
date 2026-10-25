@@ -94,4 +94,17 @@
     height: 300px;
   }
 }
-@media (max-width: 520px) { .hero-slide { height: 180px; } .hero-slide-overlay { padding: 18px; } .hero-slide-title { font-size: 21px; } }
+@media (max-width: 520px) {
+  .hero-slide { height: 180px; }
+  .hero-slide-overlay { padding: 18px; }
+  .hero-slide-title { font-size: 21px; }
+}
+
+@media (max-width: 360px) {
+  .hero-slide { height: 160px; }
+  .hero-slide-overlay { padding: 14px 12px; }
+  .hero-slide-title { font-size: 18px; }
+  .hero-slide-subtitle { font-size: 11.5px; }
+  .hero-carousel-dots { padding: 0 10px; }
+  .playback-toggle { font-size: 11px; padding: 4px; }
+}

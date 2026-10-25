@@ -1,0 +1,599 @@
+{
+  "device": "Pixel 10 Pro",
+  "serial": "emulator-5554",
+  "resolution": "1280 x 2856",
+  "captures": [
+    {
+      "file": "screenshots/admin/01-dashboard.png",
+      "route": "/admin-dashboard",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:17:13.425Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 305205
+    },
+    {
+      "file": "screenshots/admin/01-dashboard-part-02.png",
+      "route": "/admin-dashboard",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:17:16.513Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 304767
+    },
+    {
+      "file": "screenshots/admin/02-manage-products.png",
+      "route": "/manage-products",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:17:42.461Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 396253
+    },
+    {
+      "file": "screenshots/admin/02-manage-products-part-02.png",
+      "route": "/manage-products",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:17:45.349Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 404527
+    },
+    {
+      "file": "screenshots/admin/02-manage-products-part-03.png",
+      "route": "/manage-products",
+      "part": 3,
+      "capturedAt": "2026-10-24T06:17:48.769Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 421002
+    },
+    {
+      "file": "screenshots/admin/03-add-product.png",
+      "route": "/add-product",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:17:58.192Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 196933
+    },
+    {
+      "file": "screenshots/admin/03-add-product-part-02.png",
+      "route": "/add-product",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:18:01.101Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 176868
+    },
+    {
+      "file": "screenshots/admin/04-edit-product.png",
+      "route": "/edit-product/seed-almond-bliss",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:18:11.184Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 292395
+    },
+    {
+      "file": "screenshots/admin/04-edit-product-part-02.png",
+      "route": "/edit-product/seed-almond-bliss",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:18:14.125Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 241031
+    },
+    {
+      "file": "screenshots/admin/05-manage-orders.png",
+      "route": "/manage-orders",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:18:24.588Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 306769
+    },
+    {
+      "file": "screenshots/admin/05-manage-orders-part-02.png",
+      "route": "/manage-orders",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:18:27.860Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 321128
+    },
+    {
+      "file": "screenshots/admin/05-manage-orders-part-03.png",
+      "route": "/manage-orders",
+      "part": 3,
+      "capturedAt": "2026-10-24T06:18:30.745Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 315697
+    },
+    {
+      "file": "screenshots/admin/05-manage-orders-part-04.png",
+      "route": "/manage-orders",
+      "part": 4,
+      "capturedAt": "2026-10-24T06:18:33.774Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 325074
+    },
+    {
+      "file": "screenshots/admin/05-manage-orders-part-05.png",
+      "route": "/manage-orders",
+      "part": 5,
+      "capturedAt": "2026-10-24T06:18:36.885Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 333840
+    },
+    {
+      "file": "screenshots/admin/06-account.png",
+      "route": "/account",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:18:58.076Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 457100
+    },
+    {
+      "file": "screenshots/admin/06-account-part-02.png",
+      "route": "/account",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:19:01.072Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 326697
+    },
+    {
+      "file": "screenshots/admin/07-navigation-menu.png",
+      "route": "/admin-dashboard",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:19:17.205Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 266746
+    },
+    {
+      "file": "screenshots/admin/08-edit-order-delivery.png",
+      "route": "/manage-orders",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:18:45.462Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 278383
+    },
+    {
+      "file": "screenshots/admin/08-edit-order-delivery-part-02.png",
+      "route": "/manage-orders",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:18:48.533Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 315534
+    },
+    {
+      "file": "screenshots/user/01-home.png",
+      "route": "/dashboard",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:11:01.078Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 891409
+    },
+    {
+      "file": "screenshots/user/01-home-part-02.png",
+      "route": "/dashboard",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:11:04.339Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 521944
+    },
+    {
+      "file": "screenshots/user/02-shop.png",
+      "route": "/products",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:11:13.933Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 409454
+    },
+    {
+      "file": "screenshots/user/02-shop-part-02.png",
+      "route": "/products",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:11:17.090Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 453061
+    },
+    {
+      "file": "screenshots/user/03-product-details.png",
+      "route": "/view-product/seed-almond-bliss",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:11:26.377Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 396628
+    },
+    {
+      "file": "screenshots/user/03-product-details-part-02.png",
+      "route": "/view-product/seed-almond-bliss",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:11:29.359Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 245462
+    },
+    {
+      "file": "screenshots/user/04-cart-empty.png",
+      "route": "/cart",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:11:37.741Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 108760
+    },
+    {
+      "file": "screenshots/user/05-cart-with-items.png",
+      "route": "/cart",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:11:58.388Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 202990
+    },
+    {
+      "file": "screenshots/user/05-cart-with-items-part-02.png",
+      "route": "/cart",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:12:10.654Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 203768
+    },
+    {
+      "file": "screenshots/user/06-wishlist-signed-out.png",
+      "route": "/wishlist",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:12:20.987Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 141868
+    },
+    {
+      "file": "screenshots/user/07-sign-in.png",
+      "route": "/account",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:12:38.849Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 385190
+    },
+    {
+      "file": "screenshots/user/07-sign-in-part-02.png",
+      "route": "/account",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:12:42.164Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 395165
+    },
+    {
+      "file": "screenshots/user/08-create-account.png",
+      "route": "/account",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:12:48.043Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 313866
+    },
+    {
+      "file": "screenshots/user/08-create-account-part-02.png",
+      "route": "/account",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:12:50.969Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 343768
+    },
+    {
+      "file": "screenshots/user/09-forgot-password.png",
+      "route": "/account",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:13:01.956Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 398826
+    },
+    {
+      "file": "screenshots/user/09-forgot-password-part-02.png",
+      "route": "/account",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:13:04.913Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 398942
+    },
+    {
+      "file": "screenshots/user/10-about.png",
+      "route": "/about",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:13:14.264Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 410529
+    },
+    {
+      "file": "screenshots/user/10-about-part-02.png",
+      "route": "/about",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:13:17.542Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 390710
+    },
+    {
+      "file": "screenshots/user/11-company-history.png",
+      "route": "/company-history",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:13:27.758Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 347402
+    },
+    {
+      "file": "screenshots/user/11-company-history-part-02.png",
+      "route": "/company-history",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:13:30.696Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 339288
+    },
+    {
+      "file": "screenshots/user/12-developers.png",
+      "route": "/developers",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:13:40.458Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 534469
+    },
+    {
+      "file": "screenshots/user/12-developers-part-02.png",
+      "route": "/developers",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:13:43.396Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 575966
+    },
+    {
+      "file": "screenshots/user/13-contact-us.png",
+      "route": "/contact-us",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:13:53.225Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 241617
+    },
+    {
+      "file": "screenshots/user/13-contact-us-part-02.png",
+      "route": "/contact-us",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:13:56.083Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 225269
+    },
+    {
+      "file": "screenshots/user/14-navigation-menu.png",
+      "route": "/dashboard",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:14:10.694Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 509663
+    },
+    {
+      "file": "screenshots/user/15-account-signed-in.png",
+      "route": "/account",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:14:46.397Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 455097
+    },
+    {
+      "file": "screenshots/user/15-account-signed-in-part-02.png",
+      "route": "/account",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:14:49.256Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 325844
+    },
+    {
+      "file": "screenshots/user/16-wishlist-signed-in.png",
+      "route": "/wishlist",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:14:57.619Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 146770
+    },
+    {
+      "file": "screenshots/user/17-my-orders.png",
+      "route": "/orders",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:15:06.011Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 288023
+    },
+    {
+      "file": "screenshots/user/17-my-orders-part-02.png",
+      "route": "/orders",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:15:08.783Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 287142
+    },
+    {
+      "file": "screenshots/user/18-edit-delivery.png",
+      "route": "/orders",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:15:14.260Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 288034
+    },
+    {
+      "file": "screenshots/user/18-edit-delivery-part-02.png",
+      "route": "/orders",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:15:17.590Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 258097
+    },
+    {
+      "file": "screenshots/user/18-edit-delivery-part-03.png",
+      "route": "/orders",
+      "part": 3,
+      "capturedAt": "2026-10-24T06:15:20.431Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 241535
+    },
+    {
+      "file": "screenshots/user/19-checkout-delivery.png",
+      "route": "/checkout",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:15:29.908Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 286288
+    },
+    {
+      "file": "screenshots/user/19-checkout-delivery-part-02.png",
+      "route": "/checkout",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:15:32.847Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 234346
+    },
+    {
+      "file": "screenshots/user/19-checkout-delivery-part-03.png",
+      "route": "/checkout",
+      "part": 3,
+      "capturedAt": "2026-10-24T06:15:36.100Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 227372
+    },
+    {
+      "file": "screenshots/user/20-checkout-payment.png",
+      "route": "/checkout",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:15:41.918Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 254706
+    },
+    {
+      "file": "screenshots/user/20-checkout-payment-part-02.png",
+      "route": "/checkout",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:15:44.813Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 211270
+    },
+    {
+      "file": "screenshots/user/21-checkout-review.png",
+      "route": "/checkout",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:15:56.706Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 281163
+    },
+    {
+      "file": "screenshots/user/21-checkout-review-part-02.png",
+      "route": "/checkout",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:15:59.693Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 222894
+    },
+    {
+      "file": "screenshots/user/21-checkout-review-part-03.png",
+      "route": "/checkout",
+      "part": 3,
+      "capturedAt": "2026-10-24T06:16:02.670Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 231511
+    },
+    {
+      "file": "screenshots/user/22-navigation-menu-signed-in.png",
+      "route": "/dashboard",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:16:41.677Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 513193
+    },
+    {
+      "file": "screenshots/user/23-product-details-signed-in.png",
+      "route": "/view-product/seed-almond-bliss",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:16:15.761Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 399249
+    },
+    {
+      "file": "screenshots/user/23-product-details-signed-in-part-02.png",
+      "route": "/view-product/seed-almond-bliss",
+      "part": 2,
+      "capturedAt": "2026-10-24T06:16:18.749Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 202716
+    },
+    {
+      "file": "screenshots/user/24-cart-signed-in.png",
+      "route": "/cart",
+      "part": 1,
+      "capturedAt": "2026-10-24T06:16:28.780Z",
+      "width": 1280,
+      "height": 2856,
+      "bytes": 203913
+    }
+  ],
+  "validation": {
+    "total": 64,
+    "user": 45,
+    "admin": 19,
+    "productionRoutes": 17,
+    "missingRoutes": [],
+    "allPngsValidated": true
+  },
+  "timeZone": "Asia/Manila",
+  "notes": [
+    "Direct Android framebuffer captures from the installed debug APK using adb exec-out screencap -p.",
+    "Light theme with bottom navigation enabled. Additional parts show lower portions of long pages.",
+    "Product details and product editing use Almond Bliss as the representative product.",
+    "Checkout was captured through delivery, payment, and final review. No order was submitted.",
+    "Existing test*.png files in the screenshots root predate this capture session and are excluded from the index."
+  ]
+}

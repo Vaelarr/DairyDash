@@ -45,6 +45,17 @@
     >
       Low stock <span class="chip-count">{{ lowStockCount() }}</span>
     </button>
+    <button
+      type="button"
+      class="chip chip-out-stock"
+      role="tab"
+      *ngIf="outOfStockCount() > 0"
+      [class.active]="statusFilter() === 'out'"
+      [attr.aria-selected]="statusFilter() === 'out'"
+      (click)="statusFilter.set('out')"
+    >
+      Out of stock <span class="chip-count">{{ outOfStockCount() }}</span>
+    </button>
   </div>
 
   <div class="list-header">
@@ -117,13 +128,25 @@
   </ul>
 
   <ng-template #empty>
-    <p class="manage-empty" *ngIf="isPreview || (!loading() && !loadError())">
-      {{ searchQuery().trim()
-        ? 'No products match your search.'
-        : statusFilter() === 'low'
-          ? 'No products are running low right now.'
-          : 'There are no products yet. Use Add new to create one.' }}
-    </p>
+    <div class="manage-empty" *ngIf="isPreview || (!loading() && !loadError())">
+      <p>
+        {{ searchQuery().trim()
+          ? 'No products match your search "' + searchQuery().trim() + '".'
+          : statusFilter() === 'low'
+            ? 'No products are running low right now.'
+            : statusFilter() === 'out'
+              ? 'No products are currently out of stock.'
+              : 'There are no products yet. Use Add new to create one.' }}
+      </p>
+      <button
+        *ngIf="searchQuery().trim() || statusFilter() !== 'all'"
+        type="button"
+        class="chip"
+        (click)="clearSearch(); statusFilter.set('all')"
+      >
+        Clear filters
+      </button>
+    </div>
   </ng-template>
 
   <p class="low-stock-note">
