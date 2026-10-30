@@ -43,9 +43,9 @@ import {
 export class ContactUsPage {
   // Add your group's actual contact details inside these quotes.
   readonly business = {
-    email: '',
-    phone: '',
-    address: '',
+    email: 'ervodigital@gmail.com',
+    phone: '(63+) 927 574 2388',
+    address: 'North Fairview, Quezon City, Metro Manila',
   };
 
   readonly feedback = signal('');
